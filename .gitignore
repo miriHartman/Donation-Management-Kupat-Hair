@@ -1,0 +1,11 @@
+# התעלמות מתיקיות ספריות בשני הפרויקטים
+client/node_modules/
+server/node_modules/
+
+# התעלמות מקבצי הגדרות (חשוב מאוד לאבטחה!)
+server/.env
+client/.env
+
+# קבצי לוג וזבל
+npm-debug.log*
+.DS_Storenode_modules/ 

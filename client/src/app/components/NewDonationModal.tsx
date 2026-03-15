@@ -1,0 +1,203 @@
+import React from 'react';
+import { X, Check, Loader2, CalendarClock } from 'lucide-react';
+import { useDonationForm } from '../hooks/useDonationForm';
+
+export interface DonationData {
+  date: string;
+  id?: string;
+  amount: number;
+  targetId: number;
+  methodId: number;
+  isRecurring: boolean;
+  installments?: number;
+  currency: string;
+  notes?: string;
+  branchId?: number;
+  userId?: number;
+}
+
+interface NewDonationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onRefresh: () => void;
+  editingDonation?: DonationData | null;
+  branchId: number;
+}
+
+export function NewDonationModal({ isOpen, onClose, onRefresh, editingDonation, branchId }: NewDonationModalProps) {
+
+
+
+const { formData, setFormData, handleSave, loading } = useDonationForm(
+    editingDonation,
+    () => {
+      onRefresh(); // מרענן את הטבלה
+      onClose();   // סוגר את החלונית אוטומטית
+    },
+    branchId
+  );
+
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
+          <h2 className="text-xl font-bold text-slate-800">
+            {editingDonation ? 'עריכת תרומה' : 'הוספת תרומה חדשה'}
+          </h2>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="p-6 space-y-6">
+          <div className="space-y-4">
+            
+            {/* יעד התרומה */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">יעד התרומה</label>
+              <select
+                value={formData.targetId}
+                onChange={(e) => setFormData({ ...formData, targetId: Number(e.target.value) })}
+                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+              >
+                <option value={1}>קופת העיר</option>
+                <option value={2}>קרנות</option>
+                <option value={3}>אחר</option>
+              </select>
+            </div>
+
+            {/* אמצעי תשלום */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">אמצעי תשלום</label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { id: 1, label: 'מזומן' },
+                  { id: 2, label: 'אשראי' },
+                  { id: 3, label: "צ'ק" },
+                  { id: 4, label: 'הו"ק' },
+                ].map((method) => (
+                  <label
+                    key={method.id}
+                    className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all ${
+                      formData.methodId === method.id
+                        ? 'bg-blue-50 border-blue-500 text-blue-700 font-bold shadow-sm'
+                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      className="hidden"
+                      name="methodId"
+                      checked={formData.methodId === method.id}
+                      onChange={() => {
+                        // אם נבחר הו"ק (4), נסמן אוטומטית כ-Recurring
+                        setFormData({ 
+                          ...formData, 
+                          methodId: method.id,
+                          isRecurring: method.id === 4 ? true : formData.isRecurring 
+                        });
+                      }}
+                    />
+                    {method.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* אפשרויות הו"ק ותשלומים - מופיע רק באשראי או הו"ק */}
+            {(formData.methodId === 2 || formData.methodId === 4) && (
+              <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100 space-y-3 animate-in fade-in slide-in-from-top-2">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <div className="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.isRecurring}
+                      onChange={(e) => setFormData({ ...formData, isRecurring: e.target.checked })}
+                      className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CalendarClock className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-bold text-slate-700">זוהי תרומה מחזורית / תשלומים</span>
+                  </div>
+                </label>
+
+                {formData.isRecurring && (
+                  <div className="grid grid-cols-2 items-center gap-4 pt-2 border-t border-blue-100">
+                    <label className="text-xs font-semibold text-slate-600">מספר חודשים/תשלומים:</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="120"
+                      value={formData.installments || ''}
+                      onChange={(e) => setFormData({ ...formData, installments: parseInt(e.target.value) || 1 })}
+                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-md outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold"
+                      placeholder="12"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* סכום */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">סכום התרומה (₪)</label>
+              <div className="relative">
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₪</span>
+                <input
+                  type="number"
+                  value={formData.amount || ''}
+                  onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                  className="w-full pr-10 pl-4 py-3 text-2xl font-black text-blue-900 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  placeholder="0.00"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            {/* הערות */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">הערות (אופציונלי)</label>
+              <textarea
+                value={formData.notes || ''}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                rows={2}
+                placeholder="שם התורם, קרן ספציפית וכדומה..."
+              />
+            </div>
+          </div>
+
+          {/* כפתורי פעולה */}
+          <div className="flex gap-3 pt-4 border-t border-slate-100">
+            <button 
+              type="button" 
+              onClick={onClose} 
+              className="flex-1 px-4 py-3 text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 font-medium transition-colors"
+            >
+              ביטול
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-[2] px-4 py-3 text-white bg-blue-600 hover:bg-blue-700 rounded-xl font-bold shadow-lg shadow-blue-200 flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-95"
+            >
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <Check className="w-5 h-5" />
+                  {editingDonation ? 'עדכן תרומה' : 'אישור ושמירה'}
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
