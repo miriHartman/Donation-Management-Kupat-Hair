@@ -1,24 +1,22 @@
 require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors'); 
 const app = express();
+
+// הגדרת CORS - מאפשר לכל המקורות לגשת (הכי בטוח לעבודה מול Render כרגע)
 app.use(cors());
-// app.use(cors({
-//   origin: 'http://localhost:5173', 
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   credentials: true
-// }));
 
 app.use(express.json());
 
-
-
-const PORT = process.env.PORT ;
+// --- תיקון הפורט ---
+// אנחנו אומרים לו: קח את הפורט ש-Render נותן לך, ואם אין (כמו במחשב בבית), קח 3000
+const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-  res.send('Server is running');
+  res.send('Server is running and healthy!');
 });
+
+// --- הראוטים שלך ---
 const branchRouter = require('./routers/branchRoutes');
 app.use('/api/branches', branchRouter);
 
@@ -31,6 +29,8 @@ app.use('/api/donations', donationRoutes);
 const authRoutes = require('./routers/authRoutes');
 app.use('/api/auth', authRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+// --- הפעלת השרת ---
+// שימי לב ל-'0.0.0.0' - זה קריטי כדי ש-Render יוכל לגשת לשרת מבחוץ
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is up! Listening on port: ${PORT}`);
 });
