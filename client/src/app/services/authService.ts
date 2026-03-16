@@ -1,7 +1,7 @@
 // src/services/authService.ts
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://donation-management-kupat-hair.onrender.com/api'; // עדכון לכתובת השרת החדש
 // אינטרספטור (Interceptor) - מוסיף את הטוקן לכל בקשה שיוצאת מהלקוח
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
