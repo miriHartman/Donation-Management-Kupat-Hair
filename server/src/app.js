@@ -14,7 +14,7 @@ app.use(express.json());
 
 
 
-const PORT = 'https://donation-management-kupat-hair.onrender.com/api';
+const PORT = process.env.PORT ;
 
 app.get('/', (req, res) => {
   res.send('Server is running');
