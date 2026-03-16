@@ -37,7 +37,7 @@ const donationService = {
             WHERE donation_date >= DATE_SUB(DATE_FORMAT(CURDATE() ,'%Y-%m-01'), INTERVAL 1 MONTH)
             AND donation_date < DATE_FORMAT(CURDATE() ,'%Y-%m-01')
         `;
-        const [lastMonthRows] = await pool.query(lastMonthQuery);
+        const [lastMonthRows] = await db.query(lastMonthQuery);
         const lastMonthTotal = parseFloat(lastMonthRows[0].total) || 0;
 
         // 3. שליפת סטטיסטיקות נוכחיות (לפי הפילטרים)
@@ -47,7 +47,7 @@ const donationService = {
             LEFT JOIN branches b ON d.branch_id = b.id
             ${whereClause}
         `;
-        const [totalRows] = await pool.query(statsQuery, queryParams);
+        const [totalRows] = await db.query(statsQuery, queryParams);
         const totalAmount = parseFloat(totalRows[0].totalAmount) || 0;
         const totalDonations = totalRows[0].totalDonations || 0;
 
@@ -65,7 +65,7 @@ const donationService = {
             LEFT JOIN donations d ON b.id = d.branch_id
             GROUP BY b.id, b.name
         `;
-        const [branchData] = await pool.query(branchDataQuery, [...queryParams]);
+        const [branchData] = await db.query(branchDataQuery, [...queryParams]);
 
         const branchSummary = branchData.map(branch => {
             const bTotal = parseFloat(branch.branchTotal) || 0;
@@ -84,10 +84,10 @@ const donationService = {
             ${whereClause}
             ORDER BY d.donation_date DESC, d.id DESC LIMIT ? OFFSET ?
         `;
-        const [recentTransactions] = await pool.query(transactionsQuery, [...queryParams, limit, offset]);
+        const [recentTransactions] = await db.query(transactionsQuery, [...queryParams, limit, offset]);
 
         // 6. סיכום יומי
-        const [todayBranchData] = await pool.query(`
+        const [todayBranchData] = await db.query(`
             SELECT b.name, COALESCE(SUM(d.amount), 0) as amount, COUNT(d.id) as count
             FROM branches b
             LEFT JOIN donations d ON b.id = d.branch_id AND DATE(d.donation_date) = CURDATE()
@@ -166,7 +166,7 @@ const donationService = {
             }
 
             query += ' ORDER BY d.donation_date DESC';
-            const [rows] = await pool.query(query, params);
+            const [rows] = await db.query(query, params);
             return rows;
         } catch (error) {
             throw error;
@@ -181,7 +181,7 @@ const donationService = {
             WHERE id = ?
         `;
         const params = [data.amount, data.target_id, data.method_id, data.branch_id, data.donation_date, data.notes, id];
-        await pool.query(query, params);
+        await db.query(query, params);
         return { id, ...data };
     },
 
@@ -218,7 +218,7 @@ const donationService = {
             query += ' ORDER BY d.donation_date DESC LIMIT ? OFFSET ?';
             params.push(limit, offset);
 
-            const [rows] = await pool.query(query, params);
+            const [rows] = await db.query(query, params);
             return rows;
         } catch (error) {
             console.error("Service Error (filterTransactions):", error);
@@ -236,7 +236,7 @@ const donationService = {
                 WHERE branch_id = ? AND DATE(donation_date) = CURDATE()
                 ORDER BY created_at DESC
             `;
-            const [rows] = await pool.query(query, [branchId]);
+            const [rows] = await db.query(query, [branchId]);
             return rows;
         } catch (error) {
             console.error("Service Error (getTodayDonations):", error);
@@ -259,7 +259,7 @@ const donationService = {
                 VALUES (?, ?, ?, ?, CURDATE(), 'completed', ?, ?, NOW())
             `;
             
-            const [result] = await pool.query(query, [amount, target_id, method_id, branch_id, notes, created_by]);
+            const [result] = await db.query(query, [amount, target_id, method_id, branch_id, notes, created_by]);
             return { id: result.insertId, ...data };
         } catch (error) {
             console.error("SQL Error:", error);
@@ -277,7 +277,7 @@ const donationService = {
                 SET amount = ?, target_id = ?, method_id = ?, notes = ?
                 WHERE id = ?
             `;
-            await pool.query(query, [data.amount, target_id, method_id, data.notes, id]);
+            await db.query(query, [data.amount, target_id, method_id, data.notes, id]);
             return { id, ...data };
         } catch (error) {
             console.error("Service Error (updateDonation):", error);
@@ -286,7 +286,7 @@ const donationService = {
     },
 
     getBranches: async () => {
-        const [rows] = await pool.query('SELECT id, name FROM branches ORDER BY name ASC');
+        const [rows] = await db.query('SELECT id, name FROM branches ORDER BY name ASC');
         return rows;
     },
     
