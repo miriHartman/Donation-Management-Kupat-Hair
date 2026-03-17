@@ -77,13 +77,17 @@ const donationService = {
         });
 
         // 5. רשימת עסקאות
-        let transactionsQuery = `
-            SELECT d.id, b.name AS branch, d.donation_date AS date, d.amount, d.status
-            FROM donations d
-            LEFT JOIN branches b ON d.branch_id = b.id
-            ${whereClause}
-            ORDER BY d.donation_date DESC, d.id DESC LIMIT ? OFFSET ?
-        `;
+    
+let transactionsQuery = `
+    SELECT d.id, b.name AS branch, d.donation_date AS date, d.amount, d.status, 
+           d.is_recurring, d.months_count
+    FROM donations d
+    LEFT JOIN branches b ON d.branch_id = b.id
+    ${whereClause}
+    ORDER BY d.donation_date DESC, d.id DESC LIMIT ? OFFSET ?
+`;
+
+
         const [recentTransactions] = await db.query(transactionsQuery, [...queryParams, limit, offset]);
 
         // 6. סיכום יומי
@@ -245,27 +249,31 @@ const donationService = {
     },
 
     createDonation: async (data) => {
-        try {
-            const amount = data.amount;
-            const branch_id = data.branchId || data.branch_id;
-            const target_id = data.targetId || data.target_id;
-            const method_id = data.methodId || data.method_id;
-            const notes = data.notes || '';
-            const created_by = data.userId || data.created_by; 
+    try {
+        const { amount, notes, is_recurring, months_count } = data;
+        const branch_id = data.branchId || data.branch_id;
+        const target_id = data.targetId || data.target_id;
+        const method_id = data.methodId || data.method_id;
+        const created_by = data.userId || data.created_by; 
 
-            const query = `
-                INSERT INTO donations 
-                (amount, target_id, method_id, branch_id, donation_date, status, notes, created_by, created_at) 
-                VALUES (?, ?, ?, ?, CURDATE(), 'completed', ?, ?, NOW())
-            `;
-            
-            const [result] = await db.query(query, [amount, target_id, method_id, branch_id, notes, created_by]);
-            return { id: result.insertId, ...data };
-        } catch (error) {
-            console.error("SQL Error:", error);
-            throw error;
-        }
-    },
+        const query = `
+            INSERT INTO donations 
+            (amount, target_id, method_id, branch_id, donation_date, status, notes, created_by, is_recurring, months_count, created_at) 
+            VALUES (?, ?, ?, ?, CURDATE(), 'completed', ?, ?, ?, ?, NOW())
+        `;
+        
+        // שליחת הפרמטרים החדשים
+        const [result] = await db.query(query, [
+            amount, target_id, method_id, branch_id, notes, created_by, 
+            is_recurring ? 1 : 0, 
+            is_recurring ? months_count : 1
+        ]);
+        return { id: result.insertId, ...data };
+    } catch (error) {
+        console.error("SQL Error:", error);
+        throw error;
+    }
+},
 
     updateDonation: async (id, data) => {
         try {
