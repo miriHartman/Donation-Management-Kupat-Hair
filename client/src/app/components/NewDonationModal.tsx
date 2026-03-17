@@ -1,11 +1,11 @@
-import React from 'react';
-import { X, Check, Loader2, CalendarClock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Check, Loader2, CalendarClock, Info } from 'lucide-react';
 import { useDonationForm } from '../hooks/useDonationForm';
 
 export interface DonationData {
   date: string;
   id?: string;
-  amount: number;
+  amount: number; // סכום חודשי (מה שנשמר ב-DB)
   targetId: number;
   methodId: number;
   isRecurring: boolean;
@@ -25,18 +25,41 @@ interface NewDonationModalProps {
 }
 
 export function NewDonationModal({ isOpen, onClose, onRefresh, editingDonation, branchId }: NewDonationModalProps) {
+  // ניהול סכום כולל מקומי לצורך החישובים בטופס
+  const [totalAmount, setTotalAmount] = useState<number>(0);
 
-
-
-const { formData, setFormData, handleSave, loading } = useDonationForm(
+  const { formData, setFormData, handleSave, loading } = useDonationForm(
     editingDonation,
     () => {
-      onRefresh(); // מרענן את הטבלה
-      onClose();   // סוגר את החלונית אוטומטית
+      onRefresh();
+      onClose();
     },
     branchId
   );
 
+  // סנכרון ראשוני בעת עריכה או שינוי סוג תרומה
+  useEffect(() => {
+    if (formData.isRecurring && formData.amount && formData.installments) {
+      setTotalAmount(formData.amount * (formData.installments || 1));
+    } else {
+      setTotalAmount(formData.amount);
+    }
+  }, [formData.isRecurring]);
+
+  // פונקציות חישוב חכמות
+  const updateMonthlyAmount = (total: number, months: number) => {
+    if (months > 0) {
+      const monthly = total / months;
+      setFormData(prev => ({ ...prev, amount: Number(monthly.toFixed(2)) }));
+    }
+  };
+
+  const updateInstallments = (total: number, monthly: number) => {
+    if (monthly > 0) {
+      const months = Math.round(total / monthly);
+      setFormData(prev => ({ ...prev, installments: months }));
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -58,7 +81,7 @@ const { formData, setFormData, handleSave, loading } = useDonationForm(
             
             {/* יעד התרומה */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">יעד התרומה</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">יעד התרומה <span className="text-red-500">*</span></label>
               <select
                 value={formData.targetId}
                 onChange={(e) => setFormData({ ...formData, targetId: Number(e.target.value) })}
@@ -72,7 +95,7 @@ const { formData, setFormData, handleSave, loading } = useDonationForm(
 
             {/* אמצעי תשלום */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">אמצעי תשלום</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">אמצעי תשלום <span className="text-red-500">*</span></label>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { id: 1, label: 'מזומן' },
@@ -94,11 +117,12 @@ const { formData, setFormData, handleSave, loading } = useDonationForm(
                       name="methodId"
                       checked={formData.methodId === method.id}
                       onChange={() => {
-                        // אם נבחר הו"ק (4), נסמן אוטומטית כ-Recurring
+                        const isRecurring = method.id === 4;
                         setFormData({ 
                           ...formData, 
                           methodId: method.id,
-                          isRecurring: method.id === 4 ? true : formData.isRecurring 
+                          isRecurring: isRecurring,
+                          installments: isRecurring ? (formData.installments || 12) : 1
                         });
                       }}
                     />
@@ -108,18 +132,16 @@ const { formData, setFormData, handleSave, loading } = useDonationForm(
               </div>
             </div>
 
-            {/* אפשרויות הו"ק ותשלומים - מופיע רק באשראי או הו"ק */}
+            {/* איזור תרומה מחזורית */}
             {(formData.methodId === 2 || formData.methodId === 4) && (
-              <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100 space-y-3 animate-in fade-in slide-in-from-top-2">
+              <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100 space-y-4 animate-in fade-in slide-in-from-top-2">
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <div className="relative flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={formData.isRecurring}
-                      onChange={(e) => setFormData({ ...formData, isRecurring: e.target.checked })}
-                      className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
-                    />
-                  </div>
+                  <input
+                    type="checkbox"
+                    checked={formData.isRecurring}
+                    onChange={(e) => setFormData({ ...formData, isRecurring: e.target.checked })}
+                    className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                  />
                   <div className="flex items-center gap-2">
                     <CalendarClock className="w-4 h-4 text-blue-600" />
                     <span className="text-sm font-bold text-slate-700">זוהי תרומה מחזורית / תשלומים</span>
@@ -127,47 +149,82 @@ const { formData, setFormData, handleSave, loading } = useDonationForm(
                 </label>
 
                 {formData.isRecurring && (
-                  <div className="grid grid-cols-2 items-center gap-4 pt-2 border-t border-blue-100">
-                    <label className="text-xs font-semibold text-slate-600">מספר חודשים/תשלומים:</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="120"
-                      value={formData.installments || ''}
-                      onChange={(e) => setFormData({ ...formData, installments: parseInt(e.target.value) || 1 })}
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-md outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold"
-                      placeholder="12"
-                    />
+                  <div className="grid grid-cols-2 gap-4 pt-3 border-t border-blue-100">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-500 mb-1">סה"כ לתרומה</label>
+                      <input
+                        type="number"
+                        value={totalAmount || ''}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value) || 0;
+                          setTotalAmount(val);
+                          updateMonthlyAmount(val, formData.installments || 1);
+                        }}
+                        className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-blue-700 font-bold focus:ring-2 focus:ring-blue-500 outline-none"
+                        placeholder="סה''כ"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-500 mb-1">מס' חודשים <span className="text-red-500">*</span></label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={formData.installments || ''}
+                        onChange={(e) => {
+                          const months = parseInt(e.target.value) || 1;
+                          setFormData({ ...formData, installments: months });
+                          updateMonthlyAmount(totalAmount, months);
+                        }}
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg font-bold focus:ring-2 focus:ring-blue-500 outline-none"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
             )}
 
-            {/* סכום */}
+            {/* סכום חודשי / יחיד */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">סכום התרומה (₪)</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                {formData.isRecurring ? 'סכום לחיוב חודשי' : 'סכום התרומה'} (₪) <span className="text-red-500">*</span>
+              </label>
               <div className="relative">
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₪</span>
                 <input
                   type="number"
                   value={formData.amount || ''}
-                  onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                  className="w-full pr-10 pl-4 py-3 text-2xl font-black text-blue-900 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value) || 0;
+                    setFormData({ ...formData, amount: val });
+                    if (formData.isRecurring) {
+                      setTotalAmount(Number((val * (formData.installments || 1)).toFixed(2)));
+                    }
+                  }}
+                  className="w-full pr-10 pl-4 py-3 text-2xl font-black text-blue-900 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-inner"
                   placeholder="0.00"
                   step="0.01"
+                  required
                 />
               </div>
+              {formData.isRecurring && totalAmount > 0 && (
+                <div className="mt-2 flex items-center gap-1.5 text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 animate-pulse">
+                  <Info className="w-4 h-4" />
+                  <span className="text-xs font-bold">
+                    סה"כ יגבה מהתורם: ₪{totalAmount.toLocaleString()}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* הערות */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">הערות (אופציונלי)</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">הערות</label>
               <textarea
                 value={formData.notes || ''}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 rows={2}
-                placeholder="שם התורם, קרן ספציפית וכדומה..."
+                placeholder="שם התורם או פרטים נוספים..."
               />
             </div>
           </div>
@@ -183,17 +240,10 @@ const { formData, setFormData, handleSave, loading } = useDonationForm(
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !formData.amount}
               className="flex-[2] px-4 py-3 text-white bg-blue-600 hover:bg-blue-700 rounded-xl font-bold shadow-lg shadow-blue-200 flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-95"
             >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <Check className="w-5 h-5" />
-                  {editingDonation ? 'עדכן תרומה' : 'אישור ושמירה'}
-                </>
-              )}
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Check className="w-5 h-5" /> {editingDonation ? 'עדכן תרומה' : 'אישור ושמירה'}</>}
             </button>
           </div>
         </form>
