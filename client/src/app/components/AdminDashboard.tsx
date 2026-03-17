@@ -170,87 +170,89 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
           </div>
         </div>
 
-        {/* פילוח רווחיות סניפים */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div className="flex items-center gap-2 mb-6 text-slate-800 font-bold">
-            <TrendingUp className="w-5 h-5 text-indigo-600" />
-            <span>פילוח רווחיות סניפים (תקופה נבחרית)</span>
+        {/* Filters Panel + Profitability (פילוח רווחיות הוזז לכאן) */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="p-6 border-b border-slate-100">
+            <div className="flex items-center gap-2 mb-6 text-slate-800 font-bold">
+              <Filter className="w-5 h-5 text-indigo-600" />
+              <span>סינון נתונים</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div className="relative">
+                <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  type="text"
+                  placeholder="חיפוש לפי מזהה..."
+                  className="w-full pr-9 pl-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                />
+              </div>
+              
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] text-slate-500 font-bold mr-1">סניף</label>
+                <select 
+                  value={selectedBranchFilter}
+                  onChange={(e) => setSelectedBranchFilter(e.target.value)}
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none"
+                >
+                  <option value="all">כל הסניפים</option>
+                  {branches?.map((b) => <option key={b.id} value={b.name}>{b.name}</option>)}
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] text-slate-500 font-bold mr-1">מתאריך</label>
+                <input 
+                  type="date" 
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" 
+                  value={dateRange.start}
+                  onChange={(e) => setDateRange({...dateRange, start: e.target.value})} 
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] text-slate-500 font-bold mr-1">עד תאריך</label>
+                <input 
+                  type="date" 
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" 
+                  value={dateRange.end}
+                  onChange={(e) => setDateRange({...dateRange, end: e.target.value})} 
+                />
+              </div>
+            </div>
           </div>
-          <div className="space-y-4">
-            {branchSummary && branchSummary.length > 0 ? (
-              [...branchSummary].sort((a, b) => (b.amount || 0) - (a.amount || 0)).map((branch: any, idx: number) => (
-                <div key={idx} className="space-y-2">
-                  <div className="flex justify-between text-sm font-bold">
-                    <span className="text-slate-700">{branch.name}</span>
-                    <span className="text-indigo-600">
-                      {branch.percentage || 0}% 
-                      <span className="text-slate-400 font-normal mr-1">
-                        (₪{(branch.amount || 0).toLocaleString()})
+
+          {/* פילוח רווחיות סניפים - משולב בתחתית מסגרת הסינון */}
+          <div className="bg-slate-50/50 p-6">
+            <div className="flex items-center gap-2 mb-4 text-slate-700 font-bold text-sm">
+              <TrendingUp className="w-4 h-4 text-indigo-600" />
+              <span>פילוח רווחיות סניפים בהתאם לסינון</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
+              {branchSummary && branchSummary.length > 0 ? (
+                [...branchSummary].sort((a, b) => (b.amount || 0) - (a.amount || 0)).map((branch: any, idx: number) => (
+                  <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                    <div className="flex justify-between text-xs font-bold mb-2">
+                      <span className="text-slate-700">{branch.name}</span>
+                      <span className="text-indigo-600">
+                        {branch.percentage || 0}% 
+                        <span className="text-slate-400 font-normal mr-1">
+                          (₪{(branch.amount || 0).toLocaleString()})
+                        </span>
                       </span>
-                    </span>
+                    </div>
+                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-indigo-600 rounded-full transition-all duration-1000" 
+                        style={{ width: `${branch.percentage || 0}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-indigo-600 rounded-full transition-all duration-1000" 
-                      style={{ width: `${branch.percentage || 0}%` }}
-                    />
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-slate-400 text-sm">אין נתונים להצגת פילוח</p>
-            )}
-          </div>
-        </div>
-
-        {/* Filters Panel */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div className="flex items-center gap-2 mb-4 text-slate-800 font-bold">
-            <Filter className="w-5 h-5 text-indigo-600" />
-            <span>סינון נתונים</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input 
-                type="text"
-                placeholder="חיפוש לפי מזהה..."
-                className="w-full pr-9 pl-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-              />
-            </div>
-            
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-slate-500 font-bold mr-1">סניף</label>
-              <select 
-                value={selectedBranchFilter}
-                onChange={(e) => setSelectedBranchFilter(e.target.value)}
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none"
-              >
-                <option value="all">כל הסניפים</option>
-                {branches?.map((b) => <option key={b.id} value={b.name}>{b.name}</option>)}
-              </select>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-slate-500 font-bold mr-1">מתאריך</label>
-              <input 
-                type="date" 
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" 
-                value={dateRange.start}
-                onChange={(e) => setDateRange({...dateRange, start: e.target.value})} 
-              />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-slate-500 font-bold mr-1">עד תאריך</label>
-              <input 
-                type="date" 
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none" 
-                value={dateRange.end}
-                onChange={(e) => setDateRange({...dateRange, end: e.target.value})} 
-              />
+                ))
+              ) : (
+                <p className="col-span-full text-center text-slate-400 text-xs">אין נתונים להצגת פילוח בתקופה זו</p>
+              )}
             </div>
           </div>
         </div>
