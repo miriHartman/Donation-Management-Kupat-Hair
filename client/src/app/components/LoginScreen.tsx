@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Building2, Check } from 'lucide-react';
+import { User, Check } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 interface LoginScreenProps {
@@ -19,9 +19,15 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   return (
     <div className="flex items-center justify-center min-h-screen bg-slate-100 p-4 text-right" dir="rtl">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        
+        {/* Header עם הלוגו מה-Public */}
         <div className="bg-blue-600 p-8 text-center">
-          <div className="mx-auto w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
-            <Building2 className="w-8 h-8 text-white" />
+          <div className="mx-auto w-24 h-24 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-inner p-2">
+            <img 
+              src="/logo.png" 
+              alt="לוגו קופת העיר" 
+              className="max-w-full max-h-full object-contain"
+            />
           </div>
           <h1 className="text-2xl font-bold text-white mb-1">ניהול תרומות</h1>
           <p className="text-blue-100 text-sm">מערכת לניהול ובקרת תרומות</p>
