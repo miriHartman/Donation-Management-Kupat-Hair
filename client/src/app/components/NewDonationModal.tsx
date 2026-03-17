@@ -37,27 +37,20 @@ export function NewDonationModal({ isOpen, onClose, onRefresh, editingDonation, 
     branchId
   );
 
-  // סנכרון ראשוני בעת עריכה או שינוי סוג תרומה
+  // סנכרון ראשוני ועדכון סכומים בעת שינוי מצב מחזורי
   useEffect(() => {
     if (formData.isRecurring && formData.amount && formData.installments) {
-      setTotalAmount(formData.amount * (formData.installments || 1));
+      setTotalAmount(Number((formData.amount * (formData.installments || 1)).toFixed(2)));
     } else {
       setTotalAmount(formData.amount);
     }
-  }, [formData.isRecurring]);
+  }, [formData.isRecurring, formData.amount, formData.installments]);
 
   // פונקציות חישוב חכמות
   const updateMonthlyAmount = (total: number, months: number) => {
     if (months > 0) {
       const monthly = total / months;
       setFormData(prev => ({ ...prev, amount: Number(monthly.toFixed(2)) }));
-    }
-  };
-
-  const updateInstallments = (total: number, monthly: number) => {
-    if (monthly > 0) {
-      const months = Math.round(total / monthly);
-      setFormData(prev => ({ ...prev, installments: months }));
     }
   };
 
@@ -117,12 +110,15 @@ export function NewDonationModal({ isOpen, onClose, onRefresh, editingDonation, 
                       name="methodId"
                       checked={formData.methodId === method.id}
                       onChange={() => {
-                        const isRecurring = method.id === 4;
+                        const isMethodHOQ = method.id === 4;
                         setFormData({ 
                           ...formData, 
                           methodId: method.id,
-                          isRecurring: isRecurring,
-                          installments: isRecurring ? (formData.installments || 12) : 1
+                          // אם זה הו"ק - זה חייב להיות מחזורי. אם זה משהו אחר - נשמור על מה שהמשתמש סימן.
+                          isRecurring: isMethodHOQ ? true : formData.isRecurring,
+                          installments: isMethodHOQ 
+                            ? (formData.installments || 12) 
+                            : (formData.isRecurring ? formData.installments : 1)
                         });
                       }}
                     />
@@ -139,7 +135,14 @@ export function NewDonationModal({ isOpen, onClose, onRefresh, editingDonation, 
                   <input
                     type="checkbox"
                     checked={formData.isRecurring}
-                    onChange={(e) => setFormData({ ...formData, isRecurring: e.target.checked })}
+                    onChange={(e) => {
+                        const checked = e.target.checked;
+                        setFormData({ 
+                            ...formData, 
+                            isRecurring: checked,
+                            installments: checked ? (formData.installments || 12) : 1
+                        });
+                    }}
                     className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
                   />
                   <div className="flex items-center gap-2">

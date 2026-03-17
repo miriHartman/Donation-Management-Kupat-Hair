@@ -112,14 +112,18 @@ let transactionsQuery = `
                     count: b.count || 0
                 }))
             },
+            
             branchSummary,
-            transactions: recentTransactions.map(t => ({
-                id: t.id,
-                branch: t.branch || 'כללי',
-                date: new Date(t.date).toLocaleDateString('he-IL'),
-                amount: parseFloat(t.amount) || 0,
-                status: t.status || 'completed'
-            })),
+           transactions: recentTransactions.map(t => ({
+    id: t.id,
+    branch: t.branch || 'כללי',
+    date: new Date(t.date).toLocaleDateString('he-IL'),
+    amount: parseFloat(t.amount) || 0,
+    status: t.status || 'completed',
+    // הוספת השדות החסרים:
+    isRecurring: t.is_recurring === 1 || t.is_recurring === true,
+    installments: t.months_count || 1
+})),
             pagination: {
                 currentPage: page,
                 totalPages: Math.ceil(totalDonations / limit)
