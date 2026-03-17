@@ -47,13 +47,12 @@ export function useDonationForm(
   }, [editingDonation, initialBranchId]);
 
   const handleSave = async () => {
-    // 1. בדיקת תקינות סכום
+    // 1. בדיקות תקינות כרגיל...
     if (!formData.amount || formData.amount <= 0) {
       toast.error('סכום התרומה חייב להיות גדול מ-0');
       return;
     }
 
-    // 2. בדיקת קיום סניף (המרה למספר לוודא שזה לא undefined או סטרינג ריק)
     const selectedBranchId = Number(formData.branchId);
     if (!selectedBranchId || selectedBranchId === 0) {
       toast.error('שגיאה: מזהה סניף חסר');
@@ -62,32 +61,33 @@ export function useDonationForm(
 
     setLoading(true);
     try {
-      // שליפת ה-ID של המשתמש המחובר מה-localStorage
       const userString = localStorage.getItem('user');
       const user = userString ? JSON.parse(userString) : null;
       const userId = user?.id ? Number(user.id) : undefined;
 
-      // בניית האובייקט לשליחה לשרת
+      // 2. בניית ה-Payload עם התאמה לשמות השדות בשרת (Mapping)
       const payload = {
         ...formData,
         branchId: selectedBranchId,
-        userId: userId
-      } as any;
+        userId: userId,
+        // כאן אנחנו עושים את התיקון הקריטי:
+        is_recurring: formData.isRecurring ? 1 : 0,
+        months_count: formData.isRecurring ? (formData.installments || 1) : 1,
+        // שמות ה-ID של יעד ואמצעי תשלום כבר מטופלים בסרוויס בשרת (הוא עושה Mapping),
+        // אבל ליתר ביטחון נוודא שהם שם:
+        targetId: formData.targetId,
+        methodId: formData.methodId
+      };
 
       if (editingDonation?.id) {
-        // עדכון תרומה קיימת
         await donationService.updateDonation(editingDonation.id, payload);
         toast.success('התרומה עודכנה בהצלחה');
       } else {
-        // יצירת תרומה חדשה
         await donationService.createDonation(payload);
         toast.success('התרומה נשמרה בהצלחה');
       }
       
-      // קריאה לפונקציית ההצלחה (סגירת המודאל וריענון נתונים מקומי)
-      // חשוב: לוודא שב-AdminDashboard ה-onSuccess לא קורא ל-window.location.reload()
       onSuccess();
-
     } catch (error) {
       console.error('Save error:', error);
       toast.error('שגיאה בשמירת הנתונים');

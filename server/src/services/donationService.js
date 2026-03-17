@@ -250,7 +250,12 @@ let transactionsQuery = `
 
     createDonation: async (data) => {
     try {
-        const { amount, notes, is_recurring, months_count } = data;
+        // הוספת תמיכה בשני הפורמטים (CamelCase ו-SnakeCase)
+        const amount = data.amount;
+        const notes = data.notes;
+        const is_recurring = data.is_recurring !== undefined ? data.is_recurring : (data.isRecurring ? 1 : 0);
+        const months_count = data.months_count || data.installments || 1;
+        
         const branch_id = data.branchId || data.branch_id;
         const target_id = data.targetId || data.target_id;
         const method_id = data.methodId || data.method_id;
@@ -262,11 +267,10 @@ let transactionsQuery = `
             VALUES (?, ?, ?, ?, CURDATE(), 'completed', ?, ?, ?, ?, NOW())
         `;
         
-        // שליחת הפרמטרים החדשים
         const [result] = await db.query(query, [
             amount, target_id, method_id, branch_id, notes, created_by, 
-            is_recurring ? 1 : 0, 
-            is_recurring ? months_count : 1
+            is_recurring, 
+            months_count
         ]);
         return { id: result.insertId, ...data };
     } catch (error) {
