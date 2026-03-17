@@ -43,10 +43,14 @@ export function BranchSelector({ onSelectBranch, onAdminAccess }: BranchSelector
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-4 sm:p-8 text-right" dir="rtl">
       <div className="max-w-7xl mx-auto">
         
-        {/* Header */}
+        {/* Header - הוחלף בלוגו קופת העיר */}
         <div className="text-center mb-12 pt-8">
-          <div className="mx-auto w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-xl shadow-blue-600/20">
-            <Building2 className="w-10 h-10 text-white" />
+          <div className="mx-auto w-28 h-28 bg-white rounded-3xl flex items-center justify-center mb-6 shadow-xl shadow-blue-600/10 p-3 border border-white">
+            <img 
+              src="/logo.png" 
+              alt="לוגו קופת העיר" 
+              className="max-w-full max-h-full object-contain"
+            />
           </div>
           <h1 className="text-4xl font-bold text-slate-800 mb-3">בחירת סניף לפעילות</h1>
           <p className="text-slate-500 text-lg">מערכת ניהול תרומות - קופת העיר</p>
@@ -71,7 +75,6 @@ export function BranchSelector({ onSelectBranch, onAdminAccess }: BranchSelector
                     <div className={`w-14 h-14 ${branchColor} rounded-2xl flex items-center justify-center shadow-lg group-hover:bg-white/20 transition-colors`}>
                       <MapPin className="w-7 h-7 text-white" />
                     </div>
-                    
                   </div>
                   
                   {/* שם הסניף */}
