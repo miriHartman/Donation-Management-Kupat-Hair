@@ -49,7 +49,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all text-left"
-              placeholder="••••••••"
+              placeholder="הכנס סיסמה..."
             />
           </div>
 
