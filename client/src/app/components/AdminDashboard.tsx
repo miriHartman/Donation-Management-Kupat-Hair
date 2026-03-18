@@ -19,16 +19,22 @@ const iconMap: Record<string, any> = {
 };
 
 export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
+  // קבלת התאריך של היום בפורמט YYYY-MM-DD
+  const today = new Date().toISOString().split('T')[0];
+
   const [inputValue, setInputValue] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedBranchFilter, setSelectedBranchFilter] = useState('all');
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  const [debouncedDateRange, setDebouncedDateRange] = useState({ start: '', end: '' });
+  
+  // הגדרת תאריך סיום דיפולטיבי להיום
+  const [dateRange, setDateRange] = useState({ start: '', end: today });
+  const [debouncedDateRange, setDebouncedDateRange] = useState({ start: '', end: today });
+  
   const [page, setPage] = useState(1); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
 
-  // --- פונקציות עזר לתצוגה (נוסף עבור הפירוט החדש) ---
+  // --- פונקציות עזר לתצוגה ---
   const getPaymentIcon = (methodId: any) => {
     const id = Number(methodId);
     switch(id) {
@@ -49,7 +55,6 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
     const targets: Record<number, string> = { 1: 'קופת העיר', 2: 'קרנות', 3: 'אחר' };
     return targets[Number(targetId)] || 'כללי';
   };
-  // ------------------------------------------------
 
   const { 
     transactions, 
@@ -86,7 +91,7 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
       targetId: 1,
       methodId: 1,
       isRecurring: false,
-      installments: 1, // הוספת שדה חודשים
+      installments: 1,
       currency: 'ILS',
       branchId: 0,
       date: new Date().toISOString().split('T')[0]
@@ -280,7 +285,7 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
           </div>
         </div>
 
-        {/* טבלת עסקאות - המבנה המעודכן עם כל הפרטים */}
+        {/* טבלת עסקאות */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-right text-sm">
@@ -346,7 +351,7 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
         </div>
       </main>
 
-      {/* Modal - הוספה/עריכה (הוספנו תמיכה במחזורי) */}
+      {/* Modal - הוספה/עריכה */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
@@ -399,7 +404,6 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
                 </div>
               </div>
 
-              {/* הוספת בחירת סוג תרומה (מחזורי/חד פעמי) */}
               <div className="flex items-center gap-6 p-3 bg-slate-50 rounded-xl border border-slate-100">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input 
