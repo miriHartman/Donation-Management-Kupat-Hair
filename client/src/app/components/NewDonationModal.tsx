@@ -22,6 +22,8 @@ interface NewDonationModalProps {
   onRefresh: () => void;
   editingDonation?: DonationData | null;
   branchId: number;
+  branches?: { id: number; name: string }[]; // רשימת סניפים למנהל
+  showAdminFields?: boolean; // האם להציג שדות מנהל כמו תאריך ובחירת סניף
 }
 
 // 1. הגדרת ההודעות להגרלה
@@ -33,8 +35,15 @@ const SUCCESS_MESSAGES = [
   { title: "תודה רבה!", subtitle: "שמחת חג של יהודים- בזכותך :)" },
 ];
 
-export function NewDonationModal({ isOpen, onClose, onRefresh, editingDonation, branchId }: NewDonationModalProps) {
-  const [totalAmount, setTotalAmount] = useState<number>(0);
+export function NewDonationModal({ 
+  isOpen, 
+  onClose, 
+  onRefresh, 
+  editingDonation, 
+  branchId,
+  branches,
+  showAdminFields 
+}: NewDonationModalProps) {  const [totalAmount, setTotalAmount] = useState<number>(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const [currentMessage, setCurrentMessage] = useState(SUCCESS_MESSAGES[0]);
 
@@ -103,6 +112,32 @@ export function NewDonationModal({ isOpen, onClose, onRefresh, editingDonation, 
                     <option value={3}>אחר</option>
                   </select>
                 </div>
+                {/* שדות מנהל: תאריך וסניף */}
+{showAdminFields && (
+  <div className="grid grid-cols-2 gap-4 p-4 bg-amber-50/50 rounded-xl border border-amber-100 animate-in fade-in slide-in-from-top-2">
+    <div>
+      <label className="block text-sm font-medium text-amber-900 mb-1">תאריך התרומה</label>
+      <input
+        type="date"
+        value={formData.date?.split('T')[0] || ''}
+        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+        className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+      />
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-amber-900 mb-1">סניף</label>
+      <select
+        value={formData.branchId || branchId}
+        onChange={(e) => setFormData({ ...formData, branchId: Number(e.target.value) })}
+        className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+      >
+        {branches?.map(b => (
+          <option key={b.id} value={b.id}>{b.name}</option>
+        ))}
+      </select>
+    </div>
+  </div>
+)}
 
                 {/* אמצעי תשלום */}
                 <div>
@@ -231,8 +266,11 @@ export function NewDonationModal({ isOpen, onClose, onRefresh, editingDonation, 
                       <Info className="w-4 h-4" />
                       <span className="text-xs font-bold">סה"כ יגבה מהתורם: ₪{totalAmount.toLocaleString()}</span>
                     </div>
+                    
                   )}
+                  
                 </div>
+                
 
                 {/* הערות */}
                 <div>
