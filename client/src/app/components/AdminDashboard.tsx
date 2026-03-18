@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
-  Search, Calendar, Filter, Download, Plus, Edit2, X, Check, Loader2,
+  Search, ChevronLeft, ChevronRight, Filter, Download, Plus, Edit2, X, Check, Loader2,
   Building2, Banknote, Users, CreditCard, ArrowRight, CalendarClock,
   ArrowUpRight, ArrowDownRight, TrendingUp, Wallet, FileText, Repeat
 } from 'lucide-react';
@@ -348,11 +348,37 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
               </tbody>
             </table>
           </div>
-        </div>
-      </main>
+          {/* סיום ה-overflow-x-auto של הטבלה */}
+          </div> 
 
-      {/* Modal - הוספה/עריכה */}
-      {isModalOpen && (
+          {/* --- הוסף מכאן: שורת הדפדוף --- */}
+          <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+            <div className="text-xs font-bold text-slate-500">
+              מציג עמוד <span className="text-indigo-600">{page}</span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage(prev => prev + 1)}
+                disabled={transactions.length < 10} // אם יש פחות מ-10 עסקאות, כנראה אין עמוד הבא
+                className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                <ChevronRight className="w-4 h-4" />
+                הקודם
+              </button>
+              <button
+                onClick={() => setPage(prev => Math.max(1, prev - 1))}
+                disabled={page === 1}
+                className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                הבא
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </main>
+
+       {/* Modal - הוספה/עריכה */}
+       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
@@ -479,5 +505,6 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
         </div>
       )}
     </div>
+    
   );
 }
