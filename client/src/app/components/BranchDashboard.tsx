@@ -99,12 +99,13 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
               <table className="w-full text-right">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100 text-slate-600 text-xs sm:text-sm">
+                    {/* שינוי סדר: סה"כ תרומה ראשון מימין */}
+                    <th className="px-4 py-4 font-bold text-blue-900">סה"כ לתרומה</th>
                     <th className="px-4 py-4 font-bold">סכום (לחודש)</th>
                     <th className="px-4 py-4 font-bold">חודשים</th>
                     <th className="px-4 py-4 font-bold">סוג</th>
                     <th className="px-4 py-4 font-bold">יעד</th>
                     <th className="px-4 py-4 font-bold">אמצעי תשלום</th>
-                    <th className="px-4 py-4 font-bold">סה"כ לתרומה</th>
                     <th className="px-4 py-4 font-bold text-left">פעולות</th>
                   </tr>
                 </thead>
@@ -115,7 +116,6 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
                     </tr>
                   ) : (
                     donations.map((donation: any) => {
-                      // שים לב: משתמשים בשמות השדות מה-Hook (isRecurring, installments)
                       const isRec = !!donation.isRecurring;
                       const amount = Number(donation.amount) || 0;
                       const months = isRec ? (Number(donation.installments) || 1) : 1;
@@ -123,12 +123,19 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
 
                       return (
                         <tr key={donation.id} className="hover:bg-blue-50/30 transition-colors group">
-                          {/* סכום לחודש */}
-                          <td className="px-4 py-4 font-bold text-slate-900">
+                          {/* 1. סה"כ (הכי ימני) */}
+                          <td className="px-4 py-4">
+                            <div className="text-base font-black text-blue-900">
+                              ₪{total.toLocaleString()}
+                            </div>
+                          </td>
+
+                          {/* 2. סכום לחודש */}
+                          <td className="px-4 py-4 font-bold text-slate-700">
                             ₪{amount.toLocaleString()}
                           </td>
 
-                          {/* חודשים */}
+                          {/* 3. חודשים */}
                           <td className="px-4 py-4">
                             {isRec ? (
                               <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded font-bold text-xs">
@@ -139,7 +146,7 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
                             )}
                           </td>
 
-                          {/* סוג */}
+                          {/* 4. סוג */}
                           <td className="px-4 py-4">
                             <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-bold ${
                               isRec ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'
@@ -149,12 +156,12 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
                             </span>
                           </td>
 
-                          {/* יעד */}
+                          {/* 5. יעד */}
                           <td className="px-4 py-4 text-sm text-slate-700">
                             {getTargetLabel(donation.targetId)}
                           </td>
 
-                          {/* אמצעי תשלום */}
+                          {/* 6. אמצעי תשלום */}
                           <td className="px-4 py-4">
                             <div className="flex items-center gap-2 text-sm text-slate-600">
                               {getPaymentIcon(donation.methodId)}
@@ -162,16 +169,12 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
                             </div>
                           </td>
 
-                          {/* סה"כ */}
-                          <td className="px-4 py-4">
-                            <div className="text-base font-black text-blue-900">
-                              ₪{total.toLocaleString()}
-                            </div>
-                          </td>
-
-                          {/* פעולות */}
+                          {/* 7. פעולות (הכי שמאלי) */}
                           <td className="px-4 py-4 text-left">
-                            <button onClick={() => handleEditClick(donation)} className="p-2 text-slate-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all">
+                            <button 
+                              onClick={() => handleEditClick(donation)} 
+                              className="p-2 text-slate-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-white shadow-sm"
+                            >
                               <Edit2 className="w-4 h-4" />
                             </button>
                           </td>
