@@ -26,11 +26,11 @@ interface NewDonationModalProps {
 
 // 1. הגדרת ההודעות להגרלה
 const SUCCESS_MESSAGES = [
-  { title: "אשריכם ישראל!", subtitle: "בזכות התרומות עוד ילד יהודי ילך לישון שבע..." },
+  { title: "אשריכם ישראל!", subtitle: "שכרך שמור לך 💰💰💰💰💰💰" },
   { title: "יישר כוח גדול!", subtitle: "עבודתך המסורה מכניסה עוד חתן לחופה ברוגע..." },
   { title: "מצווה גדולה!", subtitle: "צדקה תציל ממות !!!" },
   { title: "שכוייח עצום!", subtitle: "זוכה לברכת גדולי הדור ..." },
-  { title: "תודה רבה!", subtitle: "בזכותך עוד נפש יהודית זוכה לעזרה..." },
+  { title: "תודה רבה!", subtitle: "שמחת חג של יהודים- בזכותך :)" },
 ];
 
 export function NewDonationModal({ isOpen, onClose, onRefresh, editingDonation, branchId }: NewDonationModalProps) {
