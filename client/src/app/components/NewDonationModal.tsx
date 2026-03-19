@@ -59,16 +59,16 @@ export function NewDonationModal({
   );
 
   // אפקט לעדכון סכום כולל לצפייה (בלבד) כשהסכום החודשי משתנה
-  useEffect(() => {
-    if (formData.isRecurring && formData.amount && formData.installments) {
-      const calculatedTotal = Number((formData.amount * formData.installments).toFixed(2));
-      if (calculatedTotal !== totalAmount) {
-        setTotalAmount(calculatedTotal);
-      }
-    } else if (!formData.isRecurring) {
-      setTotalAmount(formData.amount);
-    }
-  }, [formData.isRecurring, formData.amount, formData.installments]);
+  // useEffect(() => {
+  //   if (formData.isRecurring && formData.amount && formData.installments) {
+  //     const calculatedTotal = Number((formData.amount * formData.installments).toFixed(2));
+  //     if (calculatedTotal !== totalAmount) {
+  //       setTotalAmount(calculatedTotal);
+  //     }
+  //   } else if (!formData.isRecurring) {
+  //     setTotalAmount(formData.amount);
+  //   }
+  // }, [formData.isRecurring, formData.amount, formData.installments]);
 
 
   // אפקט לעדכון הטופס בנתוני התרומה הנערכת בעת פתיחת המודאל
@@ -136,7 +136,8 @@ export function NewDonationModal({
                     <label className="block text-sm font-medium text-amber-900 mb-1">תאריך התרומה</label>
                     <input
                       type="date"
-                      value={formData.date || ''} // פשוט וקל, ה-Hook כבר דואג לפורמט
+                      // הוספת substring כאן מבטיחה שהדפדפן יציג את התאריך גם אם ה-Hook התעכב
+                      value={formData.date ? formData.date.substring(0, 10) : ''}
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                       className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg outline-none text-sm"
                     />
