@@ -153,8 +153,8 @@ export function NewDonationModal({
                       <label
                         key={method.id}
                         className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all ${formData.methodId === method.id
-                            ? 'bg-blue-50 border-blue-500 text-blue-700 font-bold shadow-sm'
-                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                          ? 'bg-blue-50 border-blue-500 text-blue-700 font-bold shadow-sm'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                           }`}
                       >
                         <input
@@ -209,9 +209,10 @@ export function NewDonationModal({
                           <label className="block text-[11px] font-bold text-slate-500 mb-1">סה"כ לתרומה</label>
                           <input
                             type="number"
+                            min="0.01"
                             value={totalAmount || ''}
                             onChange={(e) => {
-                              const val = parseFloat(e.target.value) || 0;
+                              const val = Math.max(0, parseFloat(e.target.value) || 0); // מונע שלילי
                               setTotalAmount(val);
                               updateMonthlyAmount(val, formData.installments || 1);
                             }}
