@@ -9,13 +9,14 @@ export function useDonationForm(
   initialBranchId: number
 ) {
   const [loading, setLoading] = useState(false);
-  
-  // אתחול ה-State עם ערכי ברירת מחדל כולל תאריך וסניף
+
   const [formData, setFormData] = useState<DonationData>({
     amount: 0,
     targetId: 1,
     methodId: 1,
     isRecurring: false,
+    fundNumber: '', // אתחול
+    targetOtherNote: '', // אתחול
     installments: 1,
     currency: 'ILS',
     notes: '',
@@ -23,34 +24,36 @@ export function useDonationForm(
     date: new Date().toISOString().split('T')[0]
   });
 
-  // עדכון הטופס כאשר נכנסים למצב עריכה
-  // עדכון הטופס כאשר נכנסים למצב עריכה
   useEffect(() => {
     if (editingDonation) {
       setFormData({
         ...editingDonation,
         branchId: editingDonation.branchId || initialBranchId || 0,
-        // התיקון כאן: חילוץ 10 התווים הראשונים בלבד מהתאריך שמגיע מהשרת
-        date: editingDonation.date 
-          ? editingDonation.date.split('T')[0] 
-          : new Date().toISOString().split('T')[0]
+        date: editingDonation.date
+          ? editingDonation.date.split('T')[0]
+          : new Date().toISOString().split('T')[0],
+        // וודוא שהשדות קיימים גם בעריכה
+        fundNumber: editingDonation.fundNumber || '',
+        targetOtherNote: editingDonation.targetOtherNote || ''
       });
     } else {
-      setFormData({ 
-        amount: 0, 
-        targetId: 1, 
-        methodId: 1, 
-        isRecurring: false, 
-        installments: 1, 
-        currency: 'ILS', 
+      setFormData({
+        amount: 0,
+        targetId: 1,
+        methodId: 1,
+        isRecurring: false,
+        fundNumber: '', // איפוס במעבר לתרומה חדשה
+        targetOtherNote: '', // איפוס במעבר לתרומה חדשה
+        installments: 1,
+        currency: 'ILS',
         notes: '',
         branchId: initialBranchId || 0,
         date: new Date().toISOString().split('T')[0]
       });
     }
   }, [editingDonation, initialBranchId]);
+
   const handleSave = async () => {
-    // 1. בדיקות תקינות כרגיל...
     if (!formData.amount || formData.amount <= 0) {
       toast.error('סכום התרומה חייב להיות גדול מ-0');
       return;
@@ -62,22 +65,31 @@ export function useDonationForm(
       return;
     }
 
+    // וולידציה לשדות חובה מותנים
+    if (formData.targetId === 2 && !formData.fundNumber) {
+      toast.error('חובה להזין מספר קרן');
+      return;
+    }
+    if (formData.targetId === 3 && !formData.targetOtherNote) {
+      toast.error('חובה לפרט את יעד התרומה');
+      return;
+    }
+
     setLoading(true);
     try {
       const userString = localStorage.getItem('user');
       const user = userString ? JSON.parse(userString) : null;
       const userId = user?.id ? Number(user.id) : undefined;
 
-      // 2. בניית ה-Payload עם התאמה לשמות השדות בשרת (Mapping)
       const payload = {
         ...formData,
         branchId: selectedBranchId,
         userId: userId,
-        // כאן אנחנו עושים את התיקון הקריטי:
+        // ניקוי לוגי סופי - אם זה לא יעד 2, אל תשלח מספר קרן
+        fundNumber: formData.targetId === 2 ? formData.fundNumber : undefined,
+        targetOtherNote: formData.targetId === 3 ? formData.targetOtherNote : undefined,
         is_recurring: formData.isRecurring ? 1 : 0,
         months_count: formData.isRecurring ? (formData.installments || 1) : 1,
-        // שמות ה-ID של יעד ואמצעי תשלום כבר מטופלים בסרוויס בשרת (הוא עושה Mapping),
-        // אבל ליתר ביטחון נוודא שהם שם:
         targetId: formData.targetId,
         methodId: formData.methodId
       };
@@ -89,7 +101,7 @@ export function useDonationForm(
         await donationService.createDonation(payload);
         toast.success('התרומה נשמרה בהצלחה');
       }
-      
+
       onSuccess();
     } catch (error) {
       console.error('Save error:', error);

@@ -10,6 +10,8 @@ export interface DonationData {
   methodId: number;
   isRecurring: boolean;
   installments?: number;
+  fundNumber?: string;        
+  targetOtherNote?: string;   
   currency: string;
   notes?: string;
   branchId?: number;
@@ -120,7 +122,16 @@ export function NewDonationModal({
                 <label className="block text-sm font-medium text-slate-700 mb-1">יעד התרומה <span className="text-red-500">*</span></label>
                 <select
                   value={formData.targetId}
-                  onChange={(e) => setFormData({ ...formData, targetId: Number(e.target.value) })}
+                  onChange={(e) => {
+                    const newTargetId = Number(e.target.value);
+                    setFormData({
+                      ...formData,
+                      targetId: newTargetId,
+                      // ניקוי שדות מותנים אם היעד השתנה
+                      fundNumber: newTargetId === 2 ? formData.fundNumber : '',
+                      targetOtherNote: newTargetId === 3 ? formData.targetOtherNote : ''
+                    });
+                  }}
                   className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value={1}>קופת העיר</option>
@@ -128,6 +139,35 @@ export function NewDonationModal({
                   <option value={3}>אחר</option>
                 </select>
               </div>
+              {/* שדה מותנה לקרנות */}
+              {formData.targetId === 2 && (
+                <div className="mt-3 animate-in fade-in slide-in-from-top-2">
+                  <label className="block text-sm font-medium text-blue-700 mb-1">מספר קרן <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.fundNumber || ''}
+                    onChange={(e) => setFormData({ ...formData, fundNumber: e.target.value })}
+                    placeholder="הכנס מספר קרן..."
+                    className="w-full px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+
+              {/* שדה מותנה ליעד אחר */}
+              {formData.targetId === 3 && (
+                <div className="mt-3 animate-in fade-in slide-in-from-top-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">פירוט היעד <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.targetOtherNote || ''}
+                    onChange={(e) => setFormData({ ...formData, targetOtherNote: e.target.value })}
+                    placeholder="עבור מה התרומה?"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
 
               {/* שדות מנהל */}
               {showAdminFields && (
@@ -315,13 +355,27 @@ export function NewDonationModal({
                 <button type="button" onClick={onClose} className="flex-1 px-4 py-3 text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 font-medium transition-colors">
                   ביטול
                 </button>
+
+
                 <button
                   type="submit"
-                  disabled={loading || !formData.amount}
+                  disabled={
+                    loading ||
+                    !formData.amount ||
+                    (formData.targetId === 2 && !formData.fundNumber) ||
+                    (formData.targetId === 3 && !formData.targetOtherNote)
+                  }
                   className="flex-[2] px-4 py-3 text-white bg-blue-600 hover:bg-blue-700 rounded-xl font-bold shadow-lg shadow-blue-200 flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-95"
                 >
                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Check className="w-5 h-5" /> {editingDonation ? 'עדכן תרומה' : 'אישור ושמירה'}</>}
+
                 </button>
+
+
+
+
+
+
               </div>
             </form>
           </>
