@@ -35,15 +35,16 @@ const SUCCESS_MESSAGES = [
   { title: "תודה רבה!", subtitle: "שמחת חג של יהודים- בזכותך :)" },
 ];
 
-export function NewDonationModal({ 
-  isOpen, 
-  onClose, 
-  onRefresh, 
-  editingDonation, 
+export function NewDonationModal({
+  isOpen,
+  onClose,
+  onRefresh,
+  editingDonation,
   branchId,
   branches,
-  showAdminFields 
-}: NewDonationModalProps) {  const [totalAmount, setTotalAmount] = useState<number>(0);
+  showAdminFields
+}: NewDonationModalProps) {
+  const [totalAmount, setTotalAmount] = useState<number>(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const [currentMessage, setCurrentMessage] = useState(SUCCESS_MESSAGES[0]);
 
@@ -84,7 +85,7 @@ export function NewDonationModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
-        
+
         {!showSuccess ? (
           <>
             {/* Header */}
@@ -96,7 +97,7 @@ export function NewDonationModal({
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="p-6 space-y-6">
               <div className="space-y-4">
                 {/* יעד התרומה */}
@@ -113,31 +114,31 @@ export function NewDonationModal({
                   </select>
                 </div>
                 {/* שדות מנהל: תאריך וסניף */}
-{showAdminFields && (
-  <div className="grid grid-cols-2 gap-4 p-4 bg-amber-50/50 rounded-xl border border-amber-100 animate-in fade-in slide-in-from-top-2">
-    <div>
-      <label className="block text-sm font-medium text-amber-900 mb-1">תאריך התרומה</label>
-      <input
-        type="date"
-        value={formData.date?.split('T')[0] || ''}
-        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-        className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-sm"
-      />
-    </div>
-    <div>
-      <label className="block text-sm font-medium text-amber-900 mb-1">סניף</label>
-      <select
-        value={formData.branchId || branchId}
-        onChange={(e) => setFormData({ ...formData, branchId: Number(e.target.value) })}
-        className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-sm"
-      >
-        {branches?.map(b => (
-          <option key={b.id} value={b.id}>{b.name}</option>
-        ))}
-      </select>
-    </div>
-  </div>
-)}
+                {showAdminFields && (
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-amber-50/50 rounded-xl border border-amber-100 animate-in fade-in slide-in-from-top-2">
+                    <div>
+                      <label className="block text-sm font-medium text-amber-900 mb-1">תאריך התרומה</label>
+                      <input
+                        type="date"
+                        value={formData.date?.split('T')[0] || ''}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                        className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-amber-900 mb-1">סניף</label>
+                      <select
+                        value={formData.branchId || branchId}
+                        onChange={(e) => setFormData({ ...formData, branchId: Number(e.target.value) })}
+                        className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+                      >
+                        {branches?.map(b => (
+                          <option key={b.id} value={b.id}>{b.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
 
                 {/* אמצעי תשלום */}
                 <div>
@@ -151,11 +152,10 @@ export function NewDonationModal({
                     ].map((method) => (
                       <label
                         key={method.id}
-                        className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all ${
-                          formData.methodId === method.id
+                        className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all ${formData.methodId === method.id
                             ? 'bg-blue-50 border-blue-500 text-blue-700 font-bold shadow-sm'
                             : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
+                          }`}
                       >
                         <input
                           type="radio"
@@ -164,12 +164,12 @@ export function NewDonationModal({
                           checked={formData.methodId === method.id}
                           onChange={() => {
                             const isMethodHOQ = method.id === 4;
-                            setFormData({ 
-                              ...formData, 
+                            setFormData({
+                              ...formData,
                               methodId: method.id,
                               isRecurring: isMethodHOQ ? true : formData.isRecurring,
-                              installments: isMethodHOQ 
-                                ? (formData.installments || 12) 
+                              installments: isMethodHOQ
+                                ? (formData.installments || 12)
                                 : (formData.isRecurring ? formData.installments : 1)
                             });
                           }}
@@ -188,12 +188,12 @@ export function NewDonationModal({
                         type="checkbox"
                         checked={formData.isRecurring}
                         onChange={(e) => {
-                            const checked = e.target.checked;
-                            setFormData({ 
-                                ...formData, 
-                                isRecurring: checked,
-                                installments: checked ? (formData.installments || 12) : 1
-                            });
+                          const checked = e.target.checked;
+                          setFormData({
+                            ...formData,
+                            isRecurring: checked,
+                            installments: checked ? (formData.installments || 12) : 1
+                          });
                         }}
                         className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
                       />
@@ -223,10 +223,11 @@ export function NewDonationModal({
                           <label className="block text-[11px] font-bold text-slate-500 mb-1">מס' חודשים <span className="text-red-500">*</span></label>
                           <input
                             type="number"
-                            min="1"
+                            min="1" // מונע חצים למטה מתחת ל-1 בדפדפן
                             value={formData.installments || ''}
                             onChange={(e) => {
-                              const months = parseInt(e.target.value) || 1;
+                              // Math.max מבטיח שהערך המינימלי שייכנס לסטייט הוא 1
+                              const months = Math.max(1, parseInt(e.target.value) || 1);
                               setFormData({ ...formData, installments: months });
                               updateMonthlyAmount(totalAmount, months);
                             }}
@@ -266,11 +267,11 @@ export function NewDonationModal({
                       <Info className="w-4 h-4" />
                       <span className="text-xs font-bold">סה"כ יגבה מהתורם: ₪{totalAmount.toLocaleString()}</span>
                     </div>
-                    
+
                   )}
-                  
+
                 </div>
-                
+
 
                 {/* הערות */}
                 <div>
@@ -307,11 +308,11 @@ export function NewDonationModal({
               <PartyPopper className="w-12 h-12 text-green-500" />
               <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white" />
             </div>
-            
+
             <h2 className="text-3xl font-black text-slate-800 mb-3 leading-tight">
               {currentMessage.title}
             </h2>
-            
+
             <p className="text-slate-500 text-lg font-medium mb-8 leading-relaxed max-w-[300px]">
               {currentMessage.subtitle}
             </p>
