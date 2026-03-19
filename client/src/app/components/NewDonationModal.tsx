@@ -89,8 +89,7 @@ export function NewDonationModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
-
+<div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         {!showSuccess ? (
           <>
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
@@ -102,8 +101,7 @@ export function NewDonationModal({
               </button>
             </div>
 
-            <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="p-6 space-y-6">
-              <div className="space-y-4">
+<form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="p-6 space-y-6 overflow-y-auto flex-1 custom-scrollbar">              <div className="space-y-4">
                 
                 {/* יעד התרומה */}
                 <div>
