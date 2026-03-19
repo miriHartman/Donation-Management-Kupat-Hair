@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
   res.send('Server is running and healthy!');
 });
 
-// --- הראוטים שלך ---
+// --- הראוטים  ---
 const branchRouter = require('./routers/branchRoutes');
 app.use('/api/branches', branchRouter);
 
@@ -29,8 +29,7 @@ app.use('/api/donations', donationRoutes);
 const authRoutes = require('./routers/authRoutes');
 app.use('/api/auth', authRoutes);
 
-// --- הפעלת השרת ---
-// שימי לב ל-'0.0.0.0' - זה קריטי כדי ש-Render יוכל לגשת לשרת מבחוץ
+// Run the server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is up! Listening on port: ${PORT}`);
 });

@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { 
-  Search, ChevronLeft, ChevronRight, Filter, Plus, Edit2, 
+import {
+  Search, ChevronLeft, ChevronRight, Filter, Plus, Edit2,
   Building2, Banknote, Users, CreditCard, ArrowRight, CalendarClock,
-  ArrowUpRight, ArrowDownRight, TrendingUp, Wallet, FileText, Repeat
+  ArrowUpRight, ArrowDownRight, TrendingUp, Wallet, FileText, Repeat, Trash2
 } from 'lucide-react';
-import { useDashboardData } from '../hooks/useDashboardData'; 
+import { donationService } from '../services/donationService'; // ייבוא השירות
+import { toast } from 'sonner'; // או הספרייה שאתה משתמש בה להודעות
+import { useDashboardData } from '../hooks/useDashboardData';
 import { NewDonationModal } from '../components/NewDonationModal'; // <-- ייבוא הקומפוננטה
-
+import  { useBranchDashboard } from '../hooks/useBranchDashboard'; 
 interface AdminDashboardProps {
   onLogout: () => void;
   onBack: () => void;
@@ -25,20 +27,34 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
   const [selectedBranchFilter, setSelectedBranchFilter] = useState('all');
   const [dateRange, setDateRange] = useState({ start: '', end: today });
   const [debouncedDateRange, setDebouncedDateRange] = useState({ start: '', end: today });
-  const [page, setPage] = useState(1); 
+  const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
 
-  const { 
-    transactions, 
-    stats, 
-    branches, 
+  const {
+    transactions,
+    stats,
+    branches,
     todaySummary,
-    branchSummary, 
+    branchSummary,
     loading: dataLoading,
-    fetchData 
+    fetchData
   } = useDashboardData(selectedBranchFilter, debouncedSearch, page, debouncedDateRange);
 
+  const handleDeleteTransaction = async (id: number) => {
+    if (!window.confirm('האם אתה בטוח שברצונך למחוק תרומה זו לצמיתות?')) return;
+
+    try {
+      // קריאה ישירה לשירות (Service) ולא להוק
+      await donationService.deleteDonation(id); 
+      
+      toast.success('התרומה נמחקה בהצלחה');
+      fetchData(); // רענון הנתונים בטבלה (מגיע מ-useDashboardData)
+    } catch (error) {
+      console.error('Error deleting:', error);
+      toast.error('שגיאה במחיקת התרומה');
+    }
+  };
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(inputValue);
@@ -51,7 +67,7 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
   // עזרים לתצוגה בטבלה
   const getPaymentIcon = (methodId: any) => {
     const id = Number(methodId);
-    switch(id) {
+    switch (id) {
       case 1: return <Wallet className="w-4 h-4 text-green-600" />;
       case 2: return <CreditCard className="w-4 h-4 text-blue-600" />;
       case 3: return <FileText className="w-4 h-4 text-amber-600" />;
@@ -77,7 +93,7 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
     setIsModalOpen(true);
   };
 
-  if (dataLoading && page === 1) { 
+  if (dataLoading && page === 1) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50 text-right" dir="rtl">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
@@ -102,8 +118,8 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => { setEditingTransaction(null); setIsModalOpen(true); }} 
+            <button
+              onClick={() => { setEditingTransaction(null); setIsModalOpen(true); }}
               className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 shadow-md"
             >
               <Plus className="w-4 h-4" /> תרומה חדשה
@@ -164,21 +180,21 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               <div className="relative">
                 <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
+                <input
                   type="text" placeholder="חיפוש לפי מזהה..."
                   className="w-full pr-9 pl-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
                   value={inputValue} onChange={(e) => setInputValue(e.target.value)}
                 />
               </div>
-              <select 
+              <select
                 value={selectedBranchFilter} onChange={(e) => setSelectedBranchFilter(e.target.value)}
                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
               >
                 <option value="all">כל הסניפים</option>
                 {branches?.map((b) => <option key={b.id} value={b.name}>{b.name}</option>)}
               </select>
-              <input type="date" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" value={dateRange.start} onChange={(e) => setDateRange({...dateRange, start: e.target.value})} />
-              <input type="date" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" value={dateRange.end} onChange={(e) => setDateRange({...dateRange, end: e.target.value})} />
+              <input type="date" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} />
+              <input type="date" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} />
             </div>
           </div>
 
@@ -237,16 +253,32 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
                     <td className="px-4 py-4 text-slate-600 font-medium">{trx.branch}</td>
                     <td className="px-4 py-4 text-slate-500 text-xs">{trx.date}</td>
                     <td className="px-4 py-4 text-left">
-                      <button onClick={() => openEditModal(trx)} className="p-2 hover:bg-indigo-50 text-indigo-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                    </td>
+  <div className="flex items-center justify-end gap-2">
+    {/* כפתור עריכה קיים */}
+    <button 
+      onClick={() => openEditModal(trx)} 
+      className="p-2 hover:bg-indigo-50 text-indigo-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+      title="עריכה"
+    >
+      <Edit2 className="w-4 h-4" />
+    </button>
+
+    {/* כפתור מחיקה חדש */}
+    <button 
+      onClick={() => handleDeleteTransaction(trx.id)} 
+      className="p-2 hover:bg-red-50 text-red-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+      title="מחיקה"
+    >
+      <Trash2 className="w-4 h-4" />
+    </button>
+  </div>
+</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          
+
           {/* Pagination */}
           <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500">עמוד {page}</span>
@@ -259,10 +291,13 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
       </main>
 
       {/* הקריאה הנקייה לקומפוננטת המודאל */}
-      <NewDonationModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onRefresh={fetchData} 
+      <NewDonationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onRefresh={() => {
+          fetchData();           // מרענן את הטבלה
+          setIsModalOpen(false); // סוגר את החלונית
+        }}
         editingDonation={editingTransaction}
         branches={branches}
         branchId={editingTransaction?.branchId || 0}

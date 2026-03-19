@@ -10,6 +10,26 @@ export function useBranchDashboard(branchId: number) {
   const [editingDonation, setEditingDonation] = useState<DonationData | null>(null);
   const [loading, setLoading] = useState(false);
 
+
+
+// --- הפונקציה החדשה למחיקה ---
+  const handleDelete = async (id: number) => {
+    try {
+      // 1. קריאה לשרת למחיקת התרומה
+      await donationService.deleteDonation(id); 
+      
+      // 2. הודעת הצלחה למשתמש
+      toast.success('התרומה נמחקה בהצלחה');
+      
+      // 3. רענון הרשימה כדי שהתרומה תיעלם מהטבלה
+      fetchDonations(); 
+    } catch (error) {
+      console.error('Error deleting donation:', error);
+      toast.error('שגיאה במחיקת התרומה');
+    }
+  };
+
+
   // פונקציה לטעינת התרומות מהשרת
   // השתמשנו ב-useCallback כדי שנוכל להעביר אותה בבטחה כ-Prop למודאל
   const fetchDonations = useCallback(async () => {
@@ -26,6 +46,7 @@ export function useBranchDashboard(branchId: number) {
       setLoading(false);
     }
   }, [branchId]);
+  
 
   // טעינה ראשונית של הנתונים כשהקומפוננטה עולה או כשהסניף משתנה
   useEffect(() => {
@@ -52,6 +73,7 @@ export function useBranchDashboard(branchId: number) {
     loading,
     fetchDonations, // חשיפת הפונקציה לצורך רענון (onRefresh)
     handleEditClick,
+    handleDelete,
     handleCloseModal
   };
 }

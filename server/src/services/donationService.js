@@ -184,6 +184,15 @@ const donationService = {
         }
     },
 
+    deleteDonation: async (id) => {
+        try {
+            await db.query('DELETE FROM donations WHERE id = ?', [id]);
+        } catch (error) {
+            console.error("Service Error (deleteDonation):", error);
+            throw error;
+        }
+    },
+
     updateDonation: async (id, data) => {
         try {
             const target_id = data.targetId || data.target_id;

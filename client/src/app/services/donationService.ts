@@ -49,6 +49,16 @@ export const donationService = {
     const response = await api.put(`/donations/${id}`, donation);
     return response.data;
   },
+  // 6. מחיקת תרומה
+  deleteDonation: async (id: number | string) => {
+    try {
+      const response = await api.delete(`/donations/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("API Error (deleteDonation):", error);
+      throw error;
+    }
+  },
   getBranches: async () => {
     try {
       const response = await api.get('/donations/branches');

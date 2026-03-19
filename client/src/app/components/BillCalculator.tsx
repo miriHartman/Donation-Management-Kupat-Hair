@@ -37,7 +37,7 @@ export function BillCalculator({ onBack, branchName }: BillCalculatorProps) {
             <ArrowRight className="w-4 h-4" />
             <span>חזרה לדשבורד</span>
           </button>
-          
+
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-green-600/20">
               <Banknote className="w-6 h-6" />
@@ -83,7 +83,7 @@ export function BillCalculator({ onBack, branchName }: BillCalculatorProps) {
                   </div>
                   <span className="text-2xl text-slate-400 font-light">×</span>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                   <input
                     type="number"
@@ -119,8 +119,8 @@ export function BillCalculator({ onBack, branchName }: BillCalculatorProps) {
 
           {/* Deposit Button */}
           <div className="mt-8 flex gap-4 print:hidden">
-            <button 
-              onClick={handleDepositClick} 
+            <button
+              onClick={handleDepositClick}
               className="flex-1 py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95"
             >
               <Save className="w-5 h-5" />
@@ -141,8 +141,8 @@ export function BillCalculator({ onBack, branchName }: BillCalculatorProps) {
               <h2 className="text-2xl font-bold text-slate-800 mb-2">אישור הפקדה</h2>
               <p className="text-slate-500 mb-1 text-lg">הופקד:</p>
               <p className="text-3xl font-black text-indigo-600 mb-8">₪{total.toLocaleString()}</p>
-              
-              <button 
+
+              <button
                 onClick={confirmAndExit}
                 className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
               >

@@ -1,15 +1,16 @@
 import React from 'react';
-import { 
-  Plus, 
-  Edit2, 
-  LogOut, 
-  FileText, 
-  Wallet, 
-  CreditCard, 
-  Banknote, 
-  Calendar, 
-  Calculator, 
-  Repeat 
+import {
+  Plus,
+  Edit2,
+  LogOut,
+  FileText,
+  Wallet,
+  CreditCard,
+  Banknote,
+  Calendar,
+  Calculator,
+  Repeat,
+  Trash2
 } from 'lucide-react';
 import { NewDonationModal } from './NewDonationModal';
 import { useBranchDashboard } from '../hooks/useBranchDashboard';
@@ -22,13 +23,14 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
     editingDonation,
     handleEditClick,
     handleCloseModal,
-    fetchDonations 
+    fetchDonations,
+    handleDelete
   } = useBranchDashboard(branchId);
 
   // פונקציות עזר לתוויות
   const getPaymentIcon = (methodId: any) => {
     const id = Number(methodId);
-    switch(id) {
+    switch (id) {
       case 1: return <Wallet className="w-4 h-4 text-green-600" />;
       case 2: return <CreditCard className="w-4 h-4 text-blue-600" />;
       case 3: return <FileText className="w-4 h-4 text-amber-600" />;
@@ -94,7 +96,7 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
                 תרומות שהתקבלו היום
               </h2>
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full text-right">
                 <thead>
@@ -148,9 +150,8 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
 
                           {/* 4. סוג */}
                           <td className="px-4 py-4">
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-bold ${
-                              isRec ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'
-                            }`}>
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-bold ${isRec ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'
+                              }`}>
                               {isRec && <Repeat className="w-3 h-3" />}
                               {isRec ? 'מחזורי' : 'חד פעמי'}
                             </span>
@@ -171,13 +172,30 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
 
                           {/* 7. פעולות (הכי שמאלי) */}
                           <td className="px-4 py-4 text-left">
-                            <button 
-                              onClick={() => handleEditClick(donation)} 
-                              className="p-2 text-slate-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-white shadow-sm"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                          </td>
+  <div className="flex items-center justify-end gap-2">
+    {/* כפתור עריכה */}
+    <button
+      onClick={() => handleEditClick(donation)}
+      className="p-2 text-slate-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-white shadow-sm"
+      title="עריכה"
+    >
+      <Edit2 className="w-4 h-4" />
+    </button>
+
+    {/* כפתור מחיקה */}
+    <button
+      onClick={() => {
+        if (window.confirm('האם אתה בטוח שברצונך למחוק תרומה זו?')) {
+          handleDelete(donation.id);
+        }
+      }}
+      className="p-2 text-slate-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-white shadow-sm"
+      title="מחיקה"
+    >
+      <Trash2 className="w-4 h-4" />
+    </button>
+  </div>
+</td>
                         </tr>
                       );
                     })

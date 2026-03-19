@@ -69,6 +69,18 @@ const donationController = {
             res.status(500).json({ message: "שגיאה בעדכון התרומה" });
         }
     },
+    // 6. מחיקת תרומה
+    deleteDonation: async (req, res) => {
+        try {
+            const { id } = req.params;  
+            await donationService.deleteDonation(id);
+            res.json({ message: "התרומה נמחקה בהצלחה" });
+        } catch (error) {
+            console.error("Controller Error (deleteDonation):", error);
+            res.status(500).json({ message: "שגיאה במחיקת התרומה" });
+        }
+    },
+
     getBranches: async (req, res) => {
     try {
         const branches = await donationService.getBranches();
