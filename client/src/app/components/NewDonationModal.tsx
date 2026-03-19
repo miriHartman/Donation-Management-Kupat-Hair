@@ -145,10 +145,14 @@ export function NewDonationModal({
                   <div>
                     <label className="block text-sm font-medium text-amber-900 mb-1">סניף</label>
                     <select
-                      value={formData.branchId || branchId}
-                      onChange={(e) => setFormData({ ...formData, branchId: Number(e.target.value) })}
-                      className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg text-sm"
+                      // אם אין branchId ב-formData, נציג ערך ריק (שיציג את "בחר סניף")
+                      value={formData.branchId || ''}
+                      onChange={(e) => setFormData({ ...formData, branchId: e.target.value ? Number(e.target.value) : undefined })}
+                      className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-500"
                     >
+                      {/* אופציה ריקה שמופיעה כברירת מחדל */}
+                      <option value="" disabled>בחר סניף...</option>
+
                       {branches?.map(b => (
                         <option key={b.id} value={b.id}>{b.name}</option>
                       ))}
