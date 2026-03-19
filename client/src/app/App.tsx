@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LoginScreen } from './components/LoginScreen';
 import { BranchSelector } from './components/BranchSelector';
 import { BranchDashboard } from './components/BranchDashboard';
@@ -8,14 +8,32 @@ import { Layout } from './components/ui/Layout';
 
 export type ViewState = 'login' | 'branchSelector' | 'branch' | 'admin' | 'billCalculator';
 
+
+
+
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewState>('login');
   const [selectedBranch, setSelectedBranch] = useState<{ id: number; name: string } | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      // אם יש טוקן, נעבור ישר לבחירת סניף
+      setCurrentView('branchSelector');
+    }
+  }, []);
 
   const handleLogin = () => {
     setCurrentView('branchSelector');
   };
 
+  const handleLogout = () => {
+    // חשוב: במחיקת לוגאוט, ננקה גם את הטוקן
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setSelectedBranch(null);
+    setCurrentView('login');
+  };
   const handleBranchSelect = (branchId: number, branchName: string) => {
     setSelectedBranch({ id: branchId, name: branchName });
     setCurrentView('branch');
@@ -25,10 +43,7 @@ export default function App() {
     setCurrentView('admin');
   };
 
-  const handleLogout = () => {
-    setSelectedBranch(null);
-    setCurrentView('login');
-  };
+  
   // פונקציה חדשה: חזרה לבחירת סניף
   const handleBackToSelector = () => {
     setCurrentView('branchSelector');

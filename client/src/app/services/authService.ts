@@ -3,6 +3,22 @@ import axios from 'axios';
 
 const API_URL = 'https://donation-management-kupat-hair.onrender.com/api'; // עדכון לכתובת השרת החדש
 // אינטרספטור (Interceptor) - מוסיף את הטוקן לכל בקשה שיוצאת מהלקוח
+
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // אם השרת מחזיר 401, זה אומר שהטוקן לא תקף יותר
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/'; // ירענן את הדף ויחזיר ללוגין בגלל ה-useEffect
+    }
+    return Promise.reject(error);
+  }
+);
+
+
+
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
