@@ -22,11 +22,10 @@ interface NewDonationModalProps {
   onRefresh: () => void;
   editingDonation?: DonationData | null;
   branchId: number;
-  branches?: { id: number; name: string }[]; // רשימת סניפים למנהל
-  showAdminFields?: boolean; // האם להציג שדות מנהל כמו תאריך ובחירת סניף
+  branches?: { id: number; name: string }[];
+  showAdminFields?: boolean;
 }
 
-// 1. הגדרת ההודעות להגרלה
 const SUCCESS_MESSAGES = [
   { title: "אשריכם ישראל!", subtitle: "שכרך שמור לך 💰💰💰💰💰💰" },
   { title: "יישר כוח גדול!", subtitle: "עבודתך המסורה מכניסה עוד חתן לחופה ברוגע..." },
@@ -51,7 +50,6 @@ export function NewDonationModal({
   const { formData, setFormData, handleSave, loading } = useDonationForm(
     editingDonation,
     () => {
-      // הגרלת הודעה והצגת מסך הצלחה
       const randomIndex = Math.floor(Math.random() * SUCCESS_MESSAGES.length);
       setCurrentMessage(SUCCESS_MESSAGES[randomIndex]);
       setShowSuccess(true);
@@ -60,18 +58,25 @@ export function NewDonationModal({
     branchId
   );
 
+  // אפקט לעדכון סכום כולל לצפייה (בלבד) כשהסכום החודשי משתנה
   useEffect(() => {
     if (formData.isRecurring && formData.amount && formData.installments) {
-      setTotalAmount(Number((formData.amount * (formData.installments || 1)).toFixed(2)));
-    } else {
+      const calculatedTotal = Number((formData.amount * formData.installments).toFixed(2));
+      if (calculatedTotal !== totalAmount) {
+        setTotalAmount(calculatedTotal);
+      }
+    } else if (!formData.isRecurring) {
       setTotalAmount(formData.amount);
     }
   }, [formData.isRecurring, formData.amount, formData.installments]);
 
+  // פונקציה לעדכון הסכום החודשי ב-formData כשמשנים את הסה"כ
   const updateMonthlyAmount = (total: number, months: number) => {
-    if (months > 0) {
-      const monthly = total / months;
-      setFormData(prev => ({ ...prev, amount: Number(monthly.toFixed(2)) }));
+    if (months > 0 && total >= 0) {
+      const monthly = Number((total / months).toFixed(2));
+      if (monthly !== formData.amount) {
+        setFormData(prev => ({ ...prev, amount: monthly }));
+      }
     }
   };
 
@@ -88,7 +93,6 @@ export function NewDonationModal({
 
         {!showSuccess ? (
           <>
-            {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
               <h2 className="text-xl font-bold text-slate-800">
                 {editingDonation ? 'עריכת תרומה' : 'הוספת תרומה חדשה'}
@@ -100,20 +104,22 @@ export function NewDonationModal({
 
             <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="p-6 space-y-6">
               <div className="space-y-4">
+                
                 {/* יעד התרומה */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">יעד התרומה <span className="text-red-500">*</span></label>
                   <select
                     value={formData.targetId}
                     onChange={(e) => setFormData({ ...formData, targetId: Number(e.target.value) })}
-                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value={1}>קופת העיר</option>
                     <option value={2}>קרנות</option>
                     <option value={3}>אחר</option>
                   </select>
                 </div>
-                {/* שדות מנהל: תאריך וסניף */}
+
+                {/* שדות מנהל */}
                 {showAdminFields && (
                   <div className="grid grid-cols-2 gap-4 p-4 bg-amber-50/50 rounded-xl border border-amber-100 animate-in fade-in slide-in-from-top-2">
                     <div>
@@ -122,7 +128,7 @@ export function NewDonationModal({
                         type="date"
                         value={formData.date?.split('T')[0] || ''}
                         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+                        className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg outline-none text-sm"
                       />
                     </div>
                     <div>
@@ -130,7 +136,7 @@ export function NewDonationModal({
                       <select
                         value={formData.branchId || branchId}
                         onChange={(e) => setFormData({ ...formData, branchId: Number(e.target.value) })}
-                        className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+                        className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg text-sm"
                       >
                         {branches?.map(b => (
                           <option key={b.id} value={b.id}>{b.name}</option>
@@ -168,9 +174,7 @@ export function NewDonationModal({
                               ...formData,
                               methodId: method.id,
                               isRecurring: isMethodHOQ ? true : formData.isRecurring,
-                              installments: isMethodHOQ
-                                ? (formData.installments || 12)
-                                : (formData.isRecurring ? formData.installments : 1)
+                              installments: isMethodHOQ ? (formData.installments || 12) : (formData.isRecurring ? formData.installments : 1)
                             });
                           }}
                         />
@@ -182,7 +186,7 @@ export function NewDonationModal({
 
                 {/* איזור תרומה מחזורית */}
                 {(formData.methodId === 2 || formData.methodId === 4) && (
-                  <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100 space-y-4 animate-in fade-in slide-in-from-top-2">
+                  <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100 space-y-4">
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="checkbox"
@@ -195,7 +199,7 @@ export function NewDonationModal({
                             installments: checked ? (formData.installments || 12) : 1
                           });
                         }}
-                        className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                        className="w-5 h-5 text-blue-600 border-slate-300 rounded"
                       />
                       <div className="flex items-center gap-2">
                         <CalendarClock className="w-4 h-4 text-blue-600" />
@@ -210,24 +214,23 @@ export function NewDonationModal({
                           <input
                             type="number"
                             min="0.01"
+                            step="0.01"
                             value={totalAmount || ''}
                             onChange={(e) => {
-                              const val = Math.max(0, parseFloat(e.target.value) || 0); // מונע שלילי
+                              const val = parseFloat(e.target.value) || 0;
                               setTotalAmount(val);
                               updateMonthlyAmount(val, formData.installments || 1);
                             }}
                             className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-blue-700 font-bold focus:ring-2 focus:ring-blue-500 outline-none"
-                            placeholder="סה''כ"
                           />
                         </div>
                         <div>
                           <label className="block text-[11px] font-bold text-slate-500 mb-1">מס' חודשים <span className="text-red-500">*</span></label>
                           <input
                             type="number"
-                            min="1" // מונע חצים למטה מתחת ל-1 בדפדפן
+                            min="1"
                             value={formData.installments || ''}
                             onChange={(e) => {
-                              // Math.max מבטיח שהערך המינימלי שייכנס לסטייט הוא 1
                               const months = Math.max(1, parseInt(e.target.value) || 1);
                               setFormData({ ...formData, installments: months });
                               updateMonthlyAmount(totalAmount, months);
@@ -253,11 +256,8 @@ export function NewDonationModal({
                       onChange={(e) => {
                         const val = parseFloat(e.target.value) || 0;
                         setFormData({ ...formData, amount: val });
-                        if (formData.isRecurring) {
-                          setTotalAmount(Number((val * (formData.installments || 1)).toFixed(2)));
-                        }
                       }}
-                      className="w-full pr-10 pl-4 py-3 text-2xl font-black text-blue-900 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-inner"
+                      className="w-full pr-10 pl-4 py-3 text-2xl font-black text-blue-900 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 shadow-inner outline-none"
                       placeholder="0.00"
                       step="0.01"
                       required
@@ -266,13 +266,10 @@ export function NewDonationModal({
                   {formData.isRecurring && totalAmount > 0 && (
                     <div className="mt-2 flex items-center gap-1.5 text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 animate-pulse">
                       <Info className="w-4 h-4" />
-                      <span className="text-xs font-bold">סה"כ יגבה מהתורם: ₪{totalAmount.toLocaleString()}</span>
+                      <span className="text-xs font-bold">סה"כ יגבה מהתורם: ₪{totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                     </div>
-
                   )}
-
                 </div>
-
 
                 {/* הערות */}
                 <div>
@@ -280,7 +277,7 @@ export function NewDonationModal({
                   <textarea
                     value={formData.notes || ''}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                     rows={2}
                     placeholder="שם התורם או פרטים נוספים..."
                   />
@@ -303,21 +300,14 @@ export function NewDonationModal({
             </form>
           </>
         ) : (
-          /* --- מסך הצלחה עם הגרלת כיתובים --- */
+          /* מסך הצלחה */
           <div className="p-10 flex flex-col items-center text-center animate-in fade-in zoom-in-90 duration-300">
             <div className="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mb-6 relative">
               <PartyPopper className="w-12 h-12 text-green-500" />
               <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white" />
             </div>
-
-            <h2 className="text-3xl font-black text-slate-800 mb-3 leading-tight">
-              {currentMessage.title}
-            </h2>
-
-            <p className="text-slate-500 text-lg font-medium mb-8 leading-relaxed max-w-[300px]">
-              {currentMessage.subtitle}
-            </p>
-
+            <h2 className="text-3xl font-black text-slate-800 mb-3 leading-tight">{currentMessage.title}</h2>
+            <p className="text-slate-500 text-lg font-medium mb-8 leading-relaxed max-w-[300px]">{currentMessage.subtitle}</p>
             <div className="w-full bg-blue-50/50 rounded-3xl p-5 border border-blue-100/50 mb-8 flex items-center justify-between">
               <div className="text-right">
                 <p className="text-[11px] text-blue-400 font-bold uppercase tracking-widest mb-1">סכום שנקלט</p>
@@ -327,11 +317,7 @@ export function NewDonationModal({
                 <Heart className="w-6 h-6 text-red-500 fill-red-500" />
               </div>
             </div>
-
-            <button
-              onClick={handleFinalClose}
-              className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-lg shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all active:scale-[0.98]"
-            >
+            <button onClick={handleFinalClose} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-lg shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all active:scale-[0.98]">
               הפנמתי :)
             </button>
           </div>
