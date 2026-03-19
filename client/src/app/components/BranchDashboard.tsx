@@ -27,6 +27,19 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
     handleDelete
   } = useBranchDashboard(branchId);
 
+  // חישוב סיכומים להיום
+  const todayStats = donations.reduce((acc: any, curr: any) => {
+    const isRec = !!curr.isRecurring;
+    const amount = Number(curr.amount) || 0;
+    const months = isRec ? (Number(curr.installments) || 1) : 1;
+    const total = isRec ? (amount * months) : amount;
+
+    return {
+      count: acc.count + 1,
+      totalAmount: acc.totalAmount + total
+    };
+  }, { count: 0, totalAmount: 0 });
+
   // פונקציות עזר לתוויות
   const getPaymentIcon = (methodId: any) => {
     const id = Number(methodId);
@@ -55,13 +68,13 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-<div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md border border-slate-100 overflow-hidden hover:scale-105 transition-transform">
-  <img 
-    src="/logo.png" 
-    alt="לוגו" 
-    className="w-10 h-10 object-contain" 
-  />
-</div>            <div>
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md border border-slate-100 overflow-hidden hover:scale-105 transition-transform">
+              <img
+                src="/logo.png"
+                alt="לוגו"
+                className="w-10 h-10 object-contain"
+              />
+            </div>            <div>
               <h1 className="text-lg font-bold text-slate-800 leading-tight">דשבורד סניף</h1>
               <p className="text-xs text-blue-600 font-medium">{branchName} (סניף {branchId})</p>
             </div>
@@ -75,6 +88,28 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <div className="space-y-6">
+          {/* כרטיסי סיכום מהיר להיום */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-500 font-medium">סה"כ סכום (כולל פריסה)</p>
+                <h3 className="text-2xl font-black text-blue-600">₪{todayStats.totalAmount.toLocaleString()}</h3>
+              </div>
+              <div className="bg-blue-50 p-3 rounded-xl">
+                <Banknote className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-500 font-medium">מספר תרומות היום</p>
+                <h3 className="text-2xl font-black text-slate-800">{todayStats.count}</h3>
+              </div>
+              <div className="bg-slate-50 p-3 rounded-xl">
+                <Plus className="w-6 h-6 text-slate-600" />
+              </div>
+            </div>
+          </div>
           {/* כפתורים מהירים */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between group transition-all hover:scale-[1.01]">
