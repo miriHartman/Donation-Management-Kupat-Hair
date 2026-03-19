@@ -55,8 +55,13 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg font-bold text-lg">ק"ע</div>
-            <div>
+<div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md border border-slate-100 overflow-hidden hover:scale-105 transition-transform">
+  <img 
+    src="/logo.png" 
+    alt="לוגו" 
+    className="w-10 h-10 object-contain" 
+  />
+</div>            <div>
               <h1 className="text-lg font-bold text-slate-800 leading-tight">דשבורד סניף</h1>
               <p className="text-xs text-blue-600 font-medium">{branchName} (סניף {branchId})</p>
             </div>
@@ -172,30 +177,30 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
 
                           {/* 7. פעולות (הכי שמאלי) */}
                           <td className="px-4 py-4 text-left">
-  <div className="flex items-center justify-end gap-2">
-    {/* כפתור עריכה */}
-    <button
-      onClick={() => handleEditClick(donation)}
-      className="p-2 text-slate-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-white shadow-sm"
-      title="עריכה"
-    >
-      <Edit2 className="w-4 h-4" />
-    </button>
+                            <div className="flex items-center justify-end gap-2">
+                              {/* כפתור עריכה */}
+                              <button
+                                onClick={() => handleEditClick(donation)}
+                                className="p-2 text-slate-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-white shadow-sm"
+                                title="עריכה"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
 
-    {/* כפתור מחיקה */}
-    <button
-      onClick={() => {
-        if (window.confirm('האם אתה בטוח שברצונך למחוק תרומה זו?')) {
-          handleDelete(donation.id);
-        }
-      }}
-      className="p-2 text-slate-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-white shadow-sm"
-      title="מחיקה"
-    >
-      <Trash2 className="w-4 h-4" />
-    </button>
-  </div>
-</td>
+                              {/* כפתור מחיקה */}
+                              <button
+                                onClick={() => {
+                                  if (window.confirm('האם אתה בטוח שברצונך למחוק תרומה זו?')) {
+                                    handleDelete(donation.id);
+                                  }
+                                }}
+                                className="p-2 text-slate-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-white shadow-sm"
+                                title="מחיקה"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
                         </tr>
                       );
                     })
