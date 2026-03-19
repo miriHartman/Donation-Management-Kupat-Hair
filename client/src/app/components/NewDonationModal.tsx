@@ -185,12 +185,23 @@ export function NewDonationModal({
                         checked={formData.methodId === method.id}
                         onChange={() => {
                           const isMethodHOQ = method.id === 4;
+                          const isMethodOneTimeOnly = method.id === 1 || method.id === 3; // מזומן או צ'ק
+
                           setFormData({
                             ...formData,
                             methodId: method.id,
-                            isRecurring: isMethodHOQ ? true : formData.isRecurring,
-                            installments: isMethodHOQ ? (formData.installments || 12) : (formData.isRecurring ? formData.installments : 1)
+                            // אם זה הו"ק - תמיד מחזורי. אם זה מזומן/צ'ק - תמיד חד פעמי. אחרת - השאר כמו שהיה.
+                            isRecurring: isMethodHOQ ? true : (isMethodOneTimeOnly ? false : formData.isRecurring),
+                            // אם זה הפך לחד פעמי - מספר תשלומים חייב להיות 1
+                            installments: isMethodHOQ
+                              ? (formData.installments || 12)
+                              : (isMethodOneTimeOnly ? 1 : formData.installments)
                           });
+
+                          // אם עברנו למזומן/צ'ק, נאפס גם את ה-totalAmount בתצוגה כדי שלא יבלבל
+                          if (isMethodOneTimeOnly) {
+                            setTotalAmount(formData.amount);
+                          }
                         }}
                       />
                       {method.label}
