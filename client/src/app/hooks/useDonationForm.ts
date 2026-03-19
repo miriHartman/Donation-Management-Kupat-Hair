@@ -24,12 +24,16 @@ export function useDonationForm(
   });
 
   // עדכון הטופס כאשר נכנסים למצב עריכה
+  // עדכון הטופס כאשר נכנסים למצב עריכה
   useEffect(() => {
     if (editingDonation) {
       setFormData({
         ...editingDonation,
         branchId: editingDonation.branchId || initialBranchId || 0,
-        date: editingDonation.date || new Date().toISOString().split('T')[0]
+        // התיקון כאן: חילוץ 10 התווים הראשונים בלבד מהתאריך שמגיע מהשרת
+        date: editingDonation.date 
+          ? editingDonation.date.split('T')[0] 
+          : new Date().toISOString().split('T')[0]
       });
     } else {
       setFormData({ 
@@ -45,7 +49,6 @@ export function useDonationForm(
       });
     }
   }, [editingDonation, initialBranchId]);
-
   const handleSave = async () => {
     // 1. בדיקות תקינות כרגיל...
     if (!formData.amount || formData.amount <= 0) {

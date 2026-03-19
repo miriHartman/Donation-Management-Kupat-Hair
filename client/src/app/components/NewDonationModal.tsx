@@ -136,8 +136,7 @@ export function NewDonationModal({
                     <label className="block text-sm font-medium text-amber-900 mb-1">תאריך התרומה</label>
                     <input
                       type="date"
-                      // חילוץ 10 התווים הראשונים בלבד (YYYY-MM-DD) כדי שהדפדפן יציג את התאריך
-                      value={formData.date ? formData.date.substring(0, 10) : ''}
+                      value={formData.date || ''} // פשוט וקל, ה-Hook כבר דואג לפורמט
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                       className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg outline-none text-sm"
                     />
