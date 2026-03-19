@@ -8,7 +8,7 @@ import { donationService } from '../services/donationService'; // ייבוא ה�
 import { toast } from 'sonner'; // או הספרייה שאתה משתמש בה להודעות
 import { useDashboardData } from '../hooks/useDashboardData';
 import { NewDonationModal } from '../components/NewDonationModal'; // <-- ייבוא הקומפוננטה
-import  { useBranchDashboard } from '../hooks/useBranchDashboard'; 
+import { useBranchDashboard } from '../hooks/useBranchDashboard';
 interface AdminDashboardProps {
   onLogout: () => void;
   onBack: () => void;
@@ -46,8 +46,8 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
 
     try {
       // קריאה ישירה לשירות (Service) ולא להוק
-      await donationService.deleteDonation(id); 
-      
+      await donationService.deleteDonation(id);
+
       toast.success('התרומה נמחקה בהצלחה');
       fetchData(); // רענון הנתונים בטבלה (מגיע מ-useDashboardData)
     } catch (error) {
@@ -199,16 +199,24 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
           </div>
 
           {/* פילוח רווחיות */}
+          {/* פילוח רווחיות - מעודכן עם סכום כספי */}
           <div className="bg-slate-50/50 p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
               {branchSummary?.map((branch: any, idx: number) => (
                 <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
                   <div className="flex justify-between text-xs font-bold mb-2">
-                    <span className="text-slate-700">{branch.name}</span>
-                    <span className="text-indigo-600">{branch.percentage || 0}%</span>
+                    <div className="flex flex-col">
+                      <span className="text-slate-700">{branch.name}</span>
+                      {/* הוספת שורת הסכום כאן */}
+                      <span className="text-indigo-600 font-black">₪{(branch.amount || 0).toLocaleString()}</span>
+                    </div>
+                    <span className="text-slate-400 self-end">{branch.percentage || 0}%</span>
                   </div>
                   <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-indigo-600 rounded-full transition-all" style={{ width: `${branch.percentage || 0}%` }} />
+                    <div
+                      className="h-full bg-indigo-600 rounded-full transition-all"
+                      style={{ width: `${branch.percentage || 0}%` }}
+                    />
                   </div>
                 </div>
               ))}
@@ -253,26 +261,26 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
                     <td className="px-4 py-4 text-slate-600 font-medium">{trx.branch}</td>
                     <td className="px-4 py-4 text-slate-500 text-xs">{trx.date}</td>
                     <td className="px-4 py-4 text-left">
-  <div className="flex items-center justify-end gap-2">
-    {/* כפתור עריכה קיים */}
-    <button 
-      onClick={() => openEditModal(trx)} 
-      className="p-2 hover:bg-indigo-50 text-indigo-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-      title="עריכה"
-    >
-      <Edit2 className="w-4 h-4" />
-    </button>
+                      <div className="flex items-center justify-end gap-2">
+                        {/* כפתור עריכה קיים */}
+                        <button
+                          onClick={() => openEditModal(trx)}
+                          className="p-2 hover:bg-indigo-50 text-indigo-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                          title="עריכה"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
 
-    {/* כפתור מחיקה חדש */}
-    <button 
-      onClick={() => handleDeleteTransaction(trx.id)} 
-      className="p-2 hover:bg-red-50 text-red-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-      title="מחיקה"
-    >
-      <Trash2 className="w-4 h-4" />
-    </button>
-  </div>
-</td>
+                        {/* כפתור מחיקה חדש */}
+                        <button
+                          onClick={() => handleDeleteTransaction(trx.id)}
+                          className="p-2 hover:bg-red-50 text-red-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                          title="מחיקה"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
