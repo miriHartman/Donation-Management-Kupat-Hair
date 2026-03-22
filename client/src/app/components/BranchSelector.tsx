@@ -1,5 +1,4 @@
-import React from 'react';
-import { Building2, MapPin, Users, ChevronLeft, Loader2 } from 'lucide-react';
+import { Building2, MapPin, ChevronLeft, Loader2 } from 'lucide-react';
 import { useBranches } from '../hooks/useBranches';
 
 interface BranchSelectorProps {
@@ -90,11 +89,6 @@ export function BranchSelector({ onSelectBranch, onAdminAccess }: BranchSelector
 
                   {/* שורת סטטיסטיקה תחתונה */}
                   <div className="mt-auto pt-6 border-t border-slate-100 group-hover:border-white/20 flex items-center justify-between transition-colors">
-                    <div className="flex items-center gap-2 text-slate-600 group-hover:text-white transition-colors">
-                      <Users className="w-4 h-4" />
-                      <span className="text-sm font-medium">{branch.employees || 0} עובדים</span>
-                    </div>
-                    
                     <div className="flex items-center gap-1 text-blue-600 group-hover:text-white font-bold text-sm transition-colors">
                       <span>כניסה לסניף</span>
                       <ChevronLeft className="w-4 h-4" />
