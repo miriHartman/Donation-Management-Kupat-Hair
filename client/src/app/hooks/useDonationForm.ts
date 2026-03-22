@@ -20,6 +20,7 @@ export function useDonationForm(
     installments: 1,
     currency: 'ILS',
     notes: '',
+    workerName: '',
     branchId: initialBranchId || 0,
     date: new Date().toISOString().split('T')[0]
   });
@@ -47,6 +48,7 @@ export function useDonationForm(
         installments: 1,
         currency: 'ILS',
         notes: '',
+        workerName: '',
         branchId: initialBranchId || 0,
         date: new Date().toISOString().split('T')[0]
       });

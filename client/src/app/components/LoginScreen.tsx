@@ -45,7 +45,7 @@ const { login, loading } = useAuth(onLogin);
 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-slate-700">שם משתמש</label>
+            <label className="block text-sm font-medium text-slate-700"> משתמש</label>
             <div className="relative">
               <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
               

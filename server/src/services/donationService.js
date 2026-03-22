@@ -175,11 +175,11 @@ const donationService = {
             const branch_id = data.branchId || data.branch_id;
             const target_id = data.targetId || data.target_id;
             const method_id = data.methodId || data.method_id;
+            const worker_name = data.workerName || data.worker_name;
             const created_by = data.userId || data.created_by;
-
             const query = `
             INSERT INTO donations 
-            (amount, target_id, fund_number, target_other_note, method_id, branch_id, donation_date, status, notes, created_by, is_recurring, months_count, created_at) 
+            (amount, target_id, fund_number, target_other_note, method_id,worker_name, branch_id, donation_date, status, notes, created_by, is_recurring, months_count, created_at) 
             VALUES (?, ?, ?, ?, ?, ?, CURDATE(), 'completed', ?, ?, ?, ?, NOW())
         `;
 
@@ -189,6 +189,7 @@ const donationService = {
                 fund_number,
                 target_other_note,
                 method_id,
+                worker_name,
                 branch_id,
                 notes,
                 created_by,

@@ -9,9 +9,10 @@ export interface DonationData {
   targetId: number;
   methodId: number;
   isRecurring: boolean;
+  workerName: string;
   installments?: number;
-  fundNumber?: string;        
-  targetOtherNote?: string;   
+  fundNumber?: string;
+  targetOtherNote?: string;
   currency: string;
   notes?: string;
   branchId?: number;
@@ -68,16 +69,17 @@ export function NewDonationModal({
         ...editingDonation, branchId: editingDonation.branchId || branchId,
         // וידוא שהתאריך נשמר בפורמט נקי
         date: editingDonation.date ? editingDonation.date.substring(0, 10) : new Date().toISOString().substring(0, 10),
+        targetOtherNote: editingDonation.targetId === 3 ? editingDonation.targetOtherNote : '',
         fundNumber: editingDonation.targetId === 2 ? editingDonation.fundNumber : '',
-        targetOtherNote: editingDonation.targetId === 3 ? editingDonation.targetOtherNote : ''
+        workerName: editingDonation.workerName || '',
       });
       if (editingDonation.isRecurring && editingDonation.amount && editingDonation.installments) {
-      setTotalAmount(editingDonation.amount * editingDonation.installments);
-    } else {
-      setTotalAmount(editingDonation.amount || 0);
+        setTotalAmount(editingDonation.amount * editingDonation.installments);
+      } else {
+        setTotalAmount(editingDonation.amount || 0);
+      }
     }
-    }
-  }, [editingDonation, setFormData,branchId]);
+  }, [editingDonation, setFormData, branchId]);
 
   // פונקציה לעדכון הסכום החודשי ב-formData כשמשנים את הסה"כ
   const updateMonthlyAmount = (total: number, months: number) => {
@@ -112,27 +114,43 @@ export function NewDonationModal({
 
             <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="p-6 space-y-6 overflow-y-auto flex-1 custom-scrollbar">              <div className="space-y-4">
 
-              {/* יעד התרומה */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">יעד התרומה <span className="text-red-500">*</span></label>
-                <select
-                  value={formData.targetId}
-                  onChange={(e) => {
-                    const newTargetId = Number(e.target.value);
-                    setFormData({
-                      ...formData,
-                      targetId: newTargetId,
-                      // ניקוי שדות מותנים אם היעד השתנה
-                      fundNumber: newTargetId === 2 ? formData.fundNumber : '',
-                      targetOtherNote: newTargetId === 3 ? formData.targetOtherNote : ''
-                    });
-                  }}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value={1}>קופת העיר</option>
-                  <option value={2}>קרנות</option>
-                  <option value={3}>אחר</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    שם העובדת <span className="text-blue-500 font-bold">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      value={formData.workerName || ''}
+                      onChange={(e) => setFormData({ ...formData, workerName: e.target.value })}
+                      placeholder="מי מבצעת?"
+                      className="w-full px-4 py-2.5 bg-blue-50/30 border border-blue-100 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">יעד התרומה <span className="text-red-500">*</span></label>
+                  <select
+                    value={formData.targetId}
+                    onChange={(e) => {
+                      const newTargetId = Number(e.target.value);
+                      setFormData({
+                        ...formData,
+                        targetId: newTargetId,
+                        fundNumber: newTargetId === 2 ? formData.fundNumber : '',
+                        targetOtherNote: newTargetId === 3 ? formData.targetOtherNote : ''
+                      });
+                    }}
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  >
+                    <option value={1}>קופת העיר</option>
+                    <option value={2}>קרנות</option>
+                    <option value={3}>אחר</option>
+                  </select>
+                </div>
               </div>
               {/* שדה מותנה לקרנות */}
               {formData.targetId === 2 && (
@@ -357,6 +375,7 @@ export function NewDonationModal({
                   disabled={
                     loading ||
                     !formData.amount ||
+                    !formData.workerName ||
                     (formData.targetId === 2 && !formData.fundNumber) ||
                     (formData.targetId === 3 && !formData.targetOtherNote)
                   }
