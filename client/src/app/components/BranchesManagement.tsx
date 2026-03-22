@@ -82,50 +82,50 @@ export function BranchesManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {allBranches.map((branch: any) => (
-                <tr key={branch.id} className="hover:bg-slate-50 group transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                        <Building2 className="w-5 h-5" />
-                      </div>
-                      <span className="font-bold text-slate-700">{branch.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-slate-500 font-mono">#{branch.id}</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      פעיל
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-left">
-                    <div className="flex items-center justify-end gap-2">
-                      <button 
-                        onClick={() => handleOpenEdit(branch)}
-                        className="p-2 hover:bg-slate-100 text-slate-600 rounded-lg transition-colors" 
-                        title="עריכה"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(branch.id)}
-                        className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors" 
-                        title="מחיקה"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {allBranches.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-slate-400 font-medium">
-                    לא נמצאו סניפים במערכת
-                  </td>
-                </tr>
-              )}
-            </tbody>
+  {allBranches.map((branch: any) => (
+    <tr key={branch.id} className="hover:bg-slate-50 group transition-colors">
+      <td className="px-6 py-4">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${branch.is_active ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'}`}>
+            <Building2 className="w-5 h-5" />
+          </div>
+          <span className={`font-bold ${branch.is_active ? 'text-slate-700' : 'text-slate-400'}`}>
+            {branch.name}
+          </span>
+        </div>
+      </td>
+      <td className="px-6 py-4 text-slate-500 font-mono">#{branch.id}</td>
+      <td className="px-6 py-4">
+        {/* כאן השינוי המרכזי - הצגת סטטוס דינמי */}
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+          branch.is_active 
+            ? 'bg-green-100 text-green-800' 
+            : 'bg-slate-100 text-slate-500'
+        }`}>
+          {branch.is_active ? 'פעיל' : 'מושבת'}
+        </span>
+      </td>
+      <td className="px-6 py-4 text-left">
+        <div className="flex items-center justify-end gap-2">
+          <button 
+            onClick={() => handleOpenEdit(branch)}
+            className="p-2 hover:bg-slate-100 text-slate-600 rounded-lg transition-colors" 
+            title="עריכה"
+          >
+            <Edit2 className="w-4 h-4" />
+          </button>
+          <button 
+            onClick={() => handleDelete(branch.id)}
+            className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors" 
+            title="מחיקה"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </td>
+    </tr>
+  ))}
+</tbody>
           </table>
         </div>
       </div>
