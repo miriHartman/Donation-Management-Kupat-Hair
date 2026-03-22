@@ -10,12 +10,13 @@ import {
   Calendar,
   Calculator,
   Repeat,
-  Trash2
+  Trash2,
+  ChevronRight
 } from 'lucide-react';
 import { NewDonationModal } from './NewDonationModal';
 import { useBranchDashboard } from '../hooks/useBranchDashboard';
 
-export function BranchDashboard({ onLogout, onBillCalculator, branchName, branchId }: any) {
+export function BranchDashboard({ onLogout, onBack, onBillCalculator, branchName, branchId }: any) {
   const {
     donations = [],
     isModalOpen,
@@ -68,6 +69,13 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
+            <button
+              onClick={onBack}
+              className="p-2 -mr-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors group"
+              title="חזרה לבחירת סניף"
+            >
+              <ChevronRight className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+            </button>
             <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md border border-slate-100 overflow-hidden hover:scale-105 transition-transform">
               <img
                 src="/logo.png"

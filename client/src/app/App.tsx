@@ -69,6 +69,7 @@ export default function App() {
       {currentView === 'branch' && selectedBranch && (
         <BranchDashboard 
           onLogout={handleLogout} 
+          onBack={handleBackToSelector}
           onBillCalculator={handleBillCalculator}
           branchName={selectedBranch.name}
           branchId={selectedBranch.id}
