@@ -65,7 +65,7 @@ export function NewDonationModal({
   useEffect(() => {
     if (editingDonation) {
       setFormData({
-        ...editingDonation,
+        ...editingDonation, branchId: editingDonation.branchId || branchId,
         // וידוא שהתאריך נשמר בפורמט נקי
         date: editingDonation.date ? editingDonation.date.substring(0, 10) : new Date().toISOString().substring(0, 10),
         fundNumber: editingDonation.targetId === 2 ? editingDonation.fundNumber : '',
@@ -77,7 +77,7 @@ export function NewDonationModal({
       setTotalAmount(editingDonation.amount || 0);
     }
     }
-  }, [editingDonation, setFormData]);
+  }, [editingDonation, setFormData,branchId]);
 
   // פונקציה לעדכון הסכום החודשי ב-formData כשמשנים את הסה"כ
   const updateMonthlyAmount = (total: number, months: number) => {
