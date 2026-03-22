@@ -28,7 +28,7 @@ static async getAllUsers() {
     try {
         const query = 'SELECT username FROM users';
         const [rows] = await db.query(query);
-        return rows;
+        return rows.map(user => user.username); 
     } catch (error) {
         console.error('Error fetching users:', error);
         throw error;
