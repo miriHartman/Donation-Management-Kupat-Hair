@@ -17,7 +17,7 @@ const donationService = {
                 whereClause += ' AND b.name = ?';
                 queryParams.push(filters.branch);
             }
-            
+
             if (filters.startDate && filters.endDate) {
                 whereClause += ' AND d.donation_date BETWEEN ? AND ?';
                 queryParams.push(filters.startDate, filters.endDate);
@@ -73,14 +73,15 @@ const donationService = {
 
             // תיקון שאילתת עסקאות - הוספת Aliases
             let transactionsQuery = `
-                SELECT d.id, b.name AS branch, d.donation_date AS date, d.amount, d.status, 
-                       d.is_recurring AS isRecurring, d.months_count AS installments,
-                       d.method_id AS methodId, d.target_id AS targetId
-                FROM donations d
-                LEFT JOIN branches b ON d.branch_id = b.id
-                ${whereClause}
-                ORDER BY d.donation_date DESC, d.id DESC LIMIT ? OFFSET ?
-            `;
+    SELECT d.id, b.name AS branch, d.donation_date AS date, d.amount, d.status, 
+           d.is_recurring AS isRecurring, d.months_count AS installments,
+           d.method_id AS methodId, d.target_id AS targetId,
+           d.fund_number AS fundNumber, d.target_other_note AS targetOtherNote
+    FROM donations d
+    LEFT JOIN branches b ON d.branch_id = b.id
+    ${whereClause}
+    ORDER BY d.donation_date DESC, d.id DESC LIMIT ? OFFSET ?
+`;
 
             const [recentTransactions] = await db.query(transactionsQuery, [...queryParams, limit, offset]);
 
@@ -97,8 +98,8 @@ const donationService = {
                     { title: 'מספר תרומות', value: totalDonations.toString(), change: 'מעודכן', isPositive: true },
                     { title: 'ממוצע לתרומה', value: `₪${totalDonations > 0 ? (totalAmount / totalDonations).toFixed(2) : 0}`, change: 'מעודכן', isPositive: true }
                 ],
-                todaySummary: { 
-                    total: todayBranchData.reduce((sum, b) => sum + (parseFloat(b.amount) || 0), 0), 
+                todaySummary: {
+                    total: todayBranchData.reduce((sum, b) => sum + (parseFloat(b.amount) || 0), 0),
                     branches: todayBranchData.map(b => ({
                         name: b.name,
                         amount: parseFloat(b.amount) || 0,
@@ -129,18 +130,23 @@ const donationService = {
     getTodayDonations: async (branchId) => {
         try {
             // הוספת Aliases כדי להתאים ל-Frontend
+
+
+
             const query = `
-                SELECT 
-                    id, amount, donation_date AS date, 
-                    target_id AS targetId, method_id AS methodId, 
-                    is_recurring AS isRecurring, months_count AS installments,
-                    status, notes
-                FROM donations 
-                WHERE branch_id = ? AND DATE(donation_date) = CURDATE()
-                ORDER BY created_at DESC
-            `;
+            SELECT 
+                id, amount, donation_date AS date, 
+                target_id AS targetId, method_id AS methodId, 
+                fund_number AS fundNumber, target_other_note AS targetOtherNote,
+                is_recurring AS isRecurring, months_count AS installments,
+                status, notes
+            FROM donations 
+            WHERE branch_id = ? AND DATE(donation_date) = CURDATE()
+            ORDER BY created_at DESC
+        `;
+
             const [rows] = await db.query(query, [branchId]);
-            
+
             // המרה נוספת ליתר ביטחון (טיפול בבוליאני)
             return rows.map(r => ({
                 ...r,
@@ -159,24 +165,37 @@ const donationService = {
         try {
             const amount = data.amount;
             const notes = data.notes;
+
+            const fund_number = data.fundNumber || data.fund_number || null;
+            const target_other_note = data.targetOtherNote || data.target_other_note || null;
+
             const is_recurring = data.isRecurring !== undefined ? (data.isRecurring ? 1 : 0) : (data.is_recurring || 0);
             const months_count = data.installments || data.months_count || 1;
-            
+
             const branch_id = data.branchId || data.branch_id;
             const target_id = data.targetId || data.target_id;
             const method_id = data.methodId || data.method_id;
-            const created_by = data.userId || data.created_by; 
+            const created_by = data.userId || data.created_by;
 
             const query = `
-                INSERT INTO donations 
-                (amount, target_id, method_id, branch_id, donation_date, status, notes, created_by, is_recurring, months_count, created_at) 
-                VALUES (?, ?, ?, ?, CURDATE(), 'completed', ?, ?, ?, ?, NOW())
-            `;
-            
+            INSERT INTO donations 
+            (amount, target_id, fund_number, target_other_note, method_id, branch_id, donation_date, status, notes, created_by, is_recurring, months_count, created_at) 
+            VALUES (?, ?, ?, ?, ?, ?, CURDATE(), 'completed', ?, ?, ?, ?, NOW())
+        `;
+
             const [result] = await db.query(query, [
-                amount, target_id, method_id, branch_id, notes, created_by, 
-                is_recurring, months_count
+                amount,
+                target_id,
+                fund_number,
+                target_other_note,
+                method_id,
+                branch_id,
+                notes,
+                created_by,
+                is_recurring,
+                months_count
             ]);
+
             return { id: result.insertId, ...data };
         } catch (error) {
             console.error("SQL Error:", error);
@@ -195,24 +214,54 @@ const donationService = {
 
     updateDonation: async (id, data) => {
         try {
+            // חילוץ ומיפוי שדות (תמיכה גם ב-CamelCase מה-Frontend וגם ב-SnakeCase)
             const target_id = data.targetId || data.target_id;
             const method_id = data.methodId || data.method_id;
+            const branch_id = data.branchId || data.branch_id;
+
+            // השדות החדשים - קריטי לעדכון!
+            const fund_number = data.fundNumber || data.fund_number || null;
+            const target_other_note = data.targetOtherNote || data.target_other_note || null;
+
             const is_recurring = data.isRecurring !== undefined ? (data.isRecurring ? 1 : 0) : (data.is_recurring || 0);
             const months_count = data.installments || data.months_count || 1;
+            const amount = data.amount;
+            const notes = data.notes || null;
 
             const query = `
-                UPDATE donations 
-                SET amount = ?, target_id = ?, method_id = ?, notes = ?, is_recurring = ?, months_count = ?
-                WHERE id = ?
-            `;
-            await db.query(query, [data.amount, target_id, method_id, data.notes, is_recurring, months_count, id]);
+            UPDATE donations 
+            SET 
+                amount = ?, 
+                target_id = ?, 
+                fund_number = ?, 
+                target_other_note = ?, 
+                method_id = ?, 
+                branch_id = ?, 
+                notes = ?, 
+                is_recurring = ?, 
+                months_count = ?
+            WHERE id = ?
+        `;
+
+            await db.query(query, [
+                amount,            // 1
+                target_id,         // 2
+                fund_number,       // 3 
+                target_other_note, // 4 
+                method_id,         // 5
+                branch_id,         // 6
+                notes,             // 7
+                is_recurring,      // 8
+                months_count,      // 9
+                id                 // 10 
+            ]);
+
             return { id, ...data };
         } catch (error) {
             console.error("Service Error (updateDonation):", error);
             throw error;
         }
     },
-
     getBranches: async () => {
         const [rows] = await db.query('SELECT id, name FROM branches ORDER BY name ASC');
         return rows;

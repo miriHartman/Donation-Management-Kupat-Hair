@@ -60,18 +60,6 @@ export function NewDonationModal({
     branchId
   );
 
-  // אפקט לעדכון סכום כולל לצפייה (בלבד) כשהסכום החודשי משתנה
-  // useEffect(() => {
-  //   if (formData.isRecurring && formData.amount && formData.installments) {
-  //     const calculatedTotal = Number((formData.amount * formData.installments).toFixed(2));
-  //     if (calculatedTotal !== totalAmount) {
-  //       setTotalAmount(calculatedTotal);
-  //     }
-  //   } else if (!formData.isRecurring) {
-  //     setTotalAmount(formData.amount);
-  //   }
-  // }, [formData.isRecurring, formData.amount, formData.installments]);
-
 
   // אפקט לעדכון הטופס בנתוני התרומה הנערכת בעת פתיחת המודאל
   useEffect(() => {
@@ -79,8 +67,15 @@ export function NewDonationModal({
       setFormData({
         ...editingDonation,
         // וידוא שהתאריך נשמר בפורמט נקי
-        date: editingDonation.date ? editingDonation.date.substring(0, 10) : new Date().toISOString().substring(0, 10)
+        date: editingDonation.date ? editingDonation.date.substring(0, 10) : new Date().toISOString().substring(0, 10),
+        fundNumber: editingDonation.targetId === 2 ? editingDonation.fundNumber : '',
+        targetOtherNote: editingDonation.targetId === 3 ? editingDonation.targetOtherNote : ''
       });
+      if (editingDonation.isRecurring && editingDonation.amount && editingDonation.installments) {
+      setTotalAmount(editingDonation.amount * editingDonation.installments);
+    } else {
+      setTotalAmount(editingDonation.amount || 0);
+    }
     }
   }, [editingDonation, setFormData]);
 
