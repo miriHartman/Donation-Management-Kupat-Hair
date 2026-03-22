@@ -11,8 +11,8 @@ class BranchService {
                     address,
                     phone
                 FROM branches 
-                ORDER BY name ASC
                 WHERE is_active = 1
+                ORDER BY name ASC
             `;
             const [rows] = await db.query(query);
             return rows;
