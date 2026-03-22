@@ -5,7 +5,6 @@ import api from '../api/axiosInstance';
 export interface Branch {
   id: number;
   name: string;
-  employees?: number;
   color?: string;
   address?: string;
 }

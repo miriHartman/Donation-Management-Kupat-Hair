@@ -9,10 +9,10 @@ class BranchService {
                     id, 
                     name, 
                     address,
-                    phone,
-                    employee_count as employees
+                    phone
                 FROM branches 
                 ORDER BY name ASC
+                WHERE is_active = 1
             `;
             const [rows] = await db.query(query);
             return rows;
