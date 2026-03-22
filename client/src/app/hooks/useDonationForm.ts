@@ -55,6 +55,7 @@ export function useDonationForm(
 
   const handleSave = async () => {
     if (!formData.amount || formData.amount <= 0) {
+      
       toast.error('סכום התרומה חייב להיות גדול מ-0');
       return;
     }
@@ -85,9 +86,8 @@ export function useDonationForm(
         ...formData,
         branchId: selectedBranchId,
         userId: userId,
-        // ניקוי לוגי סופי - אם זה לא יעד 2, אל תשלח מספר קרן
-        fundNumber: formData.targetId === 2 ? formData.fundNumber : undefined,
-        targetOtherNote: formData.targetId === 3 ? formData.targetOtherNote : undefined,
+        fundNumber: formData.targetId === 2 ? formData.fundNumber : null ,
+        targetOtherNote: formData.targetId === 3 ? formData.targetOtherNote : null,
         is_recurring: formData.isRecurring ? 1 : 0,
         months_count: formData.isRecurring ? (formData.installments || 1) : 1,
         targetId: formData.targetId,
@@ -95,10 +95,10 @@ export function useDonationForm(
       };
 
       if (editingDonation?.id) {
-        await donationService.updateDonation(editingDonation.id, payload);
+        await donationService.updateDonation(editingDonation.id, payload as any);
         toast.success('התרומה עודכנה בהצלחה');
       } else {
-        await donationService.createDonation(payload);
+        await donationService.createDonation(payload as any);
         toast.success('התרומה נשמרה בהצלחה');
       }
 
@@ -109,6 +109,7 @@ export function useDonationForm(
     } finally {
       setLoading(false);
     }
+    
   };
 
   return { formData, setFormData, handleSave, loading };
