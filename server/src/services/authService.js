@@ -23,6 +23,18 @@ class AuthService {
         throw error;
     }
 }
+
+static async getAllUsers() {
+    try {
+        const query = 'SELECT username FROM users';
+        const [rows] = await db.query(query);
+        return rows;
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+    }
+
+}
 }
 
 module.exports = AuthService;

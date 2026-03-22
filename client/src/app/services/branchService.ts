@@ -1,6 +1,6 @@
 import axios from 'axios';
+import api from '../api/axiosInstance';
 
-const API_URL = 'https://donation-management-kupat-hair.onrender.com/api';
 
 export interface Branch {
   id: number;
@@ -13,7 +13,7 @@ export interface Branch {
 export const branchService = {
   // שליפת כל הסניפים מהשרת
   getAllBranches: async (): Promise<Branch[]> => {
-    const response = await axios.get(`${API_URL}/branches`);
+    const response = await api.get('/branches');
     return response.data;
   }
 };

@@ -1,10 +1,9 @@
 // src/services/authService.ts
-import axios from 'axios';
+import api from '../api/axiosInstance';
 
-const API_URL = 'https://donation-management-kupat-hair.onrender.com/api'; // עדכון לכתובת השרת החדש
 // אינטרספטור (Interceptor) - מוסיף את הטוקן לכל בקשה שיוצאת מהלקוח
 
-axios.interceptors.response.use(
+api.interceptors.response.use(
   (response) => response,
   (error) => {
     // אם השרת מחזיר 401, זה אומר שהטוקן לא תקף יותר
@@ -19,7 +18,7 @@ axios.interceptors.response.use(
 
 
 
-axios.interceptors.request.use((config) => {
+api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -30,11 +29,17 @@ axios.interceptors.request.use((config) => {
 export const authService = {
   login: async (username: string, password: string) => {
     // שימוש ב-api במקום ב-axios הגלובלי
-    const response = await axios.post(`${API_URL}/auth/login`, { username, password });
+    const response = await api.post('/auth/login', { username, password });
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
     }
+    return response.data;
+  }
+};
+export const userService = {
+  getAllUsernames: async (): Promise<string[]> => {
+    const response = await api.get('/users/list');
     return response.data;
   }
 };

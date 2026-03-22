@@ -3,5 +3,5 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 
 router.post('/login', authController.login);
-
+router.get('/users/list', authController.getAllUsers); 
 module.exports = router;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { User, Check } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { User, Check, ChevronDown } from 'lucide-react';
+import { useAuth, useUsers } from '../hooks/useAuth';
 
 interface LoginScreenProps {
   onLogin: () => void;
@@ -9,7 +9,17 @@ interface LoginScreenProps {
 export function LoginScreen({ onLogin }: LoginScreenProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { login, loading } = useAuth(onLogin);
+  
+
+
+// 1. קריאה להוק שמושך את רשימת המשתמשים
+const { users, isLoading } = useUsers();
+
+// 2. קריאה להוק שמנהל את פעולת ההתחברות (מעבירים לו את הפונקציה להצלחה)
+const { login, loading } = useAuth(onLogin);
+
+
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,14 +47,27 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           <div className="space-y-2">
             <label className="block text-sm font-medium text-slate-700">שם משתמש</label>
             <div className="relative">
-              <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
+              <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+              
+              {/* שינוי: שימוש ברשימה המגיעה מההוק */}
+              <select
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pr-10 pl-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                placeholder="הזן שם משתמש..."
-              />
+                className="w-full pr-10 pl-10 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none"
+                required
+                disabled={isLoading}
+              >
+                <option value="" disabled>
+                  {isLoading ? 'טוען רשימת משתמשים...' : 'בחר משתמש...'}
+                </option>
+                {users.map((user) => (
+                  <option key={user} value={user}>
+                    {user}
+                  </option>
+                ))}
+              </select>
+              
+              <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             </div>
           </div>
 
@@ -61,7 +84,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || isLoading}
             className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2"
           >
             {loading ? (

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { authService } from '../services/authService';
+import { useEffect, useState } from 'react';
+import { authService, userService } from '../services/authService';
 import { toast } from 'sonner';
 
 export function useAuth(onLoginSuccess: () => void) {
@@ -25,4 +25,18 @@ export function useAuth(onLoginSuccess: () => void) {
   };
 
   return { login, loading };
+}
+
+export function useUsers() {
+  const [users, setUsers] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    userService.getAllUsernames()
+      .then(setUsers)
+      .catch(err => console.error('Error fetching users:', err))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  return { users, isLoading };
 }
