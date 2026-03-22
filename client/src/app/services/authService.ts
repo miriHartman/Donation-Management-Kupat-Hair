@@ -39,7 +39,7 @@ export const authService = {
 };
 export const userService = {
   getAllUsernames: async (): Promise<string[]> => {
-    const response = await api.get('/users/list');
+    const response = await api.get('/auth/users/list');
     return response.data;
   }
 };
