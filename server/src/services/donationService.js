@@ -76,7 +76,7 @@ const donationService = {
     SELECT d.id, b.name AS branch, d.donation_date AS date, d.amount, d.status, 
            d.is_recurring AS isRecurring, d.months_count AS installments,
            d.method_id AS methodId, d.target_id AS targetId,
-           d.fund_number AS fundNumber, d.target_other_note AS targetOtherNote
+           d.fund_number AS fundNumber, d.target_other_note AS targetOtherNote,worker_name AS workerName
     FROM donations d
     LEFT JOIN branches b ON d.branch_id = b.id
     ${whereClause}
@@ -177,25 +177,17 @@ const donationService = {
             const method_id = data.methodId || data.method_id;
             const worker_name = data.workerName || data.worker_name;
             const created_by = data.userId || data.created_by;
-            const query = `
-            INSERT INTO donations 
-            (amount, target_id, fund_number, target_other_note, method_id,worker_name, branch_id, donation_date, status, notes, created_by, is_recurring, months_count, created_at) 
-            VALUES (?, ?, ?, ?, ?, ?, CURDATE(), 'completed', ?, ?, ?, ?, NOW())
-        `;
+           const query = `
+                INSERT INTO donations 
+                (amount, target_id, fund_number, target_other_note, method_id, worker_name, branch_id, donation_date, status, notes, created_by, is_recurring, months_count, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE(), 'completed', ?, ?, ?, ?, NOW())
+            `;
 
             const [result] = await db.query(query, [
-                amount,
-                target_id,
-                fund_number,
-                target_other_note,
-                method_id,
-                worker_name,
-                branch_id,
-                notes,
-                created_by,
-                is_recurring,
-                months_count
+                amount, target_id, fund_number, target_other_note, method_id, 
+                worker_name, branch_id, notes, created_by, is_recurring, months_count
             ]);
+
 
             return { id: result.insertId, ...data };
         } catch (error) {
@@ -219,8 +211,8 @@ const donationService = {
             const target_id = data.targetId || data.target_id;
             const method_id = data.methodId || data.method_id;
             const branch_id = data.branchId || data.branch_id;
+            const worker_name = data.workerName || data.worker_name;
 
-            // השדות החדשים - קריטי לעדכון!
             const fund_number = data.fundNumber || data.fund_number || null;
             const target_other_note = data.targetOtherNote || data.target_other_note || null;
 
@@ -230,31 +222,16 @@ const donationService = {
             const notes = data.notes || null;
 
             const query = `
-            UPDATE donations 
-            SET 
-                amount = ?, 
-                target_id = ?, 
-                fund_number = ?, 
-                target_other_note = ?, 
-                method_id = ?, 
-                branch_id = ?, 
-                notes = ?, 
-                is_recurring = ?, 
-                months_count = ?
-            WHERE id = ?
-        `;
+                UPDATE donations 
+                SET amount = ?, target_id = ?, fund_number = ?, target_other_note = ?, 
+                    method_id = ?, worker_name = ?, branch_id = ?, notes = ?, 
+                    is_recurring = ?, months_count = ?
+                WHERE id = ?
+            `;
 
             await db.query(query, [
-                amount,            // 1
-                target_id,         // 2
-                fund_number,       // 3 
-                target_other_note, // 4 
-                method_id,         // 5
-                branch_id,         // 6
-                notes,             // 7
-                is_recurring,      // 8
-                months_count,      // 9
-                id                 // 10 
+                amount, target_id, fund_number, target_other_note, method_id, 
+                worker_name, branch_id, notes, is_recurring, months_count, id
             ]);
 
             return { id, ...data };
