@@ -16,7 +16,7 @@ const BRAND_COLORS = [
 ];
 
 export function BranchSelector({ onSelectBranch, onAdminAccess }: BranchSelectorProps) {
-  const { branches, isLoading } = useBranches();
+  const { activeBranches, isLoading } = useBranches();
 
   // שליפת המשתמש מהאחסון המקומי ובדיקת הרשאות מנהל
   const userString = localStorage.getItem('user');
@@ -57,13 +57,13 @@ export function BranchSelector({ onSelectBranch, onAdminAccess }: BranchSelector
 
         {/* Branches Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {branches.map((branch) => {
-            const branchColor = getBranchColor(branch.id);
+          {activeBranches.map((activeBranch) => {
+            const branchColor = getBranchColor(activeBranch.id);
             
             return (
               <button
-                key={branch.id}
-                onClick={() => onSelectBranch(branch.id, branch.name)}
+                key={activeBranch.id}
+                onClick={() => onSelectBranch(activeBranch.id, activeBranch.name)}
                 className="group relative bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl border border-slate-100 hover:border-transparent transition-all duration-300 hover:-translate-y-1 text-right overflow-hidden flex flex-col h-full"
               >
                 {/* Hover Background Layer */}
@@ -78,13 +78,13 @@ export function BranchSelector({ onSelectBranch, onAdminAccess }: BranchSelector
                   
                   {/* שם הסניף */}
                   <h3 className="text-2xl font-black text-slate-800 mb-2 group-hover:text-white transition-colors leading-tight">
-                    {branch.name}
+                    {activeBranch.name}
                   </h3>
 
                   {/* כתובת הסניף */}
                   <div className="flex items-center gap-2 text-slate-500 group-hover:text-blue-50 mb-6 transition-colors min-h-[1.5rem]">
                     <MapPin className="w-4 h-4 flex-shrink-0" />
-                    <span className="text-sm truncate">{branch.address || 'כתובת לא הוזנה'}</span>
+                    <span className="text-sm truncate">{activeBranch.address || 'כתובת לא הוזנה'}</span>
                   </div>
 
                   {/* שורת סטטיסטיקה תחתונה */}
