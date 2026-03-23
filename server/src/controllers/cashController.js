@@ -2,13 +2,23 @@ const cashService = require('../services/cashService');
 
 
 const cashController = {
-getReport : async (req, res) => {
+getReport: async (req, res) => {
     try {
         const report = await cashService.getDailyReport(req.params.branchId);
-        if (!report) return res.status(404).json({ message: "לא נמצא סיכום" });
+        
+        // אם report הוא null או שהמערך ריק
+        if (!report || (Array.isArray(report) && report.length === 0)) {
+            // אנחנו מחזירים null בסטטוס 200. 
+            // זה מונע את השורה האדומה ב-Console וגם שומר על ה-React יציב.
+            console.log(`No report found for branchId ${req.params.branchId} for this date.`);
+            return res.status(200).json(null);
+        }
+
+        // אם נמצא דיווח, שלח אותו כרגיל
         res.json(report);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Error in getReport:", err.message);
+        res.status(500).json({ error: "שגיאת שרת פנימית" });
     }
 },
 
