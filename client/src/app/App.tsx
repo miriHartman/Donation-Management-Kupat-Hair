@@ -3,11 +3,9 @@ import { LoginScreen } from './components/LoginScreen';
 import { BranchSelector } from './components/BranchSelector';
 import { BranchDashboard } from './components/BranchDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
-import { BillCalculator } from './components/BillCalculator';
 import { Layout } from './components/ui/Layout';
 
-export type ViewState = 'login' | 'branchSelector' | 'branch' | 'admin' | 'billCalculator';
-
+export type ViewState = 'login' | 'branchSelector' | 'branch' | 'admin';
 
 
 
@@ -49,13 +47,8 @@ export default function App() {
     setCurrentView('branchSelector');
   };
 
-  const handleBillCalculator = () => {
-    setCurrentView('billCalculator');
-  };
 
-  const handleBackToBranch = () => {
-    setCurrentView('branch');
-  };
+  
 
   return (
     <Layout>
@@ -70,18 +63,11 @@ export default function App() {
         <BranchDashboard 
           onLogout={handleLogout} 
           onBack={handleBackToSelector}
-          onBillCalculator={handleBillCalculator}
           branchName={selectedBranch.name}
           branchId={selectedBranch.id}
         />
       )}
       {currentView === 'admin' && <AdminDashboard onLogout={handleLogout} onBack={handleBackToSelector} />}
-      {currentView === 'billCalculator' && selectedBranch && (
-        <BillCalculator 
-          onBack={handleBackToBranch}
-          branchName={selectedBranch.name}
-        />
-      )}
     </Layout>
   );
 }

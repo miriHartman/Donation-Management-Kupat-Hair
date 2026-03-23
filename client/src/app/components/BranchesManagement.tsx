@@ -23,16 +23,28 @@ export function BranchesManagement() {
     setIsModalOpen(true);
   };
 
-  // פונקציית המחיקה
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('האם אתה בטוח שברצונך למחוק סניף זה?')) return;
-    try {
-      await deleteBranch(id);
-      toast.success('הסניף נמחק בהצלחה');
-      refreshBranches();
-    } catch (error) {
-      toast.error('שגיאה במחיקת הסניף');
-    }
+ // פונקציית המחיקה (השבתה)
+  const handleDelete = (id: number) => {
+    toast.warning('האם להשבית את הסניף?', {
+      description: 'הסניף יועבר למצב "לא פעיל" במערכת.',
+      duration: 5000, // נשאר פתוח ל-5 שניות כדי לתת זמן להחליט
+      action: {
+        label: 'כן, השבת',
+        onClick: async () => {
+          try {
+            await deleteBranch(id);
+            toast.success('הסניף הושבת בהצלחה');
+            refreshBranches();
+          } catch (error) {
+            toast.error('שגיאה בהשבתת הסניף');
+          }
+        },
+      },
+      cancel: {
+        label: 'ביטול',
+        onClick: () => {} // סוגר את ה-toast ללא פעולה
+      },
+    });
   };
 
   // פונקציית השמירה (הוספה או עריכה)

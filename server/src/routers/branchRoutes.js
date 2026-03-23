@@ -6,7 +6,6 @@ const branchController = require('../controllers/branchController');
 router.get('/', branchController.getAllBranches);
 router.get('/active', branchController.getActiveBranches); // נתיב חדש לסניפים פעילים בלבד
 
-// --- נתיבי ניהול (התוספת החדשה) ---
 
 // יצירת סניף חדש
 router.post('/', branchController.createBranch);

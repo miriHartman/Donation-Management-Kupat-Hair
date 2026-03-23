@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Plus,
   Edit2,
@@ -11,13 +11,13 @@ import {
   Calculator,
   Repeat,
   Trash2,
-  ChevronRight,
   ArrowRight
 } from 'lucide-react';
 import { NewDonationModal } from './NewDonationModal';
+import { BillCalculatorModal } from './BillCalculatorModal'; // ייבוא המודאל החדש
 import { useBranchDashboard } from '../hooks/useBranchDashboard';
 
-export function BranchDashboard({ onLogout, onBack, onBillCalculator, branchName, branchId }: any) {
+export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any) {
   const {
     donations = [],
     isModalOpen,
@@ -28,6 +28,9 @@ export function BranchDashboard({ onLogout, onBack, onBillCalculator, branchName
     fetchDonations,
     handleDelete
   } = useBranchDashboard(branchId);
+
+  // מצב חדש לניהול מודאל מחשבון השטרות
+  const [isBillCalcOpen, setIsBillCalcOpen] = useState(false);
 
   // חישוב סיכומים להיום
   const todayStats = donations.reduce((acc: any, curr: any) => {
@@ -79,7 +82,8 @@ export function BranchDashboard({ onLogout, onBack, onBillCalculator, branchName
                 alt="לוגו"
                 className="w-10 h-10 object-contain"
               />
-            </div>            <div>
+            </div>
+            <div>
               <h1 className="text-lg font-bold text-slate-800 leading-tight">דשבורד סניף</h1>
               <p className="text-xs text-blue-600 font-medium">{branchName} (סניף {branchId})</p>
             </div>
@@ -115,6 +119,7 @@ export function BranchDashboard({ onLogout, onBack, onBillCalculator, branchName
               </div>
             </div>
           </div>
+
           {/* כפתורים מהירים */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between group transition-all hover:scale-[1.01]">
@@ -124,7 +129,7 @@ export function BranchDashboard({ onLogout, onBack, onBillCalculator, branchName
               </div>
               <Plus className="w-10 h-10 opacity-30" />
             </button>
-            <button onClick={onBillCalculator} className="bg-emerald-600 hover:bg-emerald-700 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between group transition-all hover:scale-[1.01]">
+            <button onClick={() => setIsBillCalcOpen(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between group transition-all hover:scale-[1.01]">
               <div className="text-right">
                 <h3 className="text-xl font-bold mb-1">סיכום שטרות</h3>
                 <p className="text-emerald-100 text-sm opacity-80">מחשבון מזומן לסגירת משמרת</p>
@@ -146,7 +151,6 @@ export function BranchDashboard({ onLogout, onBack, onBillCalculator, branchName
               <table className="w-full text-right">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100 text-slate-600 text-xs sm:text-sm">
-                    {/* שינוי סדר: סה"כ תרומה ראשון מימין */}
                     <th className="px-4 py-4 font-bold text-blue-900">סה"כ לתרומה</th>
                     <th className="px-4 py-4 font-bold">סכום (לחודש)</th>
                     <th className="px-4 py-4 font-bold">חודשים</th>
@@ -170,19 +174,14 @@ export function BranchDashboard({ onLogout, onBack, onBillCalculator, branchName
 
                       return (
                         <tr key={donation.id} className="hover:bg-blue-50/30 transition-colors group">
-                          {/* 1. סה"כ (הכי ימני) */}
                           <td className="px-4 py-4">
                             <div className="text-base font-black text-blue-900">
                               ₪{total.toLocaleString()}
                             </div>
                           </td>
-
-                          {/* 2. סכום לחודש */}
                           <td className="px-4 py-4 font-bold text-slate-700">
                             ₪{amount.toLocaleString()}
                           </td>
-
-                          {/* 3. חודשים */}
                           <td className="px-4 py-4">
                             {isRec ? (
                               <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded font-bold text-xs">
@@ -192,8 +191,6 @@ export function BranchDashboard({ onLogout, onBack, onBillCalculator, branchName
                               <span className="text-slate-300">-</span>
                             )}
                           </td>
-
-                          {/* 4. סוג */}
                           <td className="px-4 py-4">
                             <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-bold ${isRec ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'
                               }`}>
@@ -201,24 +198,17 @@ export function BranchDashboard({ onLogout, onBack, onBillCalculator, branchName
                               {isRec ? 'מחזורי' : 'חד פעמי'}
                             </span>
                           </td>
-
-                          {/* 5. יעד */}
                           <td className="px-4 py-4 text-sm text-slate-700">
                             {getTargetLabel(donation.targetId)}
                           </td>
-
-                          {/* 6. אמצעי תשלום */}
                           <td className="px-4 py-4">
                             <div className="flex items-center gap-2 text-sm text-slate-600">
                               {getPaymentIcon(donation.methodId)}
                               <span>{getPaymentLabel(donation.methodId)}</span>
                             </div>
                           </td>
-
-                          {/* 7. פעולות (הכי שמאלי) */}
                           <td className="px-4 py-4 text-left">
                             <div className="flex items-center justify-end gap-2">
-                              {/* כפתור עריכה */}
                               <button
                                 onClick={() => handleEditClick(donation)}
                                 className="p-2 text-slate-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-white shadow-sm"
@@ -226,8 +216,6 @@ export function BranchDashboard({ onLogout, onBack, onBillCalculator, branchName
                               >
                                 <Edit2 className="w-4 h-4" />
                               </button>
-
-                              {/* כפתור מחיקה */}
                               <button
                                 onClick={() => {
                                   if (window.confirm('האם אתה בטוח שברצונך למחוק תרומה זו?')) {
@@ -252,6 +240,7 @@ export function BranchDashboard({ onLogout, onBack, onBillCalculator, branchName
         </div>
       </main>
 
+      {/* מודאל תרומה חדשה */}
       {isModalOpen && (
         <NewDonationModal
           isOpen={isModalOpen}
@@ -261,6 +250,14 @@ export function BranchDashboard({ onLogout, onBack, onBillCalculator, branchName
           branchId={branchId}
         />
       )}
+
+      {/* מודאל מחשבון שטרות - השימוש החדש */}
+      <BillCalculatorModal 
+        isOpen={isBillCalcOpen}
+        onClose={() => setIsBillCalcOpen(false)}
+        branchName={branchName}
+        branchId={branchId}
+      />
     </div>
   );
 }
