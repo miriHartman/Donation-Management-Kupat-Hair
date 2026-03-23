@@ -36,19 +36,24 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any)
   const [existingTotal, setExistingTotal] = useState(0);
 
   // בדיקה האם קיים סיכום יומי לשם עדכון ויזואלי של הכפתור
-  useEffect(() => {
+ useEffect(() => {
     let isMounted = true;
+    
     const checkSummary = async () => {
       try {
+        // אנחנו קוראים לשרת לבדוק אם יש נתונים
         const data = await billService.getDailySummary(branchId);
+        
         if (data && isMounted) {
           setHasExistingSummary(true);
           setExistingTotal(data.total_amount);
-        } else if (isMounted) {
-          setHasExistingSummary(false);
-          setExistingTotal(0);
         }
-      } catch (err) {
+      } catch (err: any) {
+        
+        if (err?.response?.status !== 404) {
+          console.error("Error checking summary:", err);
+        }
+        
         if (isMounted) {
           setHasExistingSummary(false);
           setExistingTotal(0);
@@ -58,8 +63,7 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any)
     
     checkSummary();
     return () => { isMounted = false; };
-  }, [branchId, isBillCalcOpen]); 
-
+  }, [branchId, isBillCalcOpen]);
   // חישוב סיכומים להיום
   const todayStats = donations.reduce((acc: any, curr: any) => {
     const isRec = !!curr.isRecurring;

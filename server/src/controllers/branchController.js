@@ -1,6 +1,9 @@
 const BranchService = require('../services/branchService');
 
-const getActiveBranches = async (req, res) => {
+
+
+const branchController = {
+ getActiveBranches : async (req, res) => {
     try {
         const branches = await BranchService.getActiveBranches();
         res.status(200).json(branches);
@@ -11,9 +14,9 @@ const getActiveBranches = async (req, res) => {
             error: error.message 
         });
     }
-};
+},
 
-const getAllBranches = async (req, res) => {
+ getAllBranches : async (req, res) => {
      try {
         const branches = await BranchService.getAllBranches();
         res.status(200).json(branches);
@@ -24,11 +27,11 @@ const getAllBranches = async (req, res) => {
             error: error.message 
         });
     }
-};
+},
 
 // --- פונקציות חדשות שהוספנו ---
 
-const createBranch = async (req, res) => {
+ createBranch : async (req, res) => {
     try {
         // המידע מגיע מה-body של הבקשה (שם, כתובת, טלפון, סטטוס)
         const newBranch = await BranchService.createBranch(req.body);
@@ -40,9 +43,9 @@ const createBranch = async (req, res) => {
             error: error.message 
         });
     }
-};
+},
 
-const updateBranch = async (req, res) => {
+ updateBranch : async (req, res) => {
     try {
         const { id } = req.params;
         const updatedBranch = await BranchService.updateBranch(id, req.body);
@@ -54,9 +57,9 @@ const updateBranch = async (req, res) => {
             error: error.message 
         });
     }
-};
+},
 
-const deleteBranch = async (req, res) => {
+     deleteBranch : async (req, res) => {
     try {
         const { id } = req.params;
         // כזכור, בסרוויס הפונקציה הזו רק מעדכנת is_active = 0
@@ -69,12 +72,7 @@ const deleteBranch = async (req, res) => {
             error: error.message 
         });
     }
-};
+}}
 
-module.exports = {
-    getActiveBranches,
-    getAllBranches,
-    createBranch,   
-    updateBranch,
-    deleteBranch
-};
+module.exports = branchController;
+   

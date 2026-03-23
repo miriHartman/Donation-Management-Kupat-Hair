@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const AuthService = require('../services/authService'); // וודאי שזו הפעם היחידה שהשורה הזו מופיעה!
 
-const login = async (req, res) => {
+const authController = {
+ login : async (req, res) => {
     const { username, password } = req.body;
     try {
         const user = await AuthService.validateUser(username, password);
@@ -32,9 +33,9 @@ res.status(200).json({
         console.error('Login Error:', error);
         res.status(500).json({ message: 'שגיאת שרת פנימית' });
     }
-};
+},
 // שליפת כל שמות המשתמשים
-const getAllUsers = async (req, res) => {
+ getAllUsers : async (req, res) => {
     try {
         const users = await AuthService.getAllUsers();
         res.status(200).json(users);
@@ -45,7 +46,7 @@ const getAllUsers = async (req, res) => {
             error: error.message
         });
     }
-};
+}}
 
 
-module.exports = { login, getAllUsers };
+module.exports = authController;
