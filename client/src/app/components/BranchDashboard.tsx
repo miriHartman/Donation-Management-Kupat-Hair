@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Plus,
   Edit2,
@@ -16,6 +16,8 @@ import {
 import { NewDonationModal } from './NewDonationModal';
 import { BillCalculatorModal } from './BillCalculatorModal'; // ייבוא המודאל החדש
 import { useBranchDashboard } from '../hooks/useBranchDashboard';
+import { billService } from '../services/billService';
+import { toast } from 'sonner';
 
 export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any) {
   const {
@@ -29,8 +31,34 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any)
     handleDelete
   } = useBranchDashboard(branchId);
 
-  // מצב חדש לניהול מודאל מחשבון השטרות
   const [isBillCalcOpen, setIsBillCalcOpen] = useState(false);
+  const [hasExistingSummary, setHasExistingSummary] = useState(false);
+  const [existingTotal, setExistingTotal] = useState(0);
+
+  // בדיקה האם קיים סיכום יומי לשם עדכון ויזואלי של הכפתור
+  useEffect(() => {
+    let isMounted = true;
+    const checkSummary = async () => {
+      try {
+        const data = await billService.getDailySummary(branchId);
+        if (data && isMounted) {
+          setHasExistingSummary(true);
+          setExistingTotal(data.total_amount);
+        } else if (isMounted) {
+          setHasExistingSummary(false);
+          setExistingTotal(0);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setHasExistingSummary(false);
+          setExistingTotal(0);
+        }
+      }
+    };
+    
+    checkSummary();
+    return () => { isMounted = false; };
+  }, [branchId, isBillCalcOpen]); 
 
   // חישוב סיכומים להיום
   const todayStats = donations.reduce((acc: any, curr: any) => {
@@ -65,6 +93,17 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any)
   const getTargetLabel = (targetId: any) => {
     const targets: Record<number, string> = { 1: 'קופת העיר', 2: 'קרנות', 3: 'אחר' };
     return targets[Number(targetId)] || 'כללי';
+  };
+
+  // מחיקה עם אישור Toast במקום window.confirm
+  const confirmDelete = (id: number) => {
+    toast.error('האם למחוק תרומה זו?', {
+      action: {
+        label: 'מחק עכשיו',
+        onClick: () => handleDelete(id)
+      },
+      duration: 5000,
+    });
   };
 
   return (
@@ -125,16 +164,46 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any)
             <button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between group transition-all hover:scale-[1.01]">
               <div className="text-right">
                 <h3 className="text-xl font-bold mb-1">תרומה חדשה</h3>
-                <p className="text-blue-100 text-sm opacity-80">קליטה מהירה של תרומה</p>
+                <p className="text-blue-100 text-sm opacity-80">הוסף תרומה מסניף זה</p>
               </div>
               <Plus className="w-10 h-10 opacity-30" />
             </button>
-            <button onClick={() => setIsBillCalcOpen(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between group transition-all hover:scale-[1.01]">
-              <div className="text-right">
-                <h3 className="text-xl font-bold mb-1">סיכום שטרות</h3>
-                <p className="text-emerald-100 text-sm opacity-80">מחשבון מזומן לסגירת משמרת</p>
+
+            {/* כפתור מחשבון שטרות - דינמי */}
+            <button 
+              onClick={() => setIsBillCalcOpen(true)} 
+              className={`relative overflow-hidden p-6 rounded-2xl shadow-lg flex items-center justify-between group transition-all hover:scale-[1.01] ${
+                hasExistingSummary 
+                  ? 'bg-white border-2 border-emerald-500 text-emerald-900 shadow-emerald-50' 
+                  : 'bg-emerald-600 text-white hover:bg-emerald-700'
+              }`}
+            >
+              <div className="text-right z-10">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-xl font-bold">סיכום שטרות</h3>
+                  {hasExistingSummary && (
+                    <span className="bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse font-bold">
+                      נשמר
+                    </span>
+                  )}
+                </div>
+                
+                <p className={`text-sm font-medium ${hasExistingSummary ? 'text-emerald-600' : 'text-emerald-100 opacity-80'}`}>
+                  {hasExistingSummary 
+                    ? `נרשם סיכום: ₪${existingTotal?.toLocaleString()} (לחץ לעריכה)` 
+                    : 'מחשבון מזומן לסגירת יום'}
+                </p>
               </div>
-              <Calculator className="w-10 h-10 opacity-30" />
+
+              <div className="relative">
+                <Calculator className={`w-10 h-10 transition-transform group-hover:rotate-12 ${
+                  hasExistingSummary ? 'text-emerald-500 opacity-20' : 'text-white opacity-30'
+                }`} />
+              </div>
+
+              {hasExistingSummary && (
+                <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-50 rounded-full opacity-50" />
+              )}
             </button>
           </div>
 
@@ -217,11 +286,7 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any)
                                 <Edit2 className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => {
-                                  if (window.confirm('האם אתה בטוח שברצונך למחוק תרומה זו?')) {
-                                    handleDelete(donation.id);
-                                  }
-                                }}
+                                onClick={() => confirmDelete(donation.id)}
                                 className="p-2 text-slate-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-white shadow-sm"
                                 title="מחיקה"
                               >
@@ -240,7 +305,7 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any)
         </div>
       </main>
 
-      {/* מודאל תרומה חדשה */}
+      {/* מודאלים */}
       {isModalOpen && (
         <NewDonationModal
           isOpen={isModalOpen}
@@ -251,7 +316,6 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any)
         />
       )}
 
-      {/* מודאל מחשבון שטרות - השימוש החדש */}
       <BillCalculatorModal 
         isOpen={isBillCalcOpen}
         onClose={() => setIsBillCalcOpen(false)}
