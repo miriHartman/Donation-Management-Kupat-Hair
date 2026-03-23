@@ -10,14 +10,14 @@ interface BillCalculatorModalProps {
 }
 
 const billImages: Record<number, string> = {
-  200: "/200_nis_front.png", 
-  100: "/100_nis_front.png",
-  50: "/50_nis_front.png",
-  20: "/20_nis_front.png",
-  10: "/10_nis_front.png",
-  5: "/5_nis_front.png",
-  2: "/2_nis_front.png",
-  1: "/1_nis_front.png"
+  200: "/200.png", 
+  100: "/100.png",
+  50: "/50.png",
+  20: "/20.png",
+  10: "/10.png",
+  5: "/5.png",
+  2: "/2.png",
+  1: "/1.png"
 };
 
 export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: BillCalculatorModalProps) {
