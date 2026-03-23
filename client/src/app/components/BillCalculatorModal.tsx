@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, Printer, Plus, Minus, Loader2, CheckCircle2, Banknote } from 'lucide-react';
 import { billService } from '../services/billService'; // ייבוא הסרוויס
 import { toast } from 'sonner';
+import Swal from 'sweetalert2';
 
 interface BillCalculatorModalProps {
   isOpen: boolean;
@@ -11,14 +12,14 @@ interface BillCalculatorModalProps {
 }
 
 const billImages: Record<number, string> = {
-  200: "/200.png", 
+  200: "/200.png",
   100: "/100.png",
   50: "/50.png",
   20: "/20.png",
-  
 };
 
 export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: BillCalculatorModalProps) {
+  // --- State ---
   const [bills, setBills] = useState<Record<number, number>>({
     200: 0, 100: 0, 50: 0, 20: 0
   });
@@ -26,13 +27,19 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
+  // --- Calculations ---
   const total = Object.entries(bills).reduce((sum, [d, c]) => sum + (Number(d) * c), 0);
 
+  // --- Lifecycle ---
   useEffect(() => {
-    if (isOpen) loadData();
-    else resetForm();
+    if (isOpen) {
+      loadData();
+    } else {
+      resetForm();
+    }
   }, [isOpen, branchId]);
 
+  // --- Logic ---
   const loadData = async () => {
     setIsLoading(true);
     try {
@@ -55,17 +62,8 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
     setRecordId(null);
   };
 
-  const handleSave = async () => {
-    const savePromise = billService.saveSummary(branchId, bills, total, recordId);
-
-    toast.promise(savePromise, {
-      loading: 'שומר נתונים...',
-      success: () => {
-        setShowConfirmModal(true);
-        return 'הנתונים נשמרו בהצלחה';
-      },
-      error: 'שגיאה בשמירת הנתונים',
-    });
+  const adjustCount = (denom: number, delta: number) => {
+    setBills(prev => ({ ...prev, [denom]: Math.max(0, (prev[denom] || 0) + delta) }));
   };
 
   const handlePrint = () => {
@@ -75,19 +73,74 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
     }, 500);
   };
 
-  const adjustCount = (denom: number, delta: number) => {
-    setBills(prev => ({ ...prev, [denom]: Math.max(0, (prev[denom] || 0) + delta) }));
+  // --- Save Functionality ---
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      // 1. שליפת הסכום הצפוי מהשרת (מה שהוקלד כתרומות מזומן)
+      const expectedTotal = await billService.getExpectedCash(branchId);
+
+      // 2. בדיקה האם יש הפרש בין המחשבון למה שרשום במערכת
+      if (total !== expectedTotal) {
+        const diff = total - expectedTotal;
+        const diffText = diff > 0 ? `עודף של ₪${diff}` : `חוסר של ₪${Math.abs(diff)}`;
+
+        const result = await Swal.fire({
+          title: 'נמצא הפרש בספירה',
+          html: `
+            <div class="text-right" dir="rtl" style="text-align: right;">
+              <p>סכום התרומות במערכת: <b>₪${expectedTotal.toLocaleString()}</b></p>
+              <p>סכום שספרת כעת: <b>₪${total.toLocaleString()}</b></p>
+              <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;"/>
+              <p style="color: ${diff > 0 ? '#059669' : '#e11d48'}; font-weight: bold; font-size: 1.1em;">${diffText}</p>
+            </div>
+          `,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'ספירה מחדש',
+          cancelButtonText: 'השארתי בקופה (המשך שמירה)',
+          confirmButtonColor: '#3b82f6',
+          cancelButtonColor: '#64748b',
+          reverseButtons: true
+        });
+
+        // אם המשתמש בחר "ספירה מחדש" - פשוט עוצרים כאן
+        if (result.isConfirmed) {
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // 3. תהליך השמירה בפועל
+      const savePromise = billService.saveSummary(branchId, bills, total, recordId);
+
+      toast.promise(savePromise, {
+        loading: 'שומר נתונים...',
+        success: (data) => {
+          if (data && data.id) setRecordId(data.id);
+          setShowConfirmModal(true);
+          return 'הנתונים נשמרו בהצלחה';
+        },
+        error: 'שגיאה בשמירת הנתונים',
+      });
+
+    } catch (err) {
+      console.error("Save error:", err);
+      toast.error("קרתה שגיאה בתהליך האימות");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[100] bg-slate-50 flex flex-col animate-in fade-in duration-200 overflow-hidden font-sans" dir="rtl">
-      {/* Header - עדין ומצומצם */}
+      {/* Header */}
       <header className="bg-white border-b border-slate-100 px-5 py-3 flex items-center justify-between shadow-sm shrink-0 z-10">
         <div className="flex items-center gap-3">
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="text-slate-400 hover:text-slate-600 transition-colors p-1"
           >
             <X size={22} />
@@ -97,11 +150,11 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
             <p className="text-xs text-blue-600 font-medium">{branchName}</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
-           <span className="text-xs text-slate-400 font-medium">יום עבודה: {new Date().toLocaleDateString('he-IL')}</span>
-           <button 
-            onClick={handlePrint} 
+          <span className="text-xs text-slate-400 font-medium">יום עבודה: {new Date().toLocaleDateString('he-IL')}</span>
+          <button
+            onClick={handlePrint}
             className="text-slate-400 hover:text-slate-600 transition-colors p-1 print:hidden"
           >
             <Printer size={20} />
@@ -109,12 +162,13 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-5 pb-32 bg-slate-50">
         <div className="max-w-4xl mx-auto">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-28 text-slate-400">
               <Loader2 className="w-12 h-12 animate-spin text-blue-500 mb-5" />
-              <p className="text-lg font-medium">טוען נתונים קיימים...</p>
+              <p className="text-lg font-medium">טוען נתונים...</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -135,28 +189,30 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
                   </div>
 
                   <div className="flex items-center justify-between gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-100">
-                    <button 
-                      onClick={() => adjustCount(denom, 1)} 
+                    <button
+                      onClick={() => adjustCount(denom, 1)}
                       className="w-14 h-14 bg-emerald-500 text-white rounded-xl flex items-center justify-center active:scale-95 shadow-md shadow-emerald-100 transition-all hover:bg-emerald-600"
                     >
                       <Plus size={28} strokeWidth={3} />
                     </button>
-                    
+
                     <div className="flex flex-col items-center">
                       <span className="text-4xl font-black text-slate-900 leading-none">{bills[denom]}</span>
                       <span className="text-[10px] text-slate-400 font-bold mt-1.5 uppercase tracking-wider">יחידות</span>
                     </div>
 
-                    <button 
-                      onClick={() => adjustCount(denom, -1)} 
-                      disabled={bills[denom] === 0} 
+                    <button
+                      onClick={() => adjustCount(denom, -1)}
+                      disabled={bills[denom] === 0}
                       className="w-14 h-14 bg-rose-500 text-white rounded-xl flex items-center justify-center active:scale-95 shadow-md shadow-rose-100 transition-all hover:bg-rose-600 disabled:opacity-20 disabled:shadow-none"
                     >
                       <Minus size={28} strokeWidth={3} />
                     </button>
                   </div>
-                  
-                  <div className="text-left text-xs text-slate-400 font-medium px-1">סה"כ לשטר זה: <span className="text-slate-900 font-bold text-base">₪{(bills[denom] * denom).toLocaleString()}</span></div>
+
+                  <div className="text-left text-xs text-slate-400 font-medium px-1">
+                    סה"כ לשטר זה: <span className="text-slate-900 font-bold text-base">₪{(bills[denom] * denom).toLocaleString()}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -164,14 +220,15 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
         </div>
       </main>
 
+      {/* Footer / Summary Bar */}
       <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-sm border-t border-slate-100 p-4 shadow-[0_-6px_20px_rgba(0,0,0,0.03)] z-10 print:hidden">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-6">
           <div className="flex items-center gap-3 p-2 bg-slate-50 rounded-full border border-slate-100 px-5 shadow-inner">
-             <Banknote className="w-5 h-5 text-emerald-600" />
-             <span className="text-slate-500 text-sm font-medium">סה"כ הפקדה:</span>
-             <span className="text-3xl font-black text-slate-950 leading-none">₪{total.toLocaleString()}</span>
+            <Banknote className="w-5 h-5 text-emerald-600" />
+            <span className="text-slate-500 text-sm font-medium">סה"כ הפקדה:</span>
+            <span className="text-3xl font-black text-slate-950 leading-none">₪{total.toLocaleString()}</span>
           </div>
-          
+
           <button
             onClick={handleSave}
             disabled={total === 0 || isLoading}
@@ -182,23 +239,24 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
         </div>
       </div>
 
+      {/* Success Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-300">
-           <div className="bg-white rounded-[32px] p-10 max-w-sm w-full text-center shadow-2xl border border-slate-100">
-             <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                <CheckCircle2 size={48} strokeWidth={2.5} />
-             </div>
-             <h3 className="text-2xl font-bold text-slate-900 mb-2">נשמר בהצלחה!</h3>
-             <p className="text-slate-500 mb-8 font-medium leading-relaxed">
-               הסכום <span className="text-slate-950 font-bold text-lg">₪{total.toLocaleString()}</span> עודכן בהצלחה במערכת<br/>עבור {branchName}
-             </p>
-             <button 
-               onClick={() => { setShowConfirmModal(false); onClose(); }} 
-               className="w-full py-3.5 bg-slate-950 text-white rounded-full font-bold text-lg shadow-lg hover:bg-slate-800 transition-colors"
-             >
-               חזרה לדשבורד
-             </button>
-           </div>
+          <div className="bg-white rounded-[32px] p-10 max-w-sm w-full text-center shadow-2xl border border-slate-100">
+            <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <CheckCircle2 size={48} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">נשמר בהצלחה!</h3>
+            <p className="text-slate-500 mb-8 font-medium leading-relaxed">
+              הסכום <span className="text-slate-950 font-bold text-lg">₪{total.toLocaleString()}</span> עודכן בהצלחה במערכת<br />עבור {branchName}
+            </p>
+            <button
+              onClick={() => { setShowConfirmModal(false); onClose(); }}
+              className="w-full py-3.5 bg-slate-950 text-white rounded-full font-bold text-lg shadow-lg hover:bg-slate-800 transition-colors"
+            >
+              חזרה לדשבורד
+            </button>
+          </div>
         </div>
       )}
     </div>

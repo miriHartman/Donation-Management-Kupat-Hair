@@ -68,5 +68,15 @@ export const billService = {
       console.error("Error saving cash report:", error);
       throw error;
     }
-  }
+  },
+  // --- פונקציה חדשה שנוספה ---
+  getExpectedCash: async (branchId: number): Promise<number> => {
+    try {
+      const response = await api.get<{ totalCash: number }>(`/donations/cash/${branchId}`);
+      return Number(response.data.totalCash) || 0;
+    } catch (error) {
+      console.error("Error fetching expected cash:", error);
+      return 0;
+    }
+  },
 };

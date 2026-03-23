@@ -244,6 +244,15 @@ const donationService = {
         const [rows] = await db.query('SELECT id, name FROM branches ORDER BY name ASC');
         return rows;
     },
-};
+
+    getAmountDonationCash: async (branchId) => {
+        const query = `
+            SELECT SUM(amount) AS totalCash 
+            FROM donations 
+            WHERE branch_id = ? AND method_id = 1 AND DATE(donation_date) = CURDATE()
+        `;
+        const [rows] = await db.query(query, [branchId]);
+        return parseFloat(rows[0].totalCash) || 0;
+}}
 
 module.exports = donationService;

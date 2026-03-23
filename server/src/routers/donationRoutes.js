@@ -11,5 +11,6 @@ router.get('/today/:branchId', donationController.getTodayDonations);
 router.post('/', donationController.createDonation);
 router.put('/:id', donationController.updateDonation);
 router.get('/branches', donationController.getBranches);
-router.delete('/:id', donationController.deleteDonation); // נתיב למחיקת תרומה
+router.delete('/:id', donationController.deleteDonation); 
+router.get('/cash/:branchId', donationController.getAmountDonationCash);
 module.exports = router;
