@@ -15,15 +15,12 @@ const billImages: Record<number, string> = {
   100: "/100.png",
   50: "/50.png",
   20: "/20.png",
-  10: "/10.png",
-  5: "/5.png",
-  2: "/2.png",
-  1: "/1.png"
+  
 };
 
 export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: BillCalculatorModalProps) {
   const [bills, setBills] = useState<Record<number, number>>({
-    200: 0, 100: 0, 50: 0, 20: 0, 10: 0, 5: 0, 2: 0, 1: 0
+    200: 0, 100: 0, 50: 0, 20: 0
   });
   const [recordId, setRecordId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,7 +51,7 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
   };
 
   const resetForm = () => {
-    setBills({ 200: 0, 100: 0, 50: 0, 20: 0, 10: 0, 5: 0, 2: 0, 1: 0 });
+    setBills({ 200: 0, 100: 0, 50: 0, 20: 0 });
     setRecordId(null);
   };
 
@@ -128,7 +125,7 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
                 </div>
               )}
 
-              {[200, 100, 50, 20, 10, 5, 2, 1].map((denom) => (
+              {[200, 100, 50, 20].map((denom) => (
                 <div key={denom} className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex flex-col gap-3 transition-all hover:shadow-md hover:border-slate-200">
                   <div className="flex items-center justify-between border-b border-slate-50 pb-2">
                     <div className="flex items-baseline gap-1">
