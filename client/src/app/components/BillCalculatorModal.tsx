@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, Printer, Plus, Minus, Loader2, CheckCircle2, Banknote } from 'lucide-react';
 import { billService } from '../services/billService'; // ייבוא הסרוויס
+import { toast } from 'sonner';
 
 interface BillCalculatorModalProps {
   isOpen: boolean;
@@ -42,9 +43,11 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
       if (data) {
         setBills(data.counts);
         setRecordId(data.id);
+        toast.info("נטענו נתונים קיימים להיום");
       }
     } catch (err) {
       console.error("Error loading daily summary", err);
+      toast.error("נכשלה טעינת נתונים קודמים");
     } finally {
       setIsLoading(false);
     }
@@ -56,12 +59,23 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
   };
 
   const handleSave = async () => {
-    try {
-      await billService.saveSummary(branchId, bills, total, recordId);
-      setShowConfirmModal(true);
-    } catch (err) {
-      alert("שגיאה בשמירת הנתונים");
-    }
+    const savePromise = billService.saveSummary(branchId, bills, total, recordId);
+
+    toast.promise(savePromise, {
+      loading: 'שומר נתונים...',
+      success: () => {
+        setShowConfirmModal(true);
+        return 'הנתונים נשמרו בהצלחה';
+      },
+      error: 'שגיאה בשמירת הנתונים',
+    });
+  };
+
+  const handlePrint = () => {
+    toast.info("מכין את הדף להדפסה...");
+    setTimeout(() => {
+      window.print();
+    }, 500);
   };
 
   const adjustCount = (denom: number, delta: number) => {
@@ -90,7 +104,7 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
         <div className="flex items-center gap-2">
            <span className="text-xs text-slate-400 font-medium">יום עבודה: {new Date().toLocaleDateString('he-IL')}</span>
            <button 
-            onClick={() => window.print()} 
+            onClick={handlePrint} 
             className="text-slate-400 hover:text-slate-600 transition-colors p-1 print:hidden"
           >
             <Printer size={20} />
@@ -98,13 +112,12 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
         </div>
       </header>
 
-      {/* Main Content - תצוגת רשת (Grid) של 2 בעמודה */}
       <main className="flex-1 overflow-y-auto p-5 pb-32 bg-slate-50">
         <div className="max-w-4xl mx-auto">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-28 text-slate-400">
               <Loader2 className="w-12 h-12 animate-spin text-blue-500 mb-5" />
-              <p className="text-lg font-medium">טוען נתונים קיים...</p>
+              <p className="text-lg font-medium">טוען נתונים קיימים...</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -146,7 +159,7 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
                     </button>
                   </div>
                   
-                  <div className="text-left text-xs text-slate-400 font-medium px-1">סה"כ לשורה: <span className="text-slate-900 font-bold text-base">₪{(bills[denom] * denom).toLocaleString()}</span></div>
+                  <div className="text-left text-xs text-slate-400 font-medium px-1">סה"כ לשטר זה: <span className="text-slate-900 font-bold text-base">₪{(bills[denom] * denom).toLocaleString()}</span></div>
                 </div>
               ))}
             </div>
@@ -154,12 +167,11 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
         </div>
       </main>
 
-      {/* Footer - עדין, דק ויוקרתי */}
       <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-sm border-t border-slate-100 p-4 shadow-[0_-6px_20px_rgba(0,0,0,0.03)] z-10 print:hidden">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-6">
           <div className="flex items-center gap-3 p-2 bg-slate-50 rounded-full border border-slate-100 px-5 shadow-inner">
              <Banknote className="w-5 h-5 text-emerald-600" />
-             <span className="text-slate-500 text-sm font-medium">סה"כ הפקדת מזומן:</span>
+             <span className="text-slate-500 text-sm font-medium">סה"כ הפקדה:</span>
              <span className="text-3xl font-black text-slate-950 leading-none">₪{total.toLocaleString()}</span>
           </div>
           
@@ -173,7 +185,6 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
         </div>
       </div>
 
-      {/* Confirmation Modal - נשאר כפי שהיה */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-300">
            <div className="bg-white rounded-[32px] p-10 max-w-sm w-full text-center shadow-2xl border border-slate-100">
