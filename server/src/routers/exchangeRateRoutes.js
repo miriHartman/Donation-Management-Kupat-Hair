@@ -1,8 +1,7 @@
-import { Router } from 'express';
-import { exchangeRateController } from '../controllers/exchangeRateController';
-
-const router = Router();
+const express = require('express');
+const exchangeRateController = require('../controllers/exchangeRateController');
+const router = express.Router();
 
 router.get('/', exchangeRateController.getLatestRates);
 
-export default router;
+module.exports = router;
