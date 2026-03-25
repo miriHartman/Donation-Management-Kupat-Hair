@@ -17,7 +17,6 @@ app.get('/', (req, res) => {
 });
 
 require('./jobs/bank_rates'); // ייבוא והפעלת ה-Job של עדכון שערי החליפין
-
 // --- הראוטים  ---
 const branchRouter = require('./routers/branchRoutes');
 app.use('/api/branches', branchRouter);
