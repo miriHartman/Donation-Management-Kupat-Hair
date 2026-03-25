@@ -31,4 +31,4 @@ const exchangeRateController = {
   }
 };
 
-module.exports = { exchangeRateController };
+module.exports =  exchangeRateController ;
