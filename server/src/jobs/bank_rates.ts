@@ -1,40 +1,51 @@
 const cron = require('node-cron');
 const axios = require('axios');
-const db = require('./db'); // החיבור שלך ל-MySQL
+const db = require('../db');
 
 async function updateExchangeRates() {
     try {
-        // פנייה ל-API של בנק ישראל (או ספק שערים אחר בפורמט JSON)
-        const response = await axios.get(process.env.BANK_RATES_API_KEY);
-        const rates = response.data; // נניח שזה מערך של מטבעות
+        console.log('Fetching rates from Bank of Israel...');
+        
+        // כתובת ה-API לפי הדוקומנטציה ששלחת (שליפת הדולר והאירו האחרונים בפורמט JSON)
 
-        for (let rate of rates) {
-            const sql = `
-                INSERT INTO exchange_rates (currency_code, rate) 
-                VALUES (?, ?) 
-                ON DUPLICATE KEY UPDATE rate = VALUES(rate), last_update = CURRENT_TIMESTAMP
-            `;
-            await db.execute(sql, [rate.key, rate.currentExchangeRate]);
-        }
-        console.log('Exchange rates updated successfully');
+        const response = await axios.get(process.env.BANK_RATES_API_KEY);
+        
+        // חילוץ הנתונים מהמבנה המורכב של SDMX-JSON
+        const observations = response.data.dataSets[0].series;
+        const structures = response.data.structure.dimensions.series;
+        
+        // מיפוי הקודים (USD/EUR) לערכים שלהם
+        // ב-SDMX המידע מפוצל בין ה-Structure לבין ה-DataSet
+        Object.keys(observations).forEach(async (key) => {
+            const seriesIndex = key.split(':');
+            const currencyCodeRaw = structures[1].values[seriesIndex[1]].id; // מחזיר RER_USD_ILS
+            const currencyCode = currencyCodeRaw.split('_')[1]; // מחלץ רק USD או EUR
+            
+            const obsData = observations[key].observations['0'];
+            const rate = obsData[0]; // השער היציג
+
+            if (currencyCode && rate) {
+                const sql = `
+                    INSERT INTO exchange_rates (currency_code, rate) 
+                    VALUES (?, ?) 
+                    ON DUPLICATE KEY UPDATE rate = VALUES(rate), last_update = CURRENT_TIMESTAMP
+                `;
+                await db.execute(sql, [currencyCode, rate]);
+                console.log(`Updated ${currencyCode}: ${rate}`);
+            }
+        });
+
     } catch (error) {
-        console.error('Error updating rates:', error);
+        console.error('Error updating rates from BOI:', error);
     }
 }
 
-// הגדרת ה-Job: ירוץ כל יום בשעה 16:30 (שני עד שישי)
-// פורמט: דקה (30) שעה (16) יום בחודש (*) חודש (*) יום בשבוע (1-5)
+// התזמון שלך (16:30 בימי חול)
 cron.schedule('30 16 * * 1-5', () => {
-    console.log('Running daily exchange rate update...');
     updateExchangeRates();
 });
 
-
-// הפעלה מתוזמנת
-cron.schedule('30 16 * * 1-5', () => {
-    console.log('Running daily exchange rate update...');
-    updateExchangeRates();
-});
-
-// הרצה ידנית פעם אחת בעליית השרת כדי שיהיו נתונים מעודכנים מיד
+// הרצה ראשונית
 updateExchangeRates();
+
+module.exports = { updateExchangeRates };
