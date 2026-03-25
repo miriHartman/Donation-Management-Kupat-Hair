@@ -64,18 +64,22 @@ export function useBranches() {
       throw error; // זריקת השגיאה כדי שה-UI (ה-Toast בקומפוננטה) יטפל בה
     }
   };
-
-  // מחיקת סניף
-  const deleteBranch = async (id: number) => {
-    try {
-      await branchService.deleteBranch(id);
-      // רענון הרשימות
-      await refreshBranches();
-    } catch (error) {
-      console.error('Error deleting branch:', error);
-      throw error;
-    }
-  };
+// מחיקת סניף -מחזיר האם נמחק או רק הפך ל"לא פעיל"
+const deleteBranch = async (id: number) => {
+  try {
+    // 1. שומרים את התוצאה שחוזרת מהסרוויס (action, message וכו')
+    const result = await branchService.deleteBranch(id);
+    
+    // 2. רענון הרשימה כדי שהשינוי ייראה מיד במסך
+    await refreshBranches();
+    
+    // 3. חשוב מאוד: מחזירים את ה-result כדי שהקומפוננטה תוכל להשתמש בו ל-Toast
+    return result; 
+  } catch (error) {
+    console.error('Error deleting branch:', error);
+    throw error;
+  }
+};
 
   return { 
     activeBranches, 

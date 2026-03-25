@@ -13,7 +13,7 @@ router.post('/', branchController.createBranch);
 // עדכון סניף קיים לפי מזהה (ID)
 router.put('/:id', branchController.updateBranch);
 
-// השבתת סניף (מחיקה רכה) לפי מזהה (ID)
+// מחיקת הסניף אם אין תרומות על ידו , אחרת רק שינוי סטטוס ללא מחיקה
 router.delete('/:id', branchController.deleteBranch);
 
 module.exports = router;

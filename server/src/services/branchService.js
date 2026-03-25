@@ -78,22 +78,44 @@ class BranchService {
             throw error;
         }
     }
+// 5. מחיקת סניף - מחיקה סופית או השבתה בהתאם לקיום תרומות
+static async deleteBranch(id) {
+    try {
+        // 1. בדיקה האם קיימות תרומות המשויכות לסניף זה
+        // נשתמש בשאילתה שסופרת כמה תרומות יש לסניף
+        const checkQuery = `SELECT COUNT(*) as donationCount FROM donations WHERE branch_id = ?`;
+        const [rows] = await db.query(checkQuery, [id]);
+        
+        const hasDonations = rows[0].donationCount > 0;
 
-    // 5. "מחיקת" סניף - מחיקה רכה בלבד (שינוי סטטוס ל-0)
-    static async deleteBranch(id) {
-        try {
-            const query = `
+        if (hasDonations) {
+            // 2. אם יש תרומות - בצע מחיקה רכה (השבתה)
+            const updateQuery = `
                 UPDATE branches 
                 SET is_active = 0 
                 WHERE id = ?
             `;
-            const [result] = await db.query(query, [id]);
-            return result;
-        } catch (error) {
-            console.error('Error in BranchService.deleteBranch:', error);
-            throw error;
+            const [updateResult] = await db.query(updateQuery, [id]);
+            
+            // אנחנו מחזירים אובייקט עם מידע על הפעולה שבוצעה
+            return { 
+                success: true, 
+                action: 'deactivated', 
+                affectedRows: updateResult.affectedRows 
+            };
+        } else {
+            // 3. אם אין תרומות - מחק את השורה מהטבלה לצמיתות
+            const deleteQuery = `DELETE FROM branches WHERE id = ?`;
+            const [deleteResult] = await db.query(deleteQuery, [id]);
+            
+            return { 
+                success: true, 
+                action: 'deleted', 
+                affectedRows: deleteResult.affectedRows 
+            };
         }
-    }
-}
-
+    } catch (error) {
+        console.error('Error in BranchService.deleteBranch:', error);
+        throw error;
+    }}}
 module.exports = BranchService;

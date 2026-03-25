@@ -71,7 +71,6 @@ const donationService = {
                 };
             });
 
-            // תיקון שאילתת עסקאות - הוספת Aliases
             let transactionsQuery = `
     SELECT d.id, b.name AS branch, d.donation_date AS date, d.amount, d.status, 
            d.is_recurring AS isRecurring, d.months_count AS installments,

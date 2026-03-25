@@ -25,24 +25,35 @@ export function BranchesManagement() {
 
  // פונקציית המחיקה (השבתה)
   const handleDelete = (id: number) => {
-    toast.warning('האם להשבית את הסניף?', {
-      description: 'הסניף יועבר למצב "לא פעיל" במערכת.',
-      duration: 5000, // נשאר פתוח ל-5 שניות כדי לתת זמן להחליט
+    toast.warning('מחיקת/השבתת סניף', {
+      description: 'המערכת תבדוק אם קיימות תרומות לפני מחיקה סופית.',
+      duration: 5000,
       action: {
-        label: 'כן, השבת',
+        label: 'בצע',
         onClick: async () => {
           try {
-            await deleteBranch(id);
-            toast.success('הסניף הושבת בהצלחה');
-            refreshBranches();
+            // הקריאה ל-deleteBranch מחזירה כעת את ה-result מהשרת (בזכות השינויים בהוק ובסרוויס)
+            const result = await deleteBranch(id);
+            
+            // הצגת הודעה מותאמת לפי מה שקרה בפועל בבסיס הנתונים
+            if (result && result.action === 'deleted') {
+              toast.success('הסניף נמחק לצמיתות מהמערכת');
+            } else if (result && result.action === 'deactivated') {
+              toast.info('הסניף הועבר למצב "לא פעיל" כיוון שיש לו תרומות משויכות');
+            } else {
+              // ליתר ביטחון, אם לא הגיע action
+              toast.success('הפעולה בוצעה בהצלחה');
+            }
+
+            // אין צורך לקרוא ל-refreshBranches כאן שוב כי הוספנו את זה בתוך ה-Hook
           } catch (error) {
-            toast.error('שגיאה בהשבתת הסניף');
+            toast.error('שגיאה בביצוע הפעולה');
           }
         },
       },
       cancel: {
         label: 'ביטול',
-        onClick: () => {} // סוגר את ה-toast ללא פעולה
+        onClick: () => {}
       },
     });
   };

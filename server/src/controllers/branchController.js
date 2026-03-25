@@ -59,16 +59,33 @@ const branchController = {
     }
 },
 
-     deleteBranch : async (req, res) => {
+    deleteBranch: async (req, res) => {
     try {
         const { id } = req.params;
-        // כזכור, בסרוויס הפונקציה הזו רק מעדכנת is_active = 0
-        await BranchService.deleteBranch(id);
-        res.status(200).json({ message: 'הסניף הושבת בהצלחה' });
+
+        // קריאה לסרוויס המעודכן שמחזיר אובייקט { success, action, affectedRows }
+        const result = await BranchService.deleteBranch(id);
+
+        // בדיקה מה הייתה הפעולה והחזרת הודעה מתאימה
+        if (result.action === 'deleted') {
+            return res.status(200).json({ 
+                message: 'הסניף נמחק לצמיתות מהמערכת כיוון שלא היו לו תרומות משויכות',
+                action: 'deleted'
+            });
+        } else if (result.action === 'deactivated') {
+            return res.status(200).json({ 
+                message: 'הסניף הושבת בהצלחה (לא נמחק כיוון שקיימות תרומות משויכות)',
+                action: 'deactivated'
+            });
+        }
+
+        // מקרה קצה אם לא נמצא סניף כזה
+        res.status(404).json({ message: 'סניף לא נמצא' });
+
     } catch (error) {
         console.error('Controller Error (deleteBranch):', error);
         res.status(500).json({ 
-            message: 'שגיאה במחיקת/השבתת הסניף', 
+            message: 'שגיאה בביצוע פעולת המחיקה/השבתה', 
             error: error.message 
         });
     }

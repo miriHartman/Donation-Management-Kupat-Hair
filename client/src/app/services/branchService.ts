@@ -50,12 +50,14 @@ export const branchService = {
   },
 
   // מחיקת סניף
-  deleteBranch: async (id: number): Promise<void> => {
-    try {
-      await api.delete(`/branches/${id}`);
-    } catch (error) {
-      console.error('Error deleting branch:', error);
-      throw error;
-    }
+ async deleteBranch(id: number) {
+  try {
+    const response = await api.delete(`/branches/${id}`);
+    // חשוב להחזיר את ה-data כדי שנוכל להשתמש ב-action וב-message
+    return response.data; 
+  } catch (error) {
+    console.error('Error deleting branch:', error);
+    throw error;
   }
+}
 };
