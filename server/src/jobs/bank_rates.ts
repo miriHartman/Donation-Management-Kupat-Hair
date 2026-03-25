@@ -28,3 +28,13 @@ cron.schedule('30 16 * * 1-5', () => {
     console.log('Running daily exchange rate update...');
     updateExchangeRates();
 });
+
+
+// הפעלה מתוזמנת
+cron.schedule('30 16 * * 1-5', () => {
+    console.log('Running daily exchange rate update...');
+    updateExchangeRates();
+});
+
+// הרצה ידנית פעם אחת בעליית השרת כדי שיהיו נתונים מעודכנים מיד
+updateExchangeRates();

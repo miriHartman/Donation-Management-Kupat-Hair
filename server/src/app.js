@@ -16,6 +16,8 @@ app.get('/', (req, res) => {
   res.send('Server is running and healthy!');
 });
 
+require('./jobs/bank_rates'); // ייבוא והפעלת ה-Job של עדכון שערי החליפין
+
 // --- הראוטים  ---
 const branchRouter = require('./routers/branchRoutes');
 app.use('/api/branches', branchRouter);
@@ -28,6 +30,9 @@ app.use('/api/donations', donationRoutes);
 
 const authRoutes = require('./routers/authRoutes');
 app.use('/api/auth', authRoutes);
+
+const exchangeRateRoutes = require('./routers/exchangeRateRoutes');
+app.use('/api/exchange-rates', exchangeRateRoutes);
 
 // Run the server
 app.listen(PORT, '0.0.0.0', () => {
