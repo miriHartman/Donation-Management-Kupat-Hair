@@ -45,7 +45,6 @@ cron.schedule('30 16 * * 1-5', () => {
     updateExchangeRates();
 });
 
-// הרצה ראשונית
-updateExchangeRates();
+
 
 module.exports = { updateExchangeRates };
