@@ -81,6 +81,11 @@ export function NewDonationModal({
 
   if (!isOpen) return null;
 
+
+console.log('Modal Props - branches:', branches);
+console.log('Current branchId:', branchId);
+console.log('Form Data branchId:', formData.branchId);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
