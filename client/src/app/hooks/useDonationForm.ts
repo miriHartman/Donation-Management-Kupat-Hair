@@ -26,34 +26,34 @@ export function useDonationForm(
   });
 
   useEffect(() => {
-    if (editingDonation) {
-      setFormData({
-        ...editingDonation,
-        branchId: editingDonation.branchId || initialBranchId || 0,
-        date: editingDonation.date
-          ? editingDonation.date.split('T')[0]
-          : new Date().toISOString().split('T')[0],
-        // וודוא שהשדות קיימים גם בעריכה
-        fundNumber: editingDonation.fundNumber || '',
-        targetOtherNote: editingDonation.targetOtherNote || ''
-      });
-    } else {
-      setFormData({
-        amount: 0,
-        targetId: 1,
-        methodId: 1,
-        isRecurring: false,
-        fundNumber: '', // איפוס במעבר לתרומה חדשה
-        targetOtherNote: '', // איפוס במעבר לתרומה חדשה
-        installments: 1,
-        currency: 'ILS',
-        notes: '',
-        workerName: '',
-        branchId: initialBranchId || 0,
-        date: new Date().toISOString().split('T')[0]
-      });
-    }
-  }, [editingDonation, initialBranchId]);
+  if (editingDonation) {
+    // מצב עריכה
+    setFormData({
+      ...editingDonation,
+      branchId: editingDonation.branchId || initialBranchId || 0,
+      date: editingDonation.date 
+        ? editingDonation.date.split('T')[0] 
+        : new Date().toISOString().split('T')[0],
+      fundNumber: editingDonation.fundNumber || '',
+      targetOtherNote: editingDonation.targetOtherNote || ''
+    });
+  } else {
+    // מצב תרומה חדשה - איפוס שדות תוך שמירה על מבנה האובייקט
+    setFormData(prev => ({
+      ...prev, // שומר על ערכי ברירת המחדל של targetId, methodId וכו'
+      amount: 0,
+      isRecurring: false,
+      installments: 1,
+      fundNumber: '',
+      targetOtherNote: '',
+      notes: '',
+      workerName: '',
+      currency: 'ILS',
+      branchId: initialBranchId || 0, // התיקון הקריטי לממשק מנהל
+      date: new Date().toISOString().split('T')[0]
+    }));
+  }
+}, [editingDonation, initialBranchId]);
 
   const handleSave = async () => {
     if (!formData.amount || formData.amount <= 0) {

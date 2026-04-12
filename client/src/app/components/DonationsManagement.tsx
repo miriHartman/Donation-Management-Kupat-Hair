@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { 
-  Search, ChevronLeft, ChevronRight, Plus, Edit2, Banknote, Users, 
-  CreditCard, CalendarClock, ArrowUpRight, ArrowDownRight, Wallet, 
-  FileText, Repeat, Trash2 
+import {
+  Search, ChevronLeft, ChevronRight, Plus, Edit2, Banknote, Users,
+  CreditCard, CalendarClock, ArrowUpRight, ArrowDownRight, Wallet,
+  FileText, Repeat, Trash2
 } from 'lucide-react';
 import { donationService } from '../services/donationService';
 import { toast } from 'sonner';
@@ -90,12 +90,12 @@ export function DonationsManagement() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* כפתור הוספה צף/מהיר למעלה */}
       <div className="flex justify-end">
-         <button
-            onClick={() => { setEditingTransaction(null); setIsModalOpen(true); }}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 shadow-md"
-          >
-            <Plus className="w-4 h-4" /> תרומה חדשה
-          </button>
+        <button
+          onClick={() => { setEditingTransaction(null); setIsModalOpen(true); }}
+          className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 shadow-md"
+        >
+          <Plus className="w-4 h-4" /> תרומה חדשה
+        </button>
       </div>
 
       {/* KPI Cards */}
@@ -224,7 +224,7 @@ export function DonationsManagement() {
                   </td>
                   <td className="px-4 py-4 text-slate-600 font-medium">{trx.branch}</td>
                   <td className="px-4 py-4 text-slate-500 text-xs">{trx.date}</td>
-                    <td className="px-4 py-4 text-left text-slate-700">{trx.workerName}</td>
+                  <td className="px-4 py-4 text-left text-slate-700">{trx.workerName}</td>
                   <td className="px-4 py-4 text-left">
                     <div className="flex items-center justify-end gap-2">
                       <button onClick={() => openEditModal(trx)} className="p-2 hover:bg-indigo-50 text-indigo-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"><Edit2 className="w-4 h-4" /></button>
@@ -253,7 +253,7 @@ export function DonationsManagement() {
         onRefresh={() => { fetchData(); setIsModalOpen(false); }}
         editingDonation={editingTransaction}
         branches={branches}
-        branchId={editingTransaction?.branchId || 0}
+        branchId={editingTransaction?.branchId || (selectedBranchFilter !== 'all' ? branches.find(b => b.name === selectedBranchFilter)?.id : undefined)}
         showAdminFields={true}
       />
     </div>
