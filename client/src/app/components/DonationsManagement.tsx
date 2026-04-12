@@ -32,27 +32,28 @@ export function DonationsManagement() {
   } = useDashboardData(selectedBranchFilter, debouncedSearch, page, debouncedDateRange);
   const { allBranches } = useBranches();
 
-  // לוגיקת סינון מקומית משופרת - מטפלת במקרים כמו "בתי" עבור "בתיה"
-  const filteredTransactions = transactions.filter(trx => {
-    const search = inputValue.trim().toLowerCase();
-    if (!search) return true;
-
-    return (
-      trx.workerName?.toLowerCase().includes(search) ||
-      trx.branch?.toLowerCase().includes(search) ||
-      trx.amount?.toString().includes(search) ||
-      (trx.id?.toString() || '').includes(search)
-    );
-  });
-
+  // מנגנון ה-Debounce: מעדכן את debouncedSearch רק לאחר הפסקה בהקלדה
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(inputValue);
       setDebouncedDateRange(dateRange);
       setPage(1);
-    }, 500);
+    }, 700); // כאן ניתן לשנות את זמן ההמתנה (700ms = 0.7 שניות)
     return () => clearTimeout(timer);
   }, [inputValue, dateRange]);
+
+  // סינון מקומי שמתבסס על debouncedSearch (הערך המושהה)
+  const filteredTransactions = transactions.filter(trx => {
+    const search = debouncedSearch.trim();
+    if (!search) return true;
+
+    return (
+      trx.workerName?.includes(search) ||
+      trx.branch?.includes(search) ||
+      trx.amount?.toString().includes(search) ||
+      (trx.id?.toString() || '').includes(search)
+    );
+  });
 
   const handleDeleteTransaction = async (id: number) => {
     if (!window.confirm('האם אתה בטוח שברצונך למחוק תרומה זו לצמיתות?')) return;
