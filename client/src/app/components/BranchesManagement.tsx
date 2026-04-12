@@ -25,8 +25,8 @@ export function BranchesManagement() {
 
  // פונקציית המחיקה (השבתה)
   const handleDelete = (id: number) => {
-    toast.warning('מחיקת/השבתת סניף', {
-      description: 'המערכת תבדוק אם קיימות תרומות לפני מחיקה סופית.',
+    toast.warning('מחיקת / השבתת סניף', {
+      description: 'המערכת תבדוק אם קיימות תרומות או סיכום יומי לסניף זה לפני מחיקה סופית.',
       duration: 5000,
       action: {
         label: 'בצע',
@@ -39,7 +39,7 @@ export function BranchesManagement() {
             if (result && result.action === 'deleted') {
               toast.success('הסניף נמחק לצמיתות מהמערכת');
             } else if (result && result.action === 'deactivated') {
-              toast.info('הסניף הועבר למצב "לא פעיל" כיוון שיש לו תרומות משויכות');
+              toast.info('הסניף הועבר למצב "לא פעיל" כיוון שיש לו תרומות/סיכום סכום יומיים משויכות');
             } else {
               // ליתר ביטחון, אם לא הגיע action
               toast.success('הפעולה בוצעה בהצלחה');
