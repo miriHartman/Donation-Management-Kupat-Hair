@@ -43,12 +43,14 @@ export function DonationsManagement() {
   }, [inputValue, dateRange]);
 
   // סינון מקומי שמתבסס על debouncedSearch (הערך המושהה)
+// סינון מקומי שמתבסס על debouncedSearch (הערך המושהה)
   const filteredTransactions = transactions.filter(trx => {
-    const search = debouncedSearch.trim();
+    const search = debouncedSearch.trim().toLowerCase();
     if (!search) return true;
 
     return (
-      trx.workerName?.includes(search) 
+      trx.workerName?.toLowerCase().includes(search) ||
+      trx.branch?.toLowerCase().includes(search)
     );
   });
 
