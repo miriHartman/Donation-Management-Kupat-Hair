@@ -48,10 +48,7 @@ export function DonationsManagement() {
     if (!search) return true;
 
     return (
-      trx.workerName?.includes(search) ||
-      trx.branch?.includes(search) ||
-      trx.amount?.toString().includes(search) ||
-      (trx.id?.toString() || '').includes(search)
+      trx.workerName?.includes(search) 
     );
   });
 
