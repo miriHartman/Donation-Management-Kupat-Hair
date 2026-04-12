@@ -32,6 +32,19 @@ export function DonationsManagement() {
   } = useDashboardData(selectedBranchFilter, debouncedSearch, page, debouncedDateRange);
   const { allBranches } = useBranches();
 
+  // לוגיקת סינון מקומית משופרת - מטפלת במקרים כמו "בתי" עבור "בתיה"
+  const filteredTransactions = transactions.filter(trx => {
+    const search = inputValue.trim().toLowerCase();
+    if (!search) return true;
+
+    return (
+      trx.workerName?.toLowerCase().includes(search) ||
+      trx.branch?.toLowerCase().includes(search) ||
+      trx.amount?.toString().includes(search) ||
+      (trx.id?.toString() || '').includes(search)
+    );
+  });
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(inputValue);
@@ -99,6 +112,7 @@ export function DonationsManagement() {
         </button>
       </div>
 
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, idx) => {
           const IconComponent = iconMap[stat.title] || Banknote;
@@ -120,6 +134,7 @@ export function DonationsManagement() {
         })}
       </div>
 
+      {/* הכנסות סניפים להיום */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-slate-800 font-bold">
@@ -141,6 +156,7 @@ export function DonationsManagement() {
         </div>
       </div>
 
+      {/* סינונים */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-6 border-b border-slate-100">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -148,7 +164,7 @@ export function DonationsManagement() {
               <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="חיפוש לפי שם, סניף, סכום או הערות..."
+                placeholder="חיפוש חופשי (שם, סניף...)"
                 className="w-full pr-9 pl-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -192,6 +208,7 @@ export function DonationsManagement() {
         </div>
       </div>
 
+      {/* טבלת עסקאות */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-right text-sm">
@@ -210,7 +227,7 @@ export function DonationsManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {transactions.map((trx) => (
+              {filteredTransactions.map((trx) => (
                 <tr key={trx.id} className="hover:bg-slate-50 group transition-colors">
                   <td className="px-4 py-4 font-black text-indigo-900">₪{((Number(trx.amount) || 0) * (Number(trx.installments) || 1)).toLocaleString()}</td>
                   <td className="px-4 py-4 font-bold text-slate-700">₪{(Number(trx.amount) || 0).toLocaleString()}</td>
@@ -243,6 +260,7 @@ export function DonationsManagement() {
           </table>
         </div>
 
+        {/* Pagination */}
         <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
           <span className="text-xs font-bold text-slate-500">עמוד {page}</span>
           <div className="flex gap-2">
