@@ -20,8 +20,8 @@ export function DonationsManagement() {
   const [inputValue, setInputValue] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedBranchFilter, setSelectedBranchFilter] = useState('all');
-  const [dateRange, setDateRange] = useState({ start: '', end: today });
-  const [debouncedDateRange, setDebouncedDateRange] = useState({ start: '', end: today });
+const [dateRange, setDateRange] = useState({ start: today, end: today });
+  const [debouncedDateRange, setDebouncedDateRange] = useState({ start: today, end: today });
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
@@ -223,7 +223,8 @@ export function DonationsManagement() {
                     </div>
                   </td>
                   <td className="px-4 py-4 text-slate-600 font-medium">{trx.branch}</td>
-                  <td className="px-4 py-4 text-slate-500 text-xs">{trx.date}</td>
+                  <td className="px-4 py-4 text-slate-500 text-xs">
+                  {trx.date ? new Date(trx.date).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}</td>
                     <td className="px-4 py-4 text-left text-slate-700">{trx.workerName}</td>
                   <td className="px-4 py-4 text-left">
                     <div className="flex items-center justify-end gap-2">
