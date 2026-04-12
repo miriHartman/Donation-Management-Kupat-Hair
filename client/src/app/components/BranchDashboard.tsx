@@ -1,28 +1,20 @@
-import React, { useEffect } from 'react';
-import { Plus, Edit2, LogOut, FileText, Wallet, CreditCard, Banknote, Calendar, Calculator } from 'lucide-react';
+import React from 'react';
+import { 
+  Plus, 
+  Edit2, 
+  LogOut, 
+  FileText, 
+  Wallet, 
+  CreditCard, 
+  Banknote, 
+  Calendar, 
+  Calculator, 
+  Repeat 
+} from 'lucide-react';
 import { NewDonationModal } from './NewDonationModal';
 import { useBranchDashboard } from '../hooks/useBranchDashboard';
 
-// עדכון ה-Interface שיתאים לשדות ב-DB
-interface DonationData {
-  id?: string;
-  amount: number;
-  target_id: number; // שונה מ-targetId
-  method_id: number; // שונה מ-methodId
-  is_recurring?: boolean; // בהתאם למה שקיים ב-DB (אם קיים)
-  donation_date?: string;
-  notes?: string;
-  date: string; // הוספת שדה תאריך
-}
-
-interface BranchDashboardProps {
-  onLogout: () => void;
-  onBillCalculator: () => void;
-  branchName: string;
-  branchId: number;
-}
-
-export function BranchDashboard({ onLogout, onBillCalculator, branchName, branchId }: BranchDashboardProps) {
+export function BranchDashboard({ onLogout, onBillCalculator, branchName, branchId }: any) {
   const {
     donations = [],
     isModalOpen,
@@ -32,20 +24,10 @@ export function BranchDashboard({ onLogout, onBillCalculator, branchName, branch
     handleCloseModal,
     fetchDonations 
   } = useBranchDashboard(branchId);
-useEffect(() => {
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'F5') {
-      e.preventDefault(); // מונע פתיחת עזרה של הדפדפן
-      setIsModalOpen(true);
-    }
-  };
 
-  window.addEventListener('keydown', handleKeyDown);
-  return () => window.removeEventListener('keydown', handleKeyDown);
-}, [setIsModalOpen]);
-  // פונקציות עזר מעודכנות שמשתמשות בשמות השדות מה-DB
-  const getPaymentIcon = (method_id: any) => {
-    const id = Number(method_id);
+  // פונקציות עזר לתוויות
+  const getPaymentIcon = (methodId: any) => {
+    const id = Number(methodId);
     switch(id) {
       case 1: return <Wallet className="w-4 h-4 text-green-600" />;
       case 2: return <CreditCard className="w-4 h-4 text-blue-600" />;
@@ -55,33 +37,29 @@ useEffect(() => {
     }
   };
 
-  const getPaymentLabel = (method_id: any) => {
-    const id = Number(method_id);
+  const getPaymentLabel = (methodId: any) => {
     const labels: Record<number, string> = { 1: 'מזומן', 2: 'אשראי', 3: "צ'ק", 4: 'הו"ק' };
-    return labels[id] || 'לא ידוע';
+    return labels[Number(methodId)] || 'לא ידוע';
   };
 
-  const getTargetLabel = (target_id: any) => {
-    const id = Number(target_id);
+  const getTargetLabel = (targetId: any) => {
     const targets: Record<number, string> = { 1: 'קופת העיר', 2: 'קרנות', 3: 'אחר' };
-    return targets[id] || 'כללי';
+    return targets[Number(targetId)] || 'כללי';
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans" dir="rtl">
-      {/* ... Header ... */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
+      {/* Header */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-blue-600/20">
-              <Banknote className="w-6 h-6" />
-            </div>
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg font-bold text-lg">ק"ע</div>
             <div>
-              <h1 className="text-lg font-bold text-slate-800">דשבורד סניף</h1>
-              <p className="text-xs text-slate-500">{branchName} (סניף {branchId})</p>
+              <h1 className="text-lg font-bold text-slate-800 leading-tight">דשבורד סניף</h1>
+              <p className="text-xs text-blue-600 font-medium">{branchName} (סניף {branchId})</p>
             </div>
           </div>
-          <button onClick={onLogout} className="flex items-center gap-2 text-slate-500 hover:text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 text-sm font-medium transition-colors">
+          <button onClick={onLogout} className="flex items-center gap-2 text-slate-500 hover:text-red-600 px-3 py-2 rounded-lg transition-colors text-sm font-bold">
             <LogOut className="w-4 h-4" />
             <span>יציאה</span>
           </button>
@@ -90,62 +68,119 @@ useEffect(() => {
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <div className="space-y-6">
-          {/* כפתורי פעולה */}
+          {/* כפתורים מהירים */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-2xl font-medium shadow-lg transition-all hover:scale-[1.02] flex items-center justify-between group text-right">
-              <div><h3 className="text-xl font-bold mb-1">תרומה חדשה</h3><p className="text-sm text-blue-100">הוסף תרומה למערכת</p></div>
-              <Plus className="w-10 h-10 opacity-80" />
+            <button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between group transition-all hover:scale-[1.01]">
+              <div className="text-right">
+                <h3 className="text-xl font-bold mb-1">תרומה חדשה</h3>
+                <p className="text-blue-100 text-sm opacity-80">קליטה מהירה של תרומה</p>
+              </div>
+              <Plus className="w-10 h-10 opacity-30" />
             </button>
-            <button onClick={onBillCalculator} className="bg-green-600 hover:bg-green-700 text-white p-6 rounded-2xl font-medium shadow-lg transition-all hover:scale-[1.02] flex items-center justify-between group text-right">
-              <div><h3 className="text-xl font-bold mb-1">סיכום שטרות</h3><p className="text-sm text-green-100">סיכום יומי של המזומן</p></div>
-              <Calculator className="w-10 h-10 opacity-80" />
+            <button onClick={onBillCalculator} className="bg-emerald-600 hover:bg-emerald-700 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between group transition-all hover:scale-[1.01]">
+              <div className="text-right">
+                <h3 className="text-xl font-bold mb-1">סיכום שטרות</h3>
+                <p className="text-emerald-100 text-sm opacity-80">מחשבון מזומן לסגירת משמרת</p>
+              </div>
+              <Calculator className="w-10 h-10 opacity-30" />
             </button>
           </div>
 
           {/* טבלת תרומות */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-6 border-b border-slate-100"><h2 className="text-xl font-bold text-slate-800 flex items-center gap-2"><Calendar className="w-5 h-5 text-blue-600" />תרומות היום</h2></div>
+            <div className="p-6 border-b border-slate-100">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-blue-600" />
+                תרומות שהתקבלו היום
+              </h2>
+            </div>
+            
             <div className="overflow-x-auto">
               <table className="w-full text-right">
-                <thead className="bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider">
-                  <tr>
-                    <th className="px-6 py-4">סכום</th>
-                    <th className="px-6 py-4">יעד</th>
-                    <th className="px-6 py-4">אמצעי תשלום</th>
-                    <th className="px-6 py-4">סטטוס</th>
-                    <th className="px-6 py-4 text-left">פעולות</th>
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100 text-slate-600 text-xs sm:text-sm">
+                    {/* שינוי סדר: סה"כ תרומה ראשון מימין */}
+                    <th className="px-4 py-4 font-bold text-blue-900">סה"כ לתרומה</th>
+                    <th className="px-4 py-4 font-bold">סכום (לחודש)</th>
+                    <th className="px-4 py-4 font-bold">חודשים</th>
+                    <th className="px-4 py-4 font-bold">סוג</th>
+                    <th className="px-4 py-4 font-bold">יעד</th>
+                    <th className="px-4 py-4 font-bold">אמצעי תשלום</th>
+                    <th className="px-4 py-4 font-bold text-left">פעולות</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {donations.length === 0 ? (
-                    <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400">לא נמצאו תרומות היום</td></tr>
+                    <tr>
+                      <td colSpan={7} className="px-6 py-12 text-center text-slate-400 italic">אין תרומות להצגה</td>
+                    </tr>
                   ) : (
-                    donations.map((donation: any) => (
-                      <tr key={donation.id} className="hover:bg-slate-50/80 transition-colors group">
-                        <td className="px-6 py-4 font-bold text-slate-900">₪{Number(donation.amount).toLocaleString()}</td>
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
-                            {getTargetLabel(donation.target_id)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2 text-slate-700">
-                            {getPaymentIcon(donation.method_id)}
-                            <span className="text-sm">{getPaymentLabel(donation.method_id)}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`text-xs px-2 py-1 rounded-md ${donation.status === 'completed' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>
-                            {donation.status === 'completed' ? 'בוצע' : 'במתנה'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-left">
-                          <button onClick={() => handleEditClick(donation)} className="p-2 text-slate-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all">
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                    donations.map((donation: any) => {
+                      const isRec = !!donation.isRecurring;
+                      const amount = Number(donation.amount) || 0;
+                      const months = isRec ? (Number(donation.installments) || 1) : 1;
+                      const total = isRec ? (amount * months) : amount;
+
+                      return (
+                        <tr key={donation.id} className="hover:bg-blue-50/30 transition-colors group">
+                          {/* 1. סה"כ (הכי ימני) */}
+                          <td className="px-4 py-4">
+                            <div className="text-base font-black text-blue-900">
+                              ₪{total.toLocaleString()}
+                            </div>
+                          </td>
+
+                          {/* 2. סכום לחודש */}
+                          <td className="px-4 py-4 font-bold text-slate-700">
+                            ₪{amount.toLocaleString()}
+                          </td>
+
+                          {/* 3. חודשים */}
+                          <td className="px-4 py-4">
+                            {isRec ? (
+                              <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded font-bold text-xs">
+                                {months} חודשים
+                              </span>
+                            ) : (
+                              <span className="text-slate-300">-</span>
+                            )}
+                          </td>
+
+                          {/* 4. סוג */}
+                          <td className="px-4 py-4">
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-bold ${
+                              isRec ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              {isRec && <Repeat className="w-3 h-3" />}
+                              {isRec ? 'מחזורי' : 'חד פעמי'}
+                            </span>
+                          </td>
+
+                          {/* 5. יעד */}
+                          <td className="px-4 py-4 text-sm text-slate-700">
+                            {getTargetLabel(donation.targetId)}
+                          </td>
+
+                          {/* 6. אמצעי תשלום */}
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-2 text-sm text-slate-600">
+                              {getPaymentIcon(donation.methodId)}
+                              <span>{getPaymentLabel(donation.methodId)}</span>
+                            </div>
+                          </td>
+
+                          {/* 7. פעולות (הכי שמאלי) */}
+                          <td className="px-4 py-4 text-left">
+                            <button 
+                              onClick={() => handleEditClick(donation)} 
+                              className="p-2 text-slate-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-white shadow-sm"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
