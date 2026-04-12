@@ -197,20 +197,25 @@ export function NewDonationModal({
                     <div>
                       <label className="block text-sm font-medium text-amber-900 mb-1">סניף</label>
                       <select
-                        value={formData.branchId || ''}
-                        onChange={(e) => setFormData({ ...formData, branchId: e.target.value ? Number(e.target.value) : undefined })}
+                        value={formData.branchId || ""}
+                        onChange={(e) => {
+                          const val = e.target.value ? Number(e.target.value) : undefined;
+                          setFormData({ ...formData, branchId: val });
+                        }}
                         className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-500"
                       >
-                        <option value="" disabled>בחר סניף...</option>
-
-
-                        {branches
-                          ?.filter(b => b.is_active || b.id === formData.branchId) // מציג רק פעילים, או את הסניף הנוכחי אם אנחנו בעריכה
-                          .map(b => (
-                            <option key={b.id} value={b.id}>{b.name}</option>
-                          ))}
-
-
+                        <option value="">בחר סניף...</option>
+                        {branches && branches.length > 0 ? (
+                          branches
+                            .filter(b => Number(b.is_active) === 1 || b.id === formData.branchId)
+                            .map(b => (
+                              <option key={b.id} value={b.id}>
+                                {b.name}
+                              </option>
+                            ))
+                        ) : (
+                          <option disabled>טוען סניפים או שאין סניפים פעילים...</option>
+                        )}
                       </select>
                     </div>
                   </div>
