@@ -5,7 +5,7 @@ export interface Branch {
   name: string;
   color?: string;
   address?: string;
-  isActive?: boolean; // הוספתי אופציונלי למקרה שתשתמשי בסטטוס פעיל/לא פעיל
+  is_active?: boolean | number; // הוספתי אופציונלי למקרה שתשתמשי בסטטוס פעיל/לא פעיל
 }
 
 export const branchService = {
@@ -15,16 +15,16 @@ export const branchService = {
     return response.data;
   },
 
-  // שליפת סניפים פעילים בלבד
-  getActiveBranches: async (): Promise<Branch[]> => {
-    try {
-      const response = await api.get('/branches/active');
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching active branches:', error);
-      throw error;
-    }
-  },
+  // // שליפת סניפים פעילים בלבד
+  // getActiveBranches: async (): Promise<Branch[]> => {
+  //   try {
+  //     const response = await api.get('/branches/active');
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error('Error fetching active branches:', error);
+  //     throw error;
+  //   }
+  // },
 
  
   // יצירת סניף חדש

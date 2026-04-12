@@ -183,26 +183,32 @@ console.log('Form Data branchId:', formData.branchId);
                     <div>
                       <label className="block text-sm font-medium text-amber-900 mb-1">סניף</label>
                       <select
-                        value={formData.branchId || ""}
-                        onChange={(e) => {
-                          const val = e.target.value ? Number(e.target.value) : undefined;
-                          setFormData({ ...formData, branchId: val });
-                        }}
-                        className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-500"
-                      >
-                        <option value="">בחר סניף...</option>
-                        {branches && branches.length > 0 ? (
-                          branches
-                            .filter(b => Number(b.is_active) === 1 || b.id === formData.branchId)
-                            .map(b => (
-                              <option key={b.id} value={b.id}>
-                                {b.name}
-                              </option>
-                            ))
-                        ) : (
-                          <option disabled>טוען סניפים או שאין סניפים פעילים...</option>
-                        )}
-                      </select>
+  value={formData.branchId || ""}
+  onChange={(e) => {
+    const val = e.target.value ? Number(e.target.value) : undefined;
+    setFormData({ ...formData, branchId: val });
+  }}
+  className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-500"
+>
+  <option value="">בחר סניף...</option>
+  {branches && branches.length > 0 ? (
+    branches
+      /* סינון: אם זו תרומה חדשה (אין editingDonation), הצג רק פעילים. 
+         אם זו עריכה, הצג פעילים או את הסניף הנוכחי של התרומה (כדי שלא ייעלם) */
+      .filter(b => 
+        !editingDonation 
+          ? Number(b.is_active) === 1 
+          : (Number(b.is_active) === 1 || b.id === formData.branchId)
+      )
+      .map(b => (
+        <option key={b.id} value={b.id}>
+          {b.name} {!b.is_active && "(לא פעיל)"}
+        </option>
+      ))
+  ) : (
+    <option disabled>טוען סניפים או שאין סניפים פעילים...</option>
+  )}
+</select>
                     </div>
                   </div>
                 )}

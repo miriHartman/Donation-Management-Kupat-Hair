@@ -1,27 +1,27 @@
 const db = require('../db');
 
 class BranchService {
-    // 1. שליפת סניפים פעילים בלבד
-    static async getActiveBranches() {
-        try {
-            const query = `
-                SELECT 
-                    id, 
-                    name, 
-                    address,
-                    phone,
-                    is_active
-                FROM branches 
-                WHERE is_active = 1
-                ORDER BY name ASC
-            `;
-            const [rows] = await db.query(query);
-            return rows;
-        } catch (error) {
-            console.error('Error in BranchService.getActiveBranches:', error);
-            throw error;
-        }
-    }
+    // // 1. שליפת סניפים פעילים בלבד
+    // static async getActiveBranches() {
+    //     try {
+    //         const query = `
+    //             SELECT 
+    //                 id, 
+    //                 name, 
+    //                 address,
+    //                 phone,
+    //                 is_active
+    //             FROM branches 
+    //             WHERE is_active = 1
+    //             ORDER BY name ASC
+    //         `;
+    //         const [rows] = await db.query(query);
+    //         return rows;
+    //     } catch (error) {
+    //         console.error('Error in BranchService.getActiveBranches:', error);
+    //         throw error;
+    //     }
+    // }
 
     // 2. שליפת כל הסניפים (כולל מושבתים)
     static async getAllBranches() {

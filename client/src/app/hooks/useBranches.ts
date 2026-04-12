@@ -8,18 +8,18 @@ export function useBranches() {
   const [isLoading, setIsLoading] = useState(true);
 
   // פונקציות השליפה עטופות ב-useCallback כדי לאפשר קריאה חוזרת אחרי עדכונים
-  const fetchActiveBranches = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const data = await branchService.getActiveBranches();
-      setBranches(data);
-    } catch (error) {
-      console.error('Error fetching branches:', error);
-      toast.error('שגיאה בטעינת רשימת הסניפים');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  // const fetchActiveBranches = useCallback(async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const data = await branchService.getActiveBranches();
+  //     setBranches(data);
+  //   } catch (error) {
+  //     console.error('Error fetching branches:', error);
+  //     toast.error('שגיאה בטעינת רשימת הסניפים');
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }, []);
 
   const fetchAllBranches = useCallback(async () => {
     try {
@@ -36,8 +36,13 @@ export function useBranches() {
 
   // פונקציה מאוחדת לרענון כל הנתונים
   const refreshBranches = useCallback(async () => {
-    await Promise.all([fetchActiveBranches(), fetchAllBranches()]);
-  }, [fetchActiveBranches, fetchAllBranches]);
+    await Promise.all([
+      // fetchActiveBranches(), 
+        fetchAllBranches()]);
+  },
+   [
+    // fetchActiveBranches,
+     fetchAllBranches]);
 
   // טעינה ראשונית של הנתונים
   useEffect(() => {

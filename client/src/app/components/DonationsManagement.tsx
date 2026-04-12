@@ -8,6 +8,7 @@ import { donationService } from '../services/donationService';
 import { toast } from 'sonner';
 import { useDashboardData } from '../hooks/useDashboardData';
 import { NewDonationModal } from '../components/NewDonationModal';
+import { useBranches } from '../hooks/useBranches';
 
 const iconMap: Record<string, any> = {
   'סה"כ תרומות': Banknote,
@@ -26,9 +27,10 @@ export function DonationsManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
 
-  const {
-    transactions, stats, branches, todaySummary, branchSummary, loading, fetchData
+const {
+    transactions, stats, todaySummary, branchSummary, loading, fetchData
   } = useDashboardData(selectedBranchFilter, debouncedSearch, page, debouncedDateRange);
+const { allBranches } = useBranches();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -72,7 +74,7 @@ export function DonationsManagement() {
   };
 
   const openEditModal = (trx: any) => {
-    const foundBranch = branches.find((b: any) => b.name === trx.branch);
+    const foundBranch = allBranches.find((b: any) => b.name === trx.branch);
     const bId = trx.branchId || foundBranch?.id || 0;
     setEditingTransaction({ ...trx, branchId: bId });
     setIsModalOpen(true);
@@ -159,8 +161,13 @@ export function DonationsManagement() {
               className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
             >
               <option value="all">כל הסניפים</option>
-              {branches?.map((b) => <option key={b.id} value={b.name}>{b.name}</option>)}
-            </select>
+{allBranches
+    ?.filter((b) => Number(b.is_active) === 1) // מוודא שמוצגים רק פעילים
+    .map((b) => (
+      <option key={b.id} value={b.name}>
+        {b.name}
+      </option>
+    ))}            </select>
             <input type="date" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} />
             <input type="date" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} />
           </div>
@@ -254,8 +261,8 @@ export function DonationsManagement() {
         onClose={() => setIsModalOpen(false)}
         onRefresh={() => { fetchData(); setIsModalOpen(false); }}
         editingDonation={editingTransaction}
-        branches={branches}
-        branchId={editingTransaction?.branchId || (selectedBranchFilter !== 'all' ? branches.find(b => b.name === selectedBranchFilter)?.id : undefined)}
+        branches={allBranches}
+        branchId={editingTransaction?.branchId || (selectedBranchFilter !== 'all' ? allBranches.find(b => b.name === selectedBranchFilter)?.id : undefined)}
         showAdminFields={true}
       />
     </div>

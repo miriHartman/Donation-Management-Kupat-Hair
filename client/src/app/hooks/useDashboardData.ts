@@ -32,19 +32,6 @@ export function useDashboardData(
     loading: true
   });
 
-  // שליפת רשימת הסניפים (ל-Select)
-  const fetchBranches = useCallback(async () => {
-    try {
-      const branchList = await donationService.getBranches();
-      setDataState(prev => ({ 
-        ...prev, 
-        branches: branchList || [] 
-      }));
-    } catch (error) {
-      console.error("Error fetching branches:", error);
-    }
-  }, []);
-
   // שליפת הנתונים הסטטיסטיים, העסקאות ופילוח הרווחיות
   const fetchData = useCallback(async () => {
     try {
@@ -86,9 +73,7 @@ export function useDashboardData(
     }
   }, [selectedBranch, searchTerm, page, dateRange.start, dateRange.end]);
 
-  useEffect(() => {
-    fetchBranches();
-  }, [fetchBranches]);
+ 
 
   useEffect(() => {
     fetchData();
