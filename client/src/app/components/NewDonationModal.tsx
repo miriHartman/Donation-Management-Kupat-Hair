@@ -64,25 +64,6 @@ export function NewDonationModal({
     branchId
   );
 
-  useEffect(() => {
-    if (editingDonation) {
-      setFormData({
-        ...editingDonation, branchId: editingDonation.branchId || branchId,
-        date: editingDonation.date ? editingDonation.date.substring(0, 10) : new Date().toISOString().substring(0, 10),
-        targetOtherNote: editingDonation.targetId === 3 ? editingDonation.targetOtherNote : '',
-        fundNumber: editingDonation.targetId === 2 ? editingDonation.fundNumber : '',
-        workerName: editingDonation.workerName || '',
-      });
-
-      setIsForeignCurrency(editingDonation.currency !== 'ILS');
-
-      if (editingDonation.isRecurring && editingDonation.amount && editingDonation.installments) {
-        setTotalAmount(editingDonation.amount * editingDonation.installments);
-      } else {
-        setTotalAmount(editingDonation.amount || 0);
-      }
-    }
-  }, [editingDonation, setFormData, branchId]);
 
   const updateMonthlyAmount = (total: number, months: number) => {
     if (months > 0 && total >= 0) {
