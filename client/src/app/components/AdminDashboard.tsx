@@ -1,15 +1,20 @@
 import { useState } from 'react';
-import { Building2, ArrowRight, Banknote, LayoutDashboard } from 'lucide-react';
+import { Building2, ArrowRight, Banknote, LayoutDashboard, WalletCards } from 'lucide-react'; // הוספתי את WalletCards עבור קרנות
 import { DonationsManagement } from './DonationsManagement';
 import { BranchesManagement } from './BranchesManagement';
+// כאן תייבאי בעתיד את הקומפוננטה של הקרנות:
+// import { FundsManagement } from './FundsManagement'; 
 
 interface AdminDashboardProps {
   onLogout: () => void;
   onBack: () => void;
 }
 
+// עדכון הטיפוס של הטאב להכללת 'funds'
+type ActiveTab = 'donations' | 'funds' | 'branches';
+
 export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'donations' | 'branches'>('donations');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('donations');
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col text-right" dir="rtl">
@@ -29,7 +34,7 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
             </div>
           </div>
 
-          {/* ניווט כרטיסיות (Tabs) */}
+          {/* ניווט כרטיסיות (Tabs) - מעודכן */}
           <nav className="hidden md:flex bg-slate-100 p-1 rounded-xl gap-1">
             <button
               onClick={() => setActiveTab('donations')}
@@ -42,6 +47,20 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
               <Banknote className="w-4 h-4" />
               ניהול תרומות
             </button>
+
+            {/* טאב חדש: תרומות לקרנות */}
+            <button
+              onClick={() => setActiveTab('funds')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                activeTab === 'funds' 
+                ? 'bg-white text-indigo-600 shadow-sm' 
+                : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <WalletCards className="w-4 h-4" />
+              תרומות לקרנות
+            </button>
+
             <button
               onClick={() => setActiveTab('branches')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
@@ -61,13 +80,22 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
         </div>
       </header>
 
-      {/* תוכן משתנה */}
+      {/* תוכן משתנה - מעודכן */}
       <main className="flex-1 w-full">
-        {activeTab === 'donations' ? (
-          <DonationsManagement />
-        ) : (
-          <BranchesManagement />
+        {activeTab === 'donations' && <DonationsManagement />}
+        
+        {activeTab === 'funds' && (
+          <div className="p-8 text-center text-slate-500">
+             {/* כאן תבוא קומפוננטת ניהול הקרנות שתצרי בהמשך */}
+             <div className="bg-white p-12 rounded-2xl border border-dashed border-slate-300">
+                <WalletCards className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                <h3 className="text-xl font-bold text-slate-700">ניהול תרומות לקרנות</h3>
+                <p>כאן תוצג רשימת התרומות לקרנות בלבד.</p>
+             </div>
+          </div>
         )}
+
+        {activeTab === 'branches' && <BranchesManagement />}
       </main>
     </div>
   );
