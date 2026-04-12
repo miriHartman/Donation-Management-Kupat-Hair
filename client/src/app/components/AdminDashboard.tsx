@@ -45,7 +45,7 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
               }`}
             >
               <Banknote className="w-4 h-4" />
-              ניהול תרומות
+               תרומות כללי
             </button>
 
             {/* טאב חדש: תרומות לקרנות */}
@@ -58,7 +58,7 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
               }`}
             >
               <WalletCards className="w-4 h-4" />
-              תרומות לקרנות
+              תרומות - קרנות
             </button>
 
             <button
@@ -70,7 +70,7 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
               }`}
             >
               <Building2 className="w-4 h-4" />
-              ניהול סניפים
+               סניפים
             </button>
           </nav>
 

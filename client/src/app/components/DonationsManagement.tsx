@@ -27,10 +27,10 @@ export function DonationsManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
 
-const {
+  const {
     transactions, stats, todaySummary, branchSummary, loading, fetchData
   } = useDashboardData(selectedBranchFilter, debouncedSearch, page, debouncedDateRange);
-const { allBranches } = useBranches();
+  const { allBranches } = useBranches();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -90,7 +90,6 @@ const { allBranches } = useBranches();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {/* כפתור הוספה צף/מהיר למעלה */}
       <div className="flex justify-end">
         <button
           onClick={() => { setEditingTransaction(null); setIsModalOpen(true); }}
@@ -100,7 +99,6 @@ const { allBranches } = useBranches();
         </button>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, idx) => {
           const IconComponent = iconMap[stat.title] || Banknote;
@@ -122,7 +120,6 @@ const { allBranches } = useBranches();
         })}
       </div>
 
-      {/* הכנסות סניפים להיום */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-slate-800 font-bold">
@@ -144,16 +141,17 @@ const { allBranches } = useBranches();
         </div>
       </div>
 
-      {/* סינונים */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-6 border-b border-slate-100">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div className="relative">
               <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
-                type="text" placeholder="חיפוש לפי מזהה..."
+                type="text"
+                placeholder="חיפוש לפי שם, סניף, סכום או הערות..."
                 className="w-full pr-9 pl-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-                value={inputValue} onChange={(e) => setInputValue(e.target.value)}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
               />
             </div>
             <select
@@ -161,19 +159,19 @@ const { allBranches } = useBranches();
               className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
             >
               <option value="all">כל הסניפים</option>
-{allBranches
-    ?.filter((b) => Number(b.is_active) === 1) // מוודא שמוצגים רק פעילים
-    .map((b) => (
-      <option key={b.id} value={b.name}>
-        {b.name}
-      </option>
-    ))}            </select>
+              {allBranches
+                ?.filter((b) => Number(b.is_active) === 1)
+                .map((b) => (
+                  <option key={b.id} value={b.name}>
+                    {b.name}
+                  </option>
+                ))}
+            </select>
             <input type="date" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} />
             <input type="date" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} />
           </div>
         </div>
 
-        {/* פילוח רווחיות */}
         <div className="bg-slate-50/50 p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
             {branchSummary?.map((branch: any, idx: number) => (
@@ -194,7 +192,6 @@ const { allBranches } = useBranches();
         </div>
       </div>
 
-      {/* טבלת עסקאות */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-right text-sm">
@@ -246,7 +243,6 @@ const { allBranches } = useBranches();
           </table>
         </div>
 
-        {/* Pagination */}
         <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
           <span className="text-xs font-bold text-slate-500">עמוד {page}</span>
           <div className="flex gap-2">
