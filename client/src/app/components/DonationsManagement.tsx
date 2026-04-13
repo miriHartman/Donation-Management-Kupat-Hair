@@ -27,34 +27,33 @@ export function DonationsManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
 
+  // כאן אנחנו שולחים את debouncedSearch לשרת כדי שיחפש בכל בסיס הנתונים
   const {
     transactions, stats, todaySummary, branchSummary, loading, fetchData
   } = useDashboardData(selectedBranchFilter, debouncedSearch, page, debouncedDateRange);
   const { allBranches } = useBranches();
 
-  // מנגנון ה-Debounce: מעדכן את debouncedSearch רק לאחר הפסקה בהקלדה
+  // מנגנון ה-Debounce: מעדכן את החיפוש 700 מילי-שניות אחרי סיום ההקלדה
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(inputValue);
       setDebouncedDateRange(dateRange);
-      setPage(1);
-    }, 700); // כאן ניתן לשנות את זמן ההמתנה (700ms = 0.7 שניות)
+      setPage(1); // חוזר לעמוד הראשון בחיפוש חדש
+    }, 700);
     return () => clearTimeout(timer);
   }, [inputValue, dateRange]);
-// סינון מקומי שמתבסס על debouncedSearch (הערך המושהה)
+
+  // סינון מקומי "חכם" לגיבוי - מוודא שגם אם השרת החזיר תוצאות רחבות, הממשק יציג בדיוק מה שביקשת
   const filteredTransactions = transactions.filter(trx => {
-    // מנקים רווחים מהחיפוש
-    const search = debouncedSearch.trim();
+    const search = debouncedSearch.trim().toLowerCase();
     if (!search) return true;
 
-    // יצירת ביטוי רגולרי שמחפש את המילה בכל מקום, ללא רגישות לאותיות גדולות/קטנות
-    // ה-RegExp מטפל בעברית בצורה מצוינת
-    const searchRegex = new RegExp(search, 'i');
+    const workerName = (trx.workerName || '').toString().toLowerCase();
+    const branch = (trx.branch || '').toString().toLowerCase();
+    const amount = (trx.amount || '').toString();
 
-    // ניקוי רווחים מהנתונים עצמם בזמן הבדיקה כדי למנוע בעיות
-    const workerName = trx.workerName?.trim() || '';
-console.log(workerName, search)
-    return searchRegex.test(workerName) ;
+    // בדיקת includes גמישה
+    return workerName.includes(search) || branch.includes(search) || amount.includes(search);
   });
 
   const handleDeleteTransaction = async (id: number) => {
@@ -105,7 +104,7 @@ console.log(workerName, search)
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 text-right" dir="rtl">
       <div className="flex justify-end">
         <button
           onClick={() => { setEditingTransaction(null); setIsModalOpen(true); }}
@@ -168,14 +167,14 @@ console.log(workerName, search)
               <input
                 type="text"
                 placeholder="חיפוש חופשי (שם, סניף...)"
-                className="w-full pr-9 pl-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pr-9 pl-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-right"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
               />
             </div>
             <select
               value={selectedBranchFilter} onChange={(e) => setSelectedBranchFilter(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-right"
             >
               <option value="all">כל הסניפים</option>
               {allBranches
@@ -225,7 +224,7 @@ console.log(workerName, search)
                 <th className="px-4 py-4">אמצעי תשלום</th>
                 <th className="px-4 py-4">סניף</th>
                 <th className="px-4 py-4">תאריך</th>
-                <th className="px-4 py-4 text-left">עובדת</th>
+                <th className="px-4 py-4">עובדת</th>
                 <th className="px-4 py-4 text-left">פעולות</th>
               </tr>
             </thead>
@@ -250,7 +249,7 @@ console.log(workerName, search)
                   <td className="px-4 py-4 text-slate-500 text-xs">
                     {trx.date ? new Date(trx.date).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}
                   </td>
-                  <td className="px-4 py-4 text-left text-slate-700">{trx.workerName}</td>
+                  <td className="px-4 py-4 text-slate-700">{trx.workerName}</td>
                   <td className="px-4 py-4 text-left">
                     <div className="flex items-center justify-end gap-2">
                       <button onClick={() => openEditModal(trx)} className="p-2 hover:bg-indigo-50 text-indigo-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"><Edit2 className="w-4 h-4" /></button>
