@@ -24,9 +24,9 @@ const donationService = {
             }
 
             if (filters.search) {
-                whereClause += ' AND (d.id LIKE ? OR b.name LIKE ?)';
+                whereClause += ' AND (d.id LIKE ? OR b.name LIKE ? OR d.worker_name LIKE ?)';
                 const searchVal = `%${filters.search}%`;
-                queryParams.push(searchVal, searchVal);
+                queryParams.push(searchVal, searchVal, searchVal); // הוספת הפרמטר השלישי
             }
 
             const lastMonthQuery = `
@@ -176,14 +176,14 @@ const donationService = {
             const method_id = data.methodId || data.method_id;
             const worker_name = data.workerName || data.worker_name;
             const created_by = data.userId || data.created_by;
-           const query = `
+            const query = `
                 INSERT INTO donations 
                 (amount, target_id, fund_number, target_other_note, method_id, worker_name, branch_id, donation_date, status, notes, created_by, is_recurring, months_count, created_at) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE(), 'completed', ?, ?, ?, ?, NOW())
             `;
 
             const [result] = await db.query(query, [
-                amount, target_id, fund_number, target_other_note, method_id, 
+                amount, target_id, fund_number, target_other_note, method_id,
                 worker_name, branch_id, notes, created_by, is_recurring, months_count
             ]);
 
@@ -229,7 +229,7 @@ const donationService = {
             `;
 
             await db.query(query, [
-                amount, target_id, fund_number, target_other_note, method_id, 
+                amount, target_id, fund_number, target_other_note, method_id,
                 worker_name, branch_id, notes, is_recurring, months_count, id
             ]);
 
@@ -252,6 +252,7 @@ const donationService = {
         `;
         const [rows] = await db.query(query, [branchId]);
         return parseFloat(rows[0].totalCash) || 0;
-}}
+    }
+}
 
 module.exports = donationService;

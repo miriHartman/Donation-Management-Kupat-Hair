@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { donationService } from "../services/donationService";
+import { toast } from "sonner";
 
 // הגדרת ה-Interface
 interface DashboardData {
@@ -13,6 +14,7 @@ interface DashboardData {
   pagination: any;
   loading: boolean;
   fetchData: () => Promise<void>;
+  deleteDonation: (id: number) => Promise<void>;
 }
 
 export function useDashboardData(
@@ -22,8 +24,7 @@ export function useDashboardData(
   dateRange: { start: string, end: string }
 ): DashboardData {
   
-  const [dataState, setDataState] = useState<Omit<DashboardData, 'fetchData'>>({
-    transactions: [],
+const [dataState, setDataState] = useState<Omit<DashboardData, 'fetchData' | 'deleteDonation'>>({    transactions: [],
     stats: [],
     todaySummary: { total: 0, donations: 0, branches: [] },
     branchSummary: [],
@@ -73,7 +74,18 @@ export function useDashboardData(
     }
   }, [selectedBranch, searchTerm, page, dateRange.start, dateRange.end]);
 
- 
+ const deleteDonation = useCallback(async (id: number) => {
+    if (!window.confirm('האם אתה בטוח שברצונך למחוק תרומה זו לצמיתות?')) return;
+    
+    try {
+      await donationService.deleteDonation(id);
+      toast.success('התרומה נמחקה בהצלחה');
+      await fetchData(); // רענון הנתונים אוטומטית
+    } catch (error) {
+      toast.error('שגיאה במחיקת התרומה');
+      console.error("Delete error:", error);
+    }
+  }, [fetchData]);
 
   useEffect(() => {
     fetchData();
@@ -81,6 +93,7 @@ export function useDashboardData(
 
   return {
     ...dataState,
-    fetchData
+    fetchData,
+    deleteDonation
   };
 }

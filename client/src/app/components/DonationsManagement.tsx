@@ -4,8 +4,6 @@ import {
   CreditCard, CalendarClock, ArrowUpRight, ArrowDownRight, Wallet,
   FileText, Repeat, Trash2
 } from 'lucide-react';
-import { donationService } from '../services/donationService';
-import { toast } from 'sonner';
 import { useDashboardData } from '../hooks/useDashboardData';
 import { NewDonationModal } from '../components/NewDonationModal';
 import { useBranches } from '../hooks/useBranches';
@@ -27,58 +25,26 @@ export function DonationsManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
 
-  // שינוי קריטי: הפסקנו לשלוח את debouncedSearch לשרת כדי למנוע סינון שגוי ב-API
   const {
-    transactions = [],
-    stats = [],
+    transactions,
+    stats,
     todaySummary,
     branchSummary,
     loading,
-    fetchData
-  } = useDashboardData(selectedBranchFilter, "", page, debouncedDateRange);
+    fetchData,
+    deleteDonation // פונקציה מההוק
+  } = useDashboardData(selectedBranchFilter, debouncedSearch, page, debouncedDateRange);
   
-  const { allBranches = [] } = useBranches();
+  const { allBranches } = useBranches();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(inputValue);
       setDebouncedDateRange(dateRange);
       setPage(1);
-    }, 600);
+    }, 700);
     return () => clearTimeout(timer);
   }, [inputValue, dateRange]);
-
-  // סינון לקוח חזק וגמיש
-  const filteredTransactions = (transactions || []).filter(trx => {
-    if (!trx) return false;
-    const search = debouncedSearch.trim().toLowerCase();
-    if (!search) return true;
-
-    // הגנה על שדות: הופכים הכל למחרוזת ומוודאים שהם קיימים
-    const workerName = (trx.workerName || '').toString().toLowerCase();
-    const branch = (trx.branch || '').toString().toLowerCase();
-    const amount = (trx.amount || '').toString();
-    const id = (trx.id || '').toString();
-
-    // בדיקה אם מילת החיפוש קיימת באחד מהשדות
-    return (
-      workerName.includes(search) || 
-      branch.includes(search) || 
-      amount.includes(search) || 
-      id.includes(search)
-    );
-  });
-
-  const handleDeleteTransaction = async (id: number) => {
-    if (!window.confirm('האם אתה בטוח שברצונך למחוק תרומה זו לצמיתות?')) return;
-    try {
-      await donationService.deleteDonation(id);
-      toast.success('התרומה נמחקה בהצלחה');
-      fetchData();
-    } catch (error) {
-      toast.error('שגיאה במחיקת התרומה');
-    }
-  };
 
   const getPaymentIcon = (methodId: any) => {
     const id = Number(methodId);
@@ -102,8 +68,7 @@ export function DonationsManagement() {
   };
 
   const openEditModal = (trx: any) => {
-    if (!trx) return;
-    const foundBranch = (allBranches || []).find((b: any) => b && b.name === trx.branch);
+    const foundBranch = allBranches.find((b: any) => b.name === trx.branch);
     const bId = trx.branchId || foundBranch?.id || 0;
     setEditingTransaction({ ...trx, branchId: bId });
     setIsModalOpen(true);
@@ -129,7 +94,7 @@ export function DonationsManagement() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {(stats || []).map((stat, idx) => {
+        {stats.map((stat, idx) => {
           const IconComponent = iconMap[stat.title] || Banknote;
           return (
             <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-start justify-between">
@@ -162,9 +127,9 @@ export function DonationsManagement() {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {todaySummary?.branches?.map((branch: any, idx: number) => (
             <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col items-center shadow-sm">
-              <span className="text-xs text-slate-500 font-bold mb-1 truncate w-full text-center">{branch?.name || 'ללא שם'}</span>
-              <span className="text-lg font-black text-indigo-600">₪{(branch?.amount || 0).toLocaleString()}</span>
-              <span className="text-[10px] text-slate-400 mt-2">{branch?.count || 0} תרומות</span>
+              <span className="text-xs text-slate-500 font-bold mb-1 truncate w-full text-center">{branch.name}</span>
+              <span className="text-lg font-black text-indigo-600">₪{(branch.amount || 0).toLocaleString()}</span>
+              <span className="text-[10px] text-slate-400 mt-2">{branch.count || 0} תרומות</span>
             </div>
           ))}
         </div>
@@ -188,16 +153,31 @@ export function DonationsManagement() {
               className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-right"
             >
               <option value="all">כל הסניפים</option>
-              {(allBranches || [])
-                .filter((b) => b && Number(b.is_active) === 1)
-                .map((b) => (
-                  <option key={b.id} value={b.name}>
-                    {b.name}
-                  </option>
-                ))}
+              {allBranches?.filter((b) => Number(b.is_active) === 1).map((b) => (
+                <option key={b.id} value={b.name}>{b.name}</option>
+              ))}
             </select>
             <input type="date" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} />
             <input type="date" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} />
+          </div>
+        </div>
+
+        <div className="bg-slate-50/50 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
+            {branchSummary?.map((branch: any, idx: number) => (
+              <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                <div className="flex justify-between text-xs font-bold mb-2">
+                  <div className="flex flex-col">
+                    <span className="text-slate-700">{branch.name}</span>
+                    <span className="text-indigo-600 font-black">₪{(branch.amount || 0).toLocaleString()}</span>
+                  </div>
+                  <span className="text-slate-400 self-end">{branch.percentage || 0}%</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-indigo-600 rounded-full transition-all" style={{ width: `${branch.percentage || 0}%` }} />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -220,7 +200,7 @@ export function DonationsManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredTransactions.map((trx) => (
+              {transactions.map((trx) => (
                 <tr key={trx.id} className="hover:bg-slate-50 group transition-colors">
                   <td className="px-4 py-4 font-black text-indigo-900">₪{((Number(trx.amount) || 0) * (Number(trx.installments) || 1)).toLocaleString()}</td>
                   <td className="px-4 py-4 font-bold text-slate-700">₪{(Number(trx.amount) || 0).toLocaleString()}</td>
@@ -244,13 +224,21 @@ export function DonationsManagement() {
                   <td className="px-4 py-4 text-left">
                     <div className="flex items-center justify-end gap-2">
                       <button onClick={() => openEditModal(trx)} className="p-2 hover:bg-indigo-50 text-indigo-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => handleDeleteTransaction(trx.id)} className="p-2 hover:bg-red-50 text-red-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => deleteDonation(trx.id)} className="p-2 hover:bg-red-50 text-red-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+
+        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-500">עמוד {page}</span>
+          <div className="flex gap-2">
+            <button onClick={() => setPage(prev => Math.max(1, prev - 1))} disabled={page === 1 || loading} className="p-2 bg-white border border-slate-200 rounded-lg disabled:opacity-50"><ChevronRight className="w-4 h-4" /></button>
+            <button onClick={() => setPage(prev => prev + 1)} disabled={transactions.length < 10 || loading} className="p-2 bg-white border border-slate-200 rounded-lg disabled:opacity-50"><ChevronLeft className="w-4 h-4" /></button>
+          </div>
         </div>
       </div>
 
