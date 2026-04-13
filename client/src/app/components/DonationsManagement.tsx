@@ -27,33 +27,35 @@ export function DonationsManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
 
-  // כאן אנחנו שולחים את debouncedSearch לשרת כדי שיחפש בכל בסיס הנתונים
   const {
-    transactions, stats, todaySummary, branchSummary, loading, fetchData
+    transactions = [], // הגנה: וודאות שיש מערך ריק כברירת מחדל
+    stats = [],
+    todaySummary,
+    branchSummary,
+    loading,
+    fetchData
   } = useDashboardData(selectedBranchFilter, debouncedSearch, page, debouncedDateRange);
-  const { allBranches } = useBranches();
+  
+  const { allBranches = [] } = useBranches();
 
-  // מנגנון ה-Debounce: מעדכן את החיפוש 700 מילי-שניות אחרי סיום ההקלדה
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(inputValue);
       setDebouncedDateRange(dateRange);
-      setPage(1); // חוזר לעמוד הראשון בחיפוש חדש
+      setPage(1);
     }, 700);
     return () => clearTimeout(timer);
   }, [inputValue, dateRange]);
 
-  // סינון מקומי "חכם" לגיבוי - מוודא שגם אם השרת החזיר תוצאות רחבות, הממשק יציג בדיוק מה שביקשת
-  const filteredTransactions = transactions.filter(trx => {
+  const filteredTransactions = (transactions || []).filter(trx => {
+    if (!trx) return false;
     const search = debouncedSearch.trim().toLowerCase();
     if (!search) return true;
 
     const workerName = (trx.workerName || '').toString().toLowerCase();
     const branch = (trx.branch || '').toString().toLowerCase();
-    const amount = (trx.amount || '').toString();
-
-    // בדיקת includes גמישה
-    return workerName.includes(search) || branch.includes(search) || amount.includes(search);
+    
+    return workerName.includes(search) || branch.includes(search);
   });
 
   const handleDeleteTransaction = async (id: number) => {
@@ -67,6 +69,7 @@ export function DonationsManagement() {
     }
   };
 
+  // פונקציות עזר עם הגנה מנפילות
   const getPaymentIcon = (methodId: any) => {
     const id = Number(methodId);
     switch (id) {
@@ -89,8 +92,11 @@ export function DonationsManagement() {
   };
 
   const openEditModal = (trx: any) => {
-    const foundBranch = allBranches.find((b: any) => b.name === trx.branch);
+    if (!trx) return;
+    // הגנה קריטית: מוודא ש-allBranches קיים לפני חיפוש id
+    const foundBranch = (allBranches || []).find((b: any) => b && b.name === trx.branch);
     const bId = trx.branchId || foundBranch?.id || 0;
+    
     setEditingTransaction({ ...trx, branchId: bId });
     setIsModalOpen(true);
   };
@@ -116,7 +122,7 @@ export function DonationsManagement() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {stats.map((stat, idx) => {
+        {(stats || []).map((stat, idx) => {
           const IconComponent = iconMap[stat.title] || Banknote;
           return (
             <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-start justify-between">
@@ -150,9 +156,9 @@ export function DonationsManagement() {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {todaySummary?.branches?.map((branch: any, idx: number) => (
             <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col items-center shadow-sm">
-              <span className="text-xs text-slate-500 font-bold mb-1 truncate w-full text-center">{branch.name}</span>
-              <span className="text-lg font-black text-indigo-600">₪{(branch.amount || 0).toLocaleString()}</span>
-              <span className="text-[10px] text-slate-400 mt-2">{branch.count || 0} תרומות</span>
+              <span className="text-xs text-slate-500 font-bold mb-1 truncate w-full text-center">{branch?.name || 'ללא שם'}</span>
+              <span className="text-lg font-black text-indigo-600">₪{(branch?.amount || 0).toLocaleString()}</span>
+              <span className="text-[10px] text-slate-400 mt-2">{branch?.count || 0} תרומות</span>
             </div>
           ))}
         </div>
@@ -177,8 +183,8 @@ export function DonationsManagement() {
               className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-right"
             >
               <option value="all">כל הסניפים</option>
-              {allBranches
-                ?.filter((b) => Number(b.is_active) === 1)
+              {(allBranches || [])
+                .filter((b) => b && Number(b.is_active) === 1)
                 .map((b) => (
                   <option key={b.id} value={b.name}>
                     {b.name}
@@ -192,17 +198,17 @@ export function DonationsManagement() {
 
         <div className="bg-slate-50/50 p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
-            {branchSummary?.map((branch: any, idx: number) => (
+            {(branchSummary || []).map((branch: any, idx: number) => (
               <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
                 <div className="flex justify-between text-xs font-bold mb-2">
                   <div className="flex flex-col">
-                    <span className="text-slate-700">{branch.name}</span>
-                    <span className="text-indigo-600 font-black">₪{(branch.amount || 0).toLocaleString()}</span>
+                    <span className="text-slate-700">{branch?.name}</span>
+                    <span className="text-indigo-600 font-black">₪{(branch?.amount || 0).toLocaleString()}</span>
                   </div>
-                  <span className="text-slate-400 self-end">{branch.percentage || 0}%</span>
+                  <span className="text-slate-400 self-end">{branch?.percentage || 0}%</span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-indigo-600 rounded-full transition-all" style={{ width: `${branch.percentage || 0}%` }} />
+                  <div className="h-full bg-indigo-600 rounded-full transition-all" style={{ width: `${branch?.percentage || 0}%` }} />
                 </div>
               </div>
             ))}
