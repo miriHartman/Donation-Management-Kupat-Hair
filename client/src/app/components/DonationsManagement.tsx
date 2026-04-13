@@ -19,8 +19,8 @@ export function DonationsManagement() {
   const [inputValue, setInputValue] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedBranchFilter, setSelectedBranchFilter] = useState('all');
-  const [dateRange, setDateRange] = useState({ start: today, end: today });
-  const [debouncedDateRange, setDebouncedDateRange] = useState({ start: today, end: today });
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [debouncedDateRange, setDebouncedDateRange] = useState({ start: '', end: '' });
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
