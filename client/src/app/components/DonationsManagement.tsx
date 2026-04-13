@@ -142,7 +142,7 @@ export function DonationsManagement() {
               <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="חיפוש חופשי (שם, סניף...)"
+                placeholder="חיפוש לפי שם עובדת"
                 className="w-full pr-9 pl-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-right"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
