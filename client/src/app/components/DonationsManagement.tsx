@@ -41,17 +41,21 @@ export function DonationsManagement() {
     }, 700); // כאן ניתן לשנות את זמן ההמתנה (700ms = 0.7 שניות)
     return () => clearTimeout(timer);
   }, [inputValue, dateRange]);
-
-  // סינון מקומי שמתבסס על debouncedSearch (הערך המושהה)
 // סינון מקומי שמתבסס על debouncedSearch (הערך המושהה)
   const filteredTransactions = transactions.filter(trx => {
-    const search = debouncedSearch.trim().toLowerCase();
+    // מנקים רווחים מהחיפוש
+    const search = debouncedSearch.trim();
     if (!search) return true;
 
-    return (
-      trx.workerName?.toLowerCase().includes(search) ||
-      trx.branch?.toLowerCase().includes(search)
-    );
+    // יצירת ביטוי רגולרי שמחפש את המילה בכל מקום, ללא רגישות לאותיות גדולות/קטנות
+    // ה-RegExp מטפל בעברית בצורה מצוינת
+    const searchRegex = new RegExp(search, 'i');
+
+    // ניקוי רווחים מהנתונים עצמם בזמן הבדיקה כדי למנוע בעיות
+    const workerName = trx.workerName?.trim() || '';
+    const branch = trx.branch?.trim() || '';
+
+    return searchRegex.test(workerName) || searchRegex.test(branch);
   });
 
   const handleDeleteTransaction = async (id: number) => {
