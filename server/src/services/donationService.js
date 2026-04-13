@@ -18,7 +18,7 @@ const donationService = {
                 queryParams.push(filters.branch);
             }
 
-            if (filters.startDate && filters.endDate) {
+            if (filters.startDate && filters.endDate && filters.startDate !== '' && filters.endDate !== '') {
                 whereClause += ' AND d.donation_date BETWEEN ? AND ?';
                 queryParams.push(filters.startDate, filters.endDate);
             }
