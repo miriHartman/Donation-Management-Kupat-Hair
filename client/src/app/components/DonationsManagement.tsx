@@ -53,9 +53,8 @@ export function DonationsManagement() {
 
     // ניקוי רווחים מהנתונים עצמם בזמן הבדיקה כדי למנוע בעיות
     const workerName = trx.workerName?.trim() || '';
-    const branch = trx.branch?.trim() || '';
-
-    return searchRegex.test(workerName) || searchRegex.test(branch);
+console.log(workerName, search)
+    return searchRegex.test(workerName) ;
   });
 
   const handleDeleteTransaction = async (id: number) => {
