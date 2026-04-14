@@ -1,7 +1,7 @@
 // src/hooks/useBranchDashboard.ts
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import { DonationData } from '../components/NewDonationModal';
+import { DonationData } from '../types';
 import { donationService } from '../services/donationService';
 
 export function useBranchDashboard(branchId: number) {

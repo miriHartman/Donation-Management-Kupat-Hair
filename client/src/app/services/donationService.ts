@@ -1,5 +1,5 @@
 import api from '../api/axiosInstance';
-import { DonationData } from '../components/NewDonationModal';
+import { DonationData } from '../types';
 
 // הגדרת טיפוס לפרמטרים של סינון ועימוד
 interface QueryParams {
@@ -39,13 +39,13 @@ export const donationService = {
   },
 
   // 4. שמירת תרומה חדשה
-  createDonation: async (donation: DonationData & { branchId: number; userId?: number }) => {
+  createDonation: async (donation: Omit<DonationData, 'id'> & { branchId: number; userId?: number }) => {
     const response = await api.post('/donations', donation);
     return response.data;
   },
 
   // 5. עדכון תרומה קיימת
-  updateDonation: async (id: string, donation: DonationData) => {
+  updateDonation: async (id: number, donation: Omit<DonationData, 'id'> & { branchId: number; userId?: number }) => {
     const response = await api.put(`/donations/${id}`, donation);
     return response.data;
   },

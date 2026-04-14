@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { donationService } from '../services/donationService';
 import { toast } from 'sonner';
-import { DonationData } from '../components/NewDonationModal';
+import { DonationData } from '../types';
+
+// סוג משלח עבור form state (id אופציונלי בזמן יצירה)
+type DonationFormData = Omit<DonationData, 'id'> & { id?: number };
 
 export function useDonationForm(
   editingDonation: DonationData | null | undefined,
@@ -10,7 +13,7 @@ export function useDonationForm(
 ) {
   const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] = useState<DonationData>({
+  const [formData, setFormData] = useState<DonationFormData>({
     amount: 0,
     targetId: 1,
     methodId: 1,
@@ -85,22 +88,28 @@ export function useDonationForm(
       const userId = user?.id ? Number(user.id) : undefined;
 
       const payload = {
-        ...formData,
         branchId: selectedBranchId,
         userId: userId,
-        fundNumber: formData.targetId === 2 ? formData.fundNumber : null ,
-        targetOtherNote: formData.targetId === 3 ? formData.targetOtherNote : null,
+        fundNumber: formData.targetId === 2 ? formData.fundNumber : undefined,
+        targetOtherNote: formData.targetId === 3 ? formData.targetOtherNote : undefined,
         is_recurring: formData.isRecurring ? 1 : 0,
         months_count: formData.isRecurring ? (formData.installments || 1) : 1,
         targetId: formData.targetId,
-        methodId: formData.methodId
-      };
+        methodId: formData.methodId,
+        amount: formData.amount,
+        date: formData.date,
+        currency: formData.currency,
+        workerName: formData.workerName,
+        notes: formData.notes,
+        isRecurring: formData.isRecurring,
+        installments: formData.installments
+      } as const;
 
-      if (editingDonation?.id) {
-        await donationService.updateDonation(editingDonation.id, payload as any);
+      if (editingDonation && editingDonation.id) {
+        await donationService.updateDonation(editingDonation.id, payload);
         toast.success('התרומה עודכנה בהצלחה');
       } else {
-        await donationService.createDonation(payload as any);
+        await donationService.createDonation(payload);
         toast.success('התרומה נשמרה בהצלחה');
       }
 

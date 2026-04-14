@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { LucideIcon } from 'lucide-react';
 import {
   Search, ChevronLeft, ChevronRight, Plus, Edit2, Banknote, Users,
   CreditCard, CalendarClock, ArrowUpRight, ArrowDownRight, Wallet,
@@ -7,8 +8,9 @@ import {
 import { useDashboardData } from '../hooks/useDashboardData';
 import { NewDonationModal } from '../components/NewDonationModal';
 import { useBranches } from '../hooks/useBranches';
+import { DateRange, Transaction, DonationData } from '../types';
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, LucideIcon> = {
   'סה"כ תרומות': Banknote,
   'מספר תרומות': Users,
   'ממוצע לתרומה': CreditCard,
@@ -19,11 +21,11 @@ export function DonationsManagement() {
   const [inputValue, setInputValue] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedBranchFilter, setSelectedBranchFilter] = useState('all');
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  const [debouncedDateRange, setDebouncedDateRange] = useState({ start: '', end: '' });
+  const [dateRange, setDateRange] = useState<DateRange>({ start: '', end: '' });
+  const [debouncedDateRange, setDebouncedDateRange] = useState<DateRange>({ start: '', end: '' });
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<any>(null);
+  const [editingTransaction, setEditingTransaction] = useState<DonationData | null>(null);
 
   const {
     transactions,
@@ -46,7 +48,7 @@ export function DonationsManagement() {
     return () => clearTimeout(timer);
   }, [inputValue, dateRange]);
 
-  const getPaymentIcon = (methodId: any) => {
+  const getPaymentIcon = (methodId: number | string) => {
     const id = Number(methodId);
     switch (id) {
       case 1: return <Wallet className="w-4 h-4 text-green-600" />;
@@ -57,12 +59,12 @@ export function DonationsManagement() {
     }
   };
 
-  const getPaymentLabel = (methodId: any) => {
+  const getPaymentLabel = (methodId: number | string): string => {
     const labels: Record<number, string> = { 1: 'מזומן', 2: 'אשראי', 3: "צ'ק", 4: 'הו"ק' };
     return labels[Number(methodId)] || 'לא ידוע';
   };
 
-  const getTargetLabel = (targetId: any) => {
+  const getTargetLabel = (targetId: number | string): string => {
     const targets: Record<number, string> = { 1: 'קופת העיר', 2: 'קרנות', 3: 'אחר' };
     return targets[Number(targetId)] || 'כללי';
   };
@@ -95,16 +97,12 @@ export function DonationsManagement() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, idx) => {
-          const IconComponent = iconMap[stat.title] || Banknote;
+          const IconComponent = iconMap[stat.label] || Banknote;
           return (
             <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-500 mb-1">{stat.title}</p>
+                <p className="text-sm font-medium text-slate-500 mb-1">{stat.label}</p>
                 <h3 className="text-3xl font-bold text-slate-900">{stat.value}</h3>
-                <div className={`flex items-center gap-1 text-xs font-bold mt-2 ${stat.isPositive ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'} px-2 py-1 rounded-full w-fit`}>
-                  {stat.isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                  {stat.change}
-                </div>
               </div>
               <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
                 <IconComponent className="w-6 h-6" />
@@ -220,7 +218,7 @@ export function DonationsManagement() {
                   <td className="px-4 py-4 text-slate-500 text-xs">
                     {trx.date ? new Date(trx.date).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}
                   </td>
-                  <td className="px-4 py-4 text-slate-700">{trx.workerName}</td>
+                  <td className="px-4 py-4 text-slate-700">{trx.workerName || '-'}</td>
                   <td className="px-4 py-4 text-left">
                     <div className="flex items-center justify-end gap-2">
                       <button onClick={() => openEditModal(trx)} className="p-2 hover:bg-indigo-50 text-indigo-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"><Edit2 className="w-4 h-4" /></button>
@@ -248,7 +246,7 @@ export function DonationsManagement() {
         onRefresh={() => { fetchData(); setIsModalOpen(false); }}
         editingDonation={editingTransaction}
         branches={allBranches}
-        branchId={editingTransaction?.branchId || (selectedBranchFilter !== 'all' ? allBranches.find(b => b.name === selectedBranchFilter)?.id : undefined)}
+        branchId={Number(editingTransaction?.branchId) || Number(selectedBranchFilter !== 'all' ? allBranches.find(b => b.name === selectedBranchFilter)?.id : 0) || 0}
         showAdminFields={true}
       />
     </div>

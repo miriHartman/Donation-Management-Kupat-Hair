@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { AxiosError } from 'axios';
 import { authService, userService } from '../services/authService';
 import { toast } from 'sonner';
 
@@ -16,8 +17,9 @@ export function useAuth(onLoginSuccess: () => void) {
       await authService.login(username, password);
       toast.success('התחברת בהצלחה למערכת');
       onLoginSuccess();
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'שגיאת התחברות';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const message = axiosError.response?.data?.message || 'שגיאת התחברות';
       toast.error(message);
     } finally {
       setLoading(false);

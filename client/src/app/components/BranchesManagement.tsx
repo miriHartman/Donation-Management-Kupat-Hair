@@ -3,6 +3,7 @@ import { Building2, Plus, Edit2, Trash2, MapPin, Phone } from 'lucide-react';
 import { useBranches } from '../hooks/useBranches';
 import { BranchModal } from '../components/BranchModal';
 import { toast } from 'sonner';
+import { Branch } from '../types';
 
 export function BranchesManagement() {
   const { allBranches, isLoading, refreshBranches, deleteBranch, saveBranch } = useBranches();
@@ -59,7 +60,7 @@ export function BranchesManagement() {
   };
 
   // פונקציית השמירה (הוספה או עריכה)
-  const handleSave = async (data: any) => {
+  const handleSave = async (data: Partial<Branch>) => {
     try {
       await saveBranch(data, selectedBranch?.id);
       toast.success(selectedBranch ? 'הסניף עודכן בהצלחה' : 'סניף חדש נוסף בהצלחה');
@@ -105,7 +106,7 @@ export function BranchesManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-  {allBranches.map((branch: any) => (
+  {allBranches.map((branch: Branch) => (
     <tr key={branch.id} className="hover:bg-slate-50 group transition-colors">
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">

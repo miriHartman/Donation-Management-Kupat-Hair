@@ -1,25 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Check, Loader2, CalendarClock, Info, PartyPopper, Heart } from 'lucide-react';
+import { DonationData } from '../types';
 import { useDonationForm } from '../hooks/useDonationForm';
 import { CurrencyCalculator } from './CurrencyCalculator'; // ייבוא הקומפוננטה שפיצלנו
-
-export interface DonationData {
-  date: string;
-  id?: string;
-  amount: number;
-  targetId: number;
-  methodId: number;
-  isRecurring: boolean;
-  workerName: string;
-  installments?: number;
-  fundNumber?: string;
-  targetOtherNote?: string;
-  currency: string;
-  notes?: string;
-  branchId?: number;
-  userId?: number;
-
-}
 
 interface NewDonationModalProps {
   isOpen: boolean;

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { AxiosError } from 'axios';
 import {
   Plus,
   Edit2,
@@ -11,15 +12,17 @@ import {
   Calculator,
   Repeat,
   Trash2,
-  ArrowRight
+  ArrowRight,
+  LucideIcon
 } from 'lucide-react';
 import { NewDonationModal } from './NewDonationModal';
-import { BillCalculatorModal } from './BillCalculatorModal'; // ייבוא המודאל החדש
+import { BillCalculatorModal } from './BillCalculatorModal';
 import { useBranchDashboard } from '../hooks/useBranchDashboard';
 import { billService } from '../services/billService';
 import { toast } from 'sonner';
+import { BranchDashboardProps, TodayStats, DonationData } from '../types';
 
-export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any) {
+export function BranchDashboard({ onLogout, onBack, branchName, branchId }: BranchDashboardProps) {
   const {
     donations = [],
     isModalOpen,
@@ -64,8 +67,7 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any)
     checkSummary();
     return () => { isMounted = false; };
   }, [branchId, isBillCalcOpen]);
-  // חישוב סיכומים להיום
-  const todayStats = donations.reduce((acc: any, curr: any) => {
+  const todayStats: TodayStats = donations.reduce((acc: TodayStats, curr: DonationData) => {
     const isRec = !!curr.isRecurring;
     const amount = Number(curr.amount) || 0;
     const months = isRec ? (Number(curr.installments) || 1) : 1;
@@ -77,8 +79,7 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any)
     };
   }, { count: 0, totalAmount: 0 });
 
-  // פונקציות עזר לתוויות
-  const getPaymentIcon = (methodId: any) => {
+  const getPaymentIcon = (methodId: number | string): React.JSX.Element => {
     const id = Number(methodId);
     switch (id) {
       case 1: return <Wallet className="w-4 h-4 text-green-600" />;
@@ -89,12 +90,12 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any)
     }
   };
 
-  const getPaymentLabel = (methodId: any) => {
+  const getPaymentLabel = (methodId: number | string): string => {
     const labels: Record<number, string> = { 1: 'מזומן', 2: 'אשראי', 3: "צ'ק", 4: 'הו"ק' };
     return labels[Number(methodId)] || 'לא ידוע';
   };
 
-  const getTargetLabel = (targetId: any) => {
+  const getTargetLabel = (targetId: number | string): string => {
     const targets: Record<number, string> = { 1: 'קופת העיר', 2: 'קרנות', 3: 'אחר' };
     return targets[Number(targetId)] || 'כללי';
   };
@@ -239,7 +240,7 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: any)
                       <td colSpan={7} className="px-6 py-12 text-center text-slate-400 italic">אין תרומות להצגה</td>
                     </tr>
                   ) : (
-                    donations.map((donation: any) => {
+                    donations.map((donation: DonationData) => {
                       const isRec = !!donation.isRecurring;
                       const amount = Number(donation.amount) || 0;
                       const months = isRec ? (Number(donation.installments) || 1) : 1;

@@ -3,15 +3,15 @@
 import { useEffect, useState, useCallback } from "react";
 import { donationService } from "../services/donationService";
 import { toast } from "sonner";
+import {
+  DashboardData as DashboardDataType,
+  BranchSummary,
+  BranchSummaryWithPercentage,
+  Pagination
+} from "../types";
 
-// הגדרת ה-Interface
-interface DashboardData {
-  transactions: any[];
-  stats: any[];
-  todaySummary: any;
-  branchSummary: any[]; // כאן יוחזרו האחוזים לכל סניף
-  branches: { id: number; name: string }[];
-  pagination: any;
+// הגדרת ה-Interface - extended עם methods
+interface DashboardData extends Omit<DashboardDataType, 'fetchData' | 'deleteDonation'> {
   loading: boolean;
   fetchData: () => Promise<void>;
   deleteDonation: (id: number) => Promise<void>;
@@ -24,12 +24,13 @@ export function useDashboardData(
   dateRange: { start: string, end: string }
 ): DashboardData {
   
-const [dataState, setDataState] = useState<Omit<DashboardData, 'fetchData' | 'deleteDonation'>>({    transactions: [],
+const [dataState, setDataState] = useState<Omit<DashboardData, 'fetchData' | 'deleteDonation'>>({
+    transactions: [],
     stats: [],
     todaySummary: { total: 0, donations: 0, branches: [] },
     branchSummary: [],
     branches: [],
-    pagination: null,
+    pagination: { page: 1, limit: 10, total: 0, pages: 0 },
     loading: true
   });
 
@@ -48,12 +49,12 @@ const [dataState, setDataState] = useState<Omit<DashboardData, 'fetchData' | 'de
       });
 
       // --- חישוב אחוזי רווחיות ---
-      const summary = result.branchSummary || [];
+      const summary = (result.branchSummary || []) as BranchSummary[];
       // חישוב הסכום הכולל בטווח התאריכים שנבחר
-      const totalAmount = summary.reduce((sum: number, b: any) => sum + b.amount, 0) || 1;
+      const totalAmount = summary.reduce((sum: number, b: BranchSummary) => sum + b.amount, 0) || 1;
 
       // הוספת שדה percentage לכל סניף
-      const branchSummaryWithPercentages = summary.map((b: any) => ({
+      const branchSummaryWithPercentages: BranchSummaryWithPercentage[] = summary.map((b: BranchSummary) => ({
         ...b,
         percentage: Number(((b.amount / totalAmount) * 100).toFixed(1))
       }));

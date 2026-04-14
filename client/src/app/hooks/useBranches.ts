@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { branchService, Branch } from '../services/branchService';
+import { CreateBranchData } from '../types';
 import { toast } from 'sonner';
 
 export function useBranches() {
@@ -60,7 +61,7 @@ export function useBranches() {
         await branchService.updateBranch(id, branchData);
       } else {
         // יצירת סניף חדש
-        await branchService.createBranch(branchData as any);
+        await branchService.createBranch(branchData as CreateBranchData);
       }
       // רענון הרשימות לאחר שינוי מוצלח
       await refreshBranches();

@@ -1,12 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Building2, Save, MapPin, Phone, ToggleLeft } from 'lucide-react';
-
-interface BranchModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: any) => void;
-  editingBranch?: any;
-}
+import { BranchModalProps, Branch } from '../types';
 
 export function BranchModal({ isOpen, onClose, onSave, editingBranch }: BranchModalProps) {
   // ניהול סטייט לכל השדות מה-DB
@@ -24,7 +18,7 @@ export function BranchModal({ isOpen, onClose, onSave, editingBranch }: BranchMo
         name: editingBranch.name || '',
         address: editingBranch.address || '',
         phone: editingBranch.phone || '',
-        is_active: editingBranch.is_active ?? 1
+        is_active: Number(editingBranch.is_active) || 1
       });
     } else {
       setFormData({
