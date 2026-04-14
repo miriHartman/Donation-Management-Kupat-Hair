@@ -1,28 +1,38 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors'); 
+const cors = require('cors');
+const path = require('path');
 const app = express();
 
-// הגדרת CORS - מאפשר לכל המקורות לגשת (הכי בטוח לעבודה מול Render כרגע)
-app.use(cors());
+// CORS Configuration
+const corsOptions = {
+  origin: [
+    'https://donation-management-kupat-hair.onrender.com', // Production frontend
+    'http://localhost:5173', // Local development (Vite default)
+    'http://localhost:3000', // Local development fallback
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 86400 // 24 hours
+};
 
+app.use(cors(corsOptions));
 app.use(express.json());
 
-// --- תיקון הפורט ---
-// אנחנו אומרים לו: קח את הפורט ש-Render נותן לך, ואם אין (כמו במחשב בבית), קח 3000
+// Port Configuration for Render
 const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-  res.send('Server is running and healthy!');
-});
+// ========================
+// API Routes (must be before static files)
+// ========================
+require('./jobs/bank_rates'); // Bank rates update job
 
-require('./jobs/bank_rates'); // ייבוא והפעלת ה-Job של עדכון שערי החליפין
-// --- הראוטים  ---
 const branchRouter = require('./routers/branchRoutes');
 app.use('/api/branches', branchRouter);
 
 const cashRouter = require('./routers/cashRoutes');
-app.use('/api/cash-reports', cashRouter); 
+app.use('/api/cash-reports', cashRouter);
 
 const donationRoutes = require('./routers/donationRoutes');
 app.use('/api/donations', donationRoutes);
@@ -33,7 +43,26 @@ app.use('/api/auth', authRoutes);
 const exchangeRateRoutes = require('./routers/exchangeRateRoutes');
 app.use('/api/exchange-rates', exchangeRateRoutes);
 
+// ========================
+// Serve Frontend Static Files
+// ========================
+const frontendDistPath = path.join(__dirname, '../../../client/dist');
+app.use(express.static(frontendDistPath));
+
+// SPA Fallback - Redirect all non-API routes to index.html
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  }
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'Server is running and healthy!' });
+});
+
 // Run the server
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is up! Listening on port: ${PORT}`);
+  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`📱 Frontend served from: ${frontendDistPath}`);
 });
