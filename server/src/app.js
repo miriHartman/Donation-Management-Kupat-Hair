@@ -49,16 +49,20 @@ app.use('/api/exchange-rates', exchangeRateRoutes);
 const frontendDistPath = path.join(__dirname, '../../../client/dist');
 app.use(express.static(frontendDistPath));
 
-// SPA Fallback - Redirect all non-API routes to index.html
-app.get('*', (req, res) => {
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(frontendDistPath, 'index.html'));
-  }
-});
-
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'Server is running and healthy!' });
+});
+
+// SPA Fallback - Redirect all non-API routes to index.html
+// Must be last middleware before listen
+app.use((req, res, next) => {
+  // Skip API routes
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  // Serve index.html for all other routes (SPA fallback)
+  res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 
 // Run the server

@@ -1,0 +1,28 @@
+services:
+  # =============== UNIFIED SERVICE ===============
+  # Frontend and Backend running on the same Server
+  - type: web
+    name: donation-management-kupat-hair
+    runtime: node
+    plan: free
+    
+    # Build and start from server root
+    buildCommand: npm run build && npm install
+    startCommand: npm start
+    
+    # Environment Variables
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: JWT_SECRET
+        sync: false
+      - key: HOST
+        value: bxwrlqsqovxxehmmliip-mysql.services.clever-cloud.com
+      - key: USER
+        value: u5cgeo20ueytmpmf
+      - key: PASSWORD
+        sync: false
+      - key: DATABASE
+        value: bxwrlqsqovxxehmmliip
+      - key: BANK_RATES_API_KEY
+        value: https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0/?c%5BSERIES_CODE%5D=RER_USD_ILS,RER_EUR_ILS&lastNObservations=1&format=sdmx-json
