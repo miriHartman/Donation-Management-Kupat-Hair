@@ -17,12 +17,12 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export function DonationsManagement() {
-  const today = new Date().toISOString().split('T')[0];
   const [inputValue, setInputValue] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedBranchFilter, setSelectedBranchFilter] = useState('all');
-  const [dateRange, setDateRange] = useState<DateRange>({ start: '', end: '' });
-  const [debouncedDateRange, setDebouncedDateRange] = useState<DateRange>({ start: '', end: '' });
+
+const today = new Date().toISOString().split('T')[0];
+const [dateRange, setDateRange] = useState({ start: today, end: today });  const [debouncedDateRange, setDebouncedDateRange] = useState({ start: '', end: '' });
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<DonationData | null>(null);
@@ -216,9 +216,11 @@ export function DonationsManagement() {
                   </td>
                   <td className="px-4 py-4 text-slate-600 font-medium">{trx.branch}</td>
                   <td className="px-4 py-4 text-slate-500 text-xs">
-                    {trx.date ? new Date(trx.date).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}
+
+                   {trx.date ? trx.date.slice(0, 10).split('-').reverse().join('.') : '-'}
                   </td>
                   <td className="px-4 py-4 text-slate-700">{trx.workerName || '-'}</td>
+
                   <td className="px-4 py-4 text-left">
                     <div className="flex items-center justify-end gap-2">
                       <button onClick={() => openEditModal(trx)} className="p-2 hover:bg-indigo-50 text-indigo-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"><Edit2 className="w-4 h-4" /></button>
