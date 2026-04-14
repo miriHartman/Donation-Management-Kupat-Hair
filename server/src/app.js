@@ -46,7 +46,7 @@ app.use('/api/exchange-rates', exchangeRateRoutes);
 // ========================
 // Serve Frontend Static Files
 // ========================
-const frontendDistPath = path.join(__dirname, '../../../client/dist');
+const frontendDistPath = path.join(__dirname, '../../client/dist');
 app.use(express.static(frontendDistPath));
 
 // Health check endpoint
