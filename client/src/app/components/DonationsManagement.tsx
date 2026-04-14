@@ -15,12 +15,11 @@ const iconMap: Record<string, any> = {
 };
 
 export function DonationsManagement() {
-  const today = new Date().toISOString().split('T')[0];
   const [inputValue, setInputValue] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedBranchFilter, setSelectedBranchFilter] = useState('all');
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  const [debouncedDateRange, setDebouncedDateRange] = useState({ start: '', end: '' });
+const today = new Date().toISOString().split('T')[0];
+const [dateRange, setDateRange] = useState({ start: today, end: today });  const [debouncedDateRange, setDebouncedDateRange] = useState({ start: '', end: '' });
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
@@ -219,7 +218,7 @@ export function DonationsManagement() {
                   <td className="px-4 py-4 text-slate-600 font-medium">{trx.branch}</td>
                   <td className="px-4 py-4 text-slate-500 text-xs">
 
-                    {trx.date ? new Date(trx.date).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}
+                   {trx.date ? trx.date.slice(0, 10).split('-').reverse().join('.') : '-'}
                   </td>
                   <td className="px-4 py-4 text-slate-700">{trx.workerName}</td>
 
