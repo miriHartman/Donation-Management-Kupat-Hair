@@ -108,7 +108,7 @@ const donationService = {
                 branchSummary,
                 transactions: recentTransactions.map(t => ({
                     ...t,
-                    date: new Date(t.date).toLocaleDateString('he-IL'),
+                    date: t.date ? new Date(t.date).toISOString().split('T')[0] : null,
                     amount: parseFloat(t.amount) || 0,
                     isRecurring: t.isRecurring === 1 || t.isRecurring === true
                 })),
@@ -149,7 +149,9 @@ const donationService = {
             // המרה נוספת ליתר ביטחון (טיפול בבוליאני)
             return rows.map(r => ({
                 ...r,
-                isRecurring: r.isRecurring === 1
+                isRecurring: r.isRecurring === 1,
+                date: r.date ? new Date(r.date).toISOString().split('T')[0] : null
+
             }));
         } catch (error) {
             console.error("Service Error (getTodayDonations):", error);

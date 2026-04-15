@@ -218,7 +218,12 @@ export function DonationsManagement() {
                   <td className="px-4 py-4 text-slate-600 font-medium">{trx.branch}</td>
                   <td className="px-4 py-4 text-slate-500 text-xs">
 
-                   {trx.date ? trx.date.slice(0, 10).split('-').reverse().join('.') : '-'}
+                   {trx.date ? (
+  <div className="flex flex-col">
+    <span>{trx.date.slice(0, 10).split('-').reverse().join('.')}</span>
+    <span className="text-slate-400 text-[11px]">{trx.date.slice(11, 16)}</span>
+  </div>
+) : '-'}
                   </td>
                   <td className="px-4 py-4 text-slate-700">{trx.workerName || '-'}</td>
 
