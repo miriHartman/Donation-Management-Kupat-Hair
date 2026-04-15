@@ -38,5 +38,4 @@ app.get('/health', (req, res) => {
 // Run the server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📱 Frontend served from: ${frontendDistPath}`);
 });
