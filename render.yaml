@@ -12,14 +12,14 @@ services:
     
     # Environment Variables
     envVars:
-      # Frontend
-      - key: REACT_APP_API_URL
+      # Frontend (Vite uses VITE_ prefix)
+      - key: VITE_APP_API_URL
         value: /api
-      - key: REACT_APP_API_TIMEOUT
-        value: 10000
+      - key: VITE_APP_API_TIMEOUT
+        value: "10000"
       # Backend
       - key: PORT
-        value: 3000
+        value: "3000"
       - key: JWT_SECRET
         sync: false
       - key: HOST

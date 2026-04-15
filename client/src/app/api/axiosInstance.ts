@@ -7,7 +7,7 @@ const getApiUrl = (): string => {
   // 3. Same-origin relative path (production with unified service)
   // 4. Local development default
   
-  const envUrl = import.meta.env.REACT_APP_API_URL;
+  const envUrl = import.meta.env.VITE_APP_API_URL;
   
   if (envUrl) {
     // Handle both absolute URLs and relative paths
@@ -22,7 +22,7 @@ const getApiUrl = (): string => {
 };
 
 const getTimeout = (): number => {
-  const timeoutStr = import.meta.env.REACT_APP_API_TIMEOUT || '10000';
+  const timeoutStr = import.meta.env.VITE_APP_API_TIMEOUT || '10000';
   return Number(timeoutStr);
 };
 
