@@ -1,13 +1,12 @@
 services:
-  # =============== UNIFIED SERVICE ===============
-  # Frontend and Backend running on the same Server
+  # =============== BACKEND SERVICE ===============
   - type: web
-    name: donation-management-kupat-hair
+    name: donation-backend-kupat-hair
     runtime: node
     plan: free
     
-    # Build client first, then install server deps
-    buildCommand: cd client && npm install && npm run build && cd ../server && npm install
+    # Build and start server only
+    buildCommand: cd server && npm install
     startCommand: cd server && npm start
     
     # Environment Variables
@@ -26,3 +25,12 @@ services:
         value: bxwrlqsqovxxehmmliip
       - key: BANK_RATES_API_KEY
         value: https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0/?c%5BSERIES_CODE%5D=RER_USD_ILS,RER_EUR_ILS&lastNObservations=1&format=sdmx-json
+
+  # =============== FRONTEND SERVICE ===============
+  - type: static
+    name: donation-management-kupat-hair-client
+    plan: free
+    
+    # Build frontend only
+    buildCommand: cd client && npm install && npm run build
+    publishDirectory: client/dist
