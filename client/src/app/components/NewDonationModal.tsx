@@ -12,6 +12,8 @@ interface NewDonationModalProps {
   branchId: number;
   branches?: { id: number; name: string; is_active?: number | boolean }[];
   showAdminFields?: boolean;
+    keepOpenOnSuccess?: boolean;
+
 }
 
 const SUCCESS_MESSAGES = [
@@ -29,23 +31,50 @@ export function NewDonationModal({
   editingDonation,
   branchId,
   branches,
-  showAdminFields
+  showAdminFields,
+  keepOpenOnSuccess
 }: NewDonationModalProps) {
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const [currentMessage, setCurrentMessage] = useState(SUCCESS_MESSAGES[0]);
   const [isForeignCurrency, setIsForeignCurrency] = useState(false);
+  const [savedWorkerName, setSavedWorkerName] = useState('');
+const { formData, setFormData, handleSave, loading } = useDonationForm(
+  editingDonation,
+  () => {
+    const randomIndex = Math.floor(Math.random() * SUCCESS_MESSAGES.length);
+    setCurrentMessage(SUCCESS_MESSAGES[randomIndex]);
 
-  const { formData, setFormData, handleSave, loading } = useDonationForm(
-    editingDonation,
-    () => {
-      const randomIndex = Math.floor(Math.random() * SUCCESS_MESSAGES.length);
-      setCurrentMessage(SUCCESS_MESSAGES[randomIndex]);
+    if (keepOpenOnSuccess) {
+      // שמור את שם העובדת, אפס את שאר השדות
+      setSavedWorkerName(formData.workerName || '');
+      setShowSuccess(true); // הצג הצלחה רגעית
+      setTimeout(() => {
+        // אפס הטופס אבל שמור שם עובדת
+        setFormData(prev => ({
+          ...prev,
+          amount: 0,
+          methodId: 1,
+          targetId: 1,
+          isRecurring: false,
+          installments: 1,
+          notes: '',
+          fundNumber: '',
+          targetOtherNote: '',
+          currency: 'ILS',
+          workerName: formData.workerName, // שמור שם!
+        }));
+        setTotalAmount(0);
+        setIsForeignCurrency(false);
+        setShowSuccess(false); // חזור לטופס
+      }, 1500); // הצג הצלחה 1.5 שניות ואז חזור
+    } else {
       setShowSuccess(true);
-      onRefresh();
-    },
-    branchId
-  );
+    }
+    onRefresh();
+  },
+  branchId
+);
 
 
   const updateMonthlyAmount = (total: number, months: number) => {

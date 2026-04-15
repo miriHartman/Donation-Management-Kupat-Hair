@@ -67,6 +67,20 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: Bran
     checkSummary();
     return () => { isMounted = false; };
   }, [branchId, isBillCalcOpen]);
+
+  const [isF1Mode, setIsF1Mode] = useState(false);
+
+useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'F5') {
+      e.preventDefault(); // מונע את פתיחת עזרה של הדפדפן
+      setIsF1Mode(true);
+      setIsModalOpen(true);
+    }
+  };
+  window.addEventListener('keydown', handleKeyDown);
+  return () => window.removeEventListener('keydown', handleKeyDown);
+}, [setIsModalOpen]);
   const todayStats: TodayStats = donations.reduce((acc: TodayStats, curr: DonationData) => {
     const isRec = !!curr.isRecurring;
     const amount = Number(curr.amount) || 0;
@@ -166,7 +180,7 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: Bran
 
           {/* כפתורים מהירים */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between group transition-all hover:scale-[1.01]">
+            <button onClick={() => { setIsF1Mode(false); setIsModalOpen(true); }}  className="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-2xl shadow-lg flex items-center justify-between group transition-all hover:scale-[1.01]">
               <div className="text-right">
                 <h3 className="text-xl font-bold mb-1">תרומה חדשה</h3>
                 <p className="text-blue-100 text-sm opacity-80">הוסף תרומה מסניף זה</p>
@@ -312,13 +326,14 @@ export function BranchDashboard({ onLogout, onBack, branchName, branchId }: Bran
 
       {/* מודאלים */}
       {isModalOpen && (
-        <NewDonationModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onRefresh={fetchDonations}
-          editingDonation={editingDonation}
-          branchId={branchId}
-        />
+<NewDonationModal
+  isOpen={isModalOpen}
+  onClose={() => { setIsF1Mode(false); handleCloseModal(); }}
+  onRefresh={fetchDonations}
+  editingDonation={editingDonation}
+  branchId={branchId}
+  keepOpenOnSuccess={isF1Mode}   // ← prop חדש
+/>
       )}
 
       <BillCalculatorModal 

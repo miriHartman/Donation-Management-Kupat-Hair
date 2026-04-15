@@ -25,7 +25,7 @@ export function useDonationForm(
     notes: '',
     workerName: '',
     branchId: initialBranchId || 0,
-    date: "" // אתחול
+    date: new Date().toISOString().split('T')[0]
   });
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export function useDonationForm(
       workerName: '',
       currency: 'ILS',
       branchId: initialBranchId || 0, // התיקון הקריטי לממשק מנהל
-      date: ""
+      date: new Date().toISOString().split('T')[0]
     }));
   }
 }, [editingDonation, initialBranchId]);
@@ -123,5 +123,21 @@ export function useDonationForm(
     
   };
 
-  return { formData, setFormData, handleSave, loading };
-}
+const resetForm = () => {
+  setFormData({
+    amount: 0,
+    targetId: 1,
+    methodId: 1,
+    isRecurring: false,
+    fundNumber: '',
+    targetOtherNote: '',
+    installments: 1,
+    currency: 'ILS',
+    notes: '',
+    workerName: '',
+    branchId: initialBranchId || 0,
+    date: new Date().toISOString().split('T')[0]
+  });
+};
+
+return { formData, setFormData, handleSave, loading, resetForm };}
