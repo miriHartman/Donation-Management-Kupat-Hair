@@ -19,19 +19,23 @@ export const billService = {
    * שליפת סיכום קיים להיום עבור סניף ספציפי
    * GET /api/cash-reports/:branchId
    */
-  getDailySummary: async (branchId: number): Promise<DailySummary | null> => {
+  getDailySummary: async (branchId: number): Promise<any> => {
     try {
       const response = await api.get<CashReportResponse>(`/cash-reports/${branchId}`);
       const data = response.data;
 
-      // המרה מהמבנה של ה-DB (עמודות נפרדות) למבנה שהמחשבון ב-React מכיר (Object)
+      // המרה מהמבנה של ה-DB (עמודות נפרדות) למבנה שהמחשבון ב-React מכיר
       return {
+        id: data.id,
         date: data.report_date,
         total_amount: Number(data.total_amount),
         donation_count: data.bills_20 + data.bills_50 + data.bills_100 + data.bills_200,
-        bills_50: data.bills_50 || 0,
-        bills_100: data.bills_100 || 0,
-        bills_200: data.bills_200 || 0
+        counts: {
+          200: data.bills_200 || 0,
+          100: data.bills_100 || 0,
+          50: data.bills_50 || 0,
+          20: data.bills_20 || 0
+        }
       };
     } catch (error) {
       const axiosError = error as AxiosError;

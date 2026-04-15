@@ -14,8 +14,18 @@ getReport: async (req, res) => {
             return res.status(200).json(null);
         }
 
-        // אם נמצא דיווח, שלח אותו כרגיל
-        res.json(report);
+        // חישוב total_amount אם לא קיים
+        const totalAmount = 
+            (report.bills_200 * 200) + 
+            (report.bills_100 * 100) + 
+            (report.bills_50 * 50) + 
+            (report.bills_20 * 20);
+
+        // שלח את הדיווח עם total_amount מחושב
+        res.json({
+            ...report,
+            total_amount: totalAmount
+        });
     } catch (err) {
         console.error("Error in getReport:", err.message);
         res.status(500).json({ error: "שגיאת שרת פנימית" });
