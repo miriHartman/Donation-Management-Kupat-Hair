@@ -6,7 +6,8 @@ const app = express();
 // CORS Configuration
 const corsOptions = {
   origin: [
-    'https://donation-management-kupat-hair.onrender.com', // Production frontend
+    'https://donation-management-kupat-hair-client.onrender.com', // Production frontend (correct URL)
+    'https://donation-management-kupat-hair.onrender.com', // Production fallback
     'http://localhost:5173', // Local development (Vite default)
     'http://localhost:3000', // Local development fallback
   ],
