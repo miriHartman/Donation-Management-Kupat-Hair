@@ -37,13 +37,20 @@ saveCashReport : async (req, res) => {
         const { recordId } = req.params; // אם מגיע מה-Route של ה-PUT
         let result;
 
+        console.log("📝 saveCashReport called:", { recordId, bodyKeys: Object.keys(req.body) });
+
         if (recordId) {
+            console.log(`🔄 Updating record ${recordId}`);
             result = await cashService.updateReport(recordId, req.body);
         } else {
+            console.log(`✨ Creating new record`);
             result = await cashService.createReport(req.body);
         }
+        
+        console.log("✅ Report saved successfully:", result);
         res.json(result);
     } catch (err) {
+        console.error("❌ Error in saveCashReport:", err);
         res.status(500).json({ error: err.message });
     }
 }}

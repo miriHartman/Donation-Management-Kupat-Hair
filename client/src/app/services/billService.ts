@@ -62,11 +62,15 @@ export const billService = {
     try {
       if (recordId) {
         // עדכון רשומה קיימת: PUT /api/cash-reports/:recordId
+        console.log(`📤 PUT /cash-reports/${recordId} with payload:`, payload);
         const response = await api.put(`/cash-reports/${recordId}`, payload);
+        console.log("✅ Update response:", response.data);
         return response.data;
       } else {
         // יצירת רשומה חדשה: POST /api/cash-reports
+        console.log("📤 POST /cash-reports with payload:", payload);
         const response = await api.post('/cash-reports', payload);
+        console.log("✅ Create response:", response.data);
         return response.data;
       }
     } catch (error) {
