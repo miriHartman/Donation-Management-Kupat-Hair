@@ -17,87 +17,72 @@ const cashService = {
     createReport: async (data) => {
         try {
             console.log("📝 createReport - Start");
-            console.log("   Input data keys:", Object.keys(data));
+            const { branchId, bills } = data;
             
-            const { branchId, bills, total_amount } = data;
-            
-            console.log("   branchId:", branchId);
-            console.log("   bills:", bills);
-            console.log("   total_amount:", total_amount);
-            
-            if (!branchId) {
-                throw new Error("branchId is missing from request");
+            if (!branchId || !bills) {
+                throw new Error("Missing branchId or bills data");
             }
             
-            if (!bills) {
-                throw new Error("Bills data is missing from request");
-            }
-            
+            // שים לב: הוצאנו את total_amount מהערכים כי ה-DB מחשב אותו
             const values = [
                 Number(branchId),
                 Number(bills[20]) || 0,
                 Number(bills[50]) || 0,
                 Number(bills[100]) || 0,
-                Number(bills[200]) || 0,
-                Number(total_amount) || 0
+                Number(bills[200]) || 0
             ];
-            
-            console.log("   Query values (converted to numbers):", values);
             
             const query = `
                 INSERT INTO daily_cash_reports 
-                (branch_id, report_date, bills_20, bills_50, bills_100, bills_200, total_amount) 
-                VALUES (?, CURDATE(), ?, ?, ?, ?, ?)
+                (branch_id, report_date, bills_20, bills_50, bills_100, bills_200) 
+                VALUES (?, CURDATE(), ?, ?, ?, ?)
             `;
             
-            console.log("   Executing INSERT query...");
+            console.log("🚀 Executing INSERT (Generated Column Safety)...");
             const [result] = await db.execute(query, values);
-            console.log("   ✅ Insert successful, insertId:", result.insertId);
+            console.log("✅ Insert successful, insertId:", result.insertId);
             
             return { id: result.insertId, ...data };
         } catch (err) {
-            console.error("   ❌ ERROR in createReport:", err.message);
+            console.error("❌ ERROR in createReport:", err.message);
             throw err;
         }
     },
 
-    // פונקציית עדכון (PUT) 
-
-updateReport: async (recordId, data) => {
-    try {
-        console.log("🔧 updateReport - Start", { recordId });
-        
-        const { bills } = data; // הוצאנו את total_amount, אנחנו לא צריכים אותו כאן
-        
-        if (!bills) {
-            throw new Error("Bills data is missing from request");
+    // פונקציית עדכון (PUT)
+    updateReport: async (recordId, data) => {
+        try {
+            console.log("🔧 updateReport - Start", { recordId });
+            const { bills } = data;
+            
+            if (!bills || !recordId) {
+                throw new Error("Missing bills or recordId");
+            }
+            
+            const values = [
+                Number(bills['20'] || bills[20] || 0),
+                Number(bills['50'] || bills[50] || 0),
+                Number(bills['100'] || bills[100] || 0),
+                Number(bills['200'] || bills[200] || 0),
+                Number(recordId)
+            ];
+            
+            const query = `
+                UPDATE daily_cash_reports 
+                SET bills_20 = ?, bills_50 = ?, bills_100 = ?, bills_200 = ?
+                WHERE id = ?
+            `;
+            
+            console.log("🚀 Executing UPDATE (Generated Column Safety)...");
+            const [result] = await db.execute(query, values);
+            console.log("✅ Update successful, affectedRows:", result.affectedRows);
+            
+            return { id: recordId, ...data };
+        } catch (err) {
+            console.error("❌ ERROR in updateReport:", err.message);
+            throw err;
         }
-        
-        // המרת ערכי השטרות למספרים
-        const bills20 = Number(bills['20'] || bills[20] || 0);
-        const bills50 = Number(bills['50'] || bills[50] || 0);
-        const bills100 = Number(bills['100'] || bills[100] || 0);
-        const bills200 = Number(bills['200'] || bills[200] || 0);
-        const recId = Number(recordId);
-        
-        // מערך הערכים כעת מכיל רק את השטרות וה-ID
-        const values = [bills20, bills50, bills100, bills200, recId];
-        
-        const query = `
-            UPDATE daily_cash_reports 
-            SET bills_20 = ?, bills_50 = ?, bills_100 = ?, bills_200 = ?
-            WHERE id = ?
-        `;
-        
-        console.log("🚀 Executing UPDATE (without total_amount)...");
-        const [result] = await db.execute(query, values);
-        
-        return { id: recordId, ...data };
-    } catch (err) {
-        console.error("❌ ERROR in updateReport:", err.message);
-        throw err;
     }
-}
 };
 
 module.exports = cashService;

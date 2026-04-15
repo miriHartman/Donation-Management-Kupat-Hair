@@ -1,3 +1,5 @@
+const cashService = require('../services/cashService');
+
 
 const cashController = {
     getReport: async (req, res) => {
@@ -8,7 +10,7 @@ const cashController = {
                 return res.status(200).json(null);
             }
 
-            // החישוב כאן הוא לגיבוי במידה והשדה לא חזר מה-DB
+            // חישוב לצורכי תצוגה בלבד
             const totalAmount = 
                 (Number(report.bills_200 || 0) * 200) + 
                 (Number(report.bills_100 || 0) * 100) + 
@@ -28,8 +30,10 @@ const cashController = {
     saveCashReport: async (req, res) => {
         try {
             const { recordId } = req.params;
+            console.log("📝 saveCashReport called, recordId:", recordId);
+            
             let result;
-
+            // בדיקה ש-recordId קיים ואינו 'undefined' כטקסט
             if (recordId && recordId !== 'undefined') {
                 result = await cashService.updateReport(recordId, req.body);
             } else {
@@ -43,4 +47,5 @@ const cashController = {
         }
     }
 };
+
 module.exports = cashController;
