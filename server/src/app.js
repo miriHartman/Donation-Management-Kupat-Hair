@@ -3,16 +3,23 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-// CORS Configuration - Permissive for now (debug mode)
-// TODO: Restrict this after testing
-app.use(cors({
-  origin: '*', // Allow all origins temporarily for debugging
-  credentials: false,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  maxAge: 86400
-}));
+// CORS Middleware - MUST be BEFORE any routes
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'false');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
+  next();
+});
 
+// Also use cors package as fallback
+app.use(cors());
 app.use(express.json());
 
 // Port Configuration for Render
