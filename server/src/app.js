@@ -35,6 +35,12 @@ app.use('/api/exchange-rates', exchangeRateRoutes);
 // Serve Frontend Static Files
 // ========================
 const frontendDistPath = path.join(__dirname, '../../client/dist');
+console.log('📍 Attempting to serve frontend from:', frontendDistPath);
+if (require('fs').existsSync(frontendDistPath)) {
+  console.log('✅ Frontend dist folder found');
+} else {
+  console.log('❌ Frontend dist folder NOT found - build may not have completed');
+}
 app.use(express.static(frontendDistPath));
 
 // Health check endpoint
