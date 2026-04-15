@@ -34,13 +34,33 @@ app.use('/api/exchange-rates', exchangeRateRoutes);
 // ========================
 // Serve Frontend Static Files
 // ========================
-const frontendDistPath = path.join(__dirname, '../../client/dist');
-console.log('📍 Attempting to serve frontend from:', frontendDistPath);
-if (require('fs').existsSync(frontendDistPath)) {
-  console.log('✅ Frontend dist folder found');
-} else {
-  console.log('❌ Frontend dist folder NOT found - build may not have completed');
+// Try multiple possible paths for client/dist
+const possiblePaths = [
+  path.join(__dirname, '../../client/dist'),
+  '/opt/render/project/repo/client/dist',
+  '/opt/render/project/client/dist',
+  path.join(process.cwd(), '../client/dist'),
+  path.join(process.cwd(), 'client/dist'),
+];
+
+let frontendDistPath = possiblePaths[0];
+console.log('📍 Current working directory:', process.cwd());
+console.log('📍 __dirname:', __dirname);
+
+for (const possiblePath of possiblePaths) {
+  console.log('🔍 Checking:', possiblePath);
+  if (require('fs').existsSync(possiblePath)) {
+    console.log('✅ Found frontend dist at:', possiblePath);
+    frontendDistPath = possiblePath;
+    break;
+  }
 }
+
+if (!require('fs').existsSync(frontendDistPath)) {
+  console.log('❌ Frontend dist folder NOT found at any expected location!');
+  console.log('📌 Build command may not have executed. Check render.yaml buildCommand.');
+}
+
 app.use(express.static(frontendDistPath));
 
 // Health check endpoint
