@@ -1,23 +1,15 @@
 services:
-  # =============== UNIFIED SERVICE ===============
-  # Frontend and Backend running on the same Server
+  # =============== BACKEND SERVICE ===============
   - type: web
-    name: donation-management-kupat-hair
+    name: donation-backend-kupat-hair
     runtime: node
     plan: free
     
-    # Build client first, then install server deps
-    buildCommand: cd client && npm install && npm run build && cd ../server && npm install
-    startCommand: cd server && npm start
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
     
-    # Environment Variables
     envVars:
-      # Frontend (Vite uses VITE_ prefix)
-      - key: VITE_APP_API_URL
-        value: /api
-      - key: VITE_APP_API_TIMEOUT
-        value: "10000"
-      # Backend
       - key: PORT
         value: "3000"
       - key: JWT_SECRET
@@ -32,3 +24,19 @@ services:
         value: bxwrlqsqovxxehmmliip
       - key: BANK_RATES_API_KEY
         value: https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0/?c%5BSERIES_CODE%5D=RER_USD_ILS,RER_EUR_ILS&lastNObservations=1&format=sdmx-json
+
+  # =============== FRONTEND SERVICE ===============
+  - type: web
+    name: donation-management-kupat-hair
+    runtime: node
+    plan: free
+    
+    rootDir: client
+    buildCommand: npm install && npm run build
+    startCommand: npx serve -s dist -l 5173
+    
+    envVars:
+      - key: VITE_APP_API_URL
+        value: https://donation-backend-kupat-hair.onrender.com/api
+      - key: VITE_APP_API_TIMEOUT
+        value: "10000"

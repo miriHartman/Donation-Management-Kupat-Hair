@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const app = express();
 
 // CORS Configuration
@@ -24,7 +23,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 // ========================
-// API Routes (must be before static files)
+// API Routes
 // ========================
 require('./jobs/bank_rates'); // Bank rates update job
 
@@ -43,30 +42,12 @@ app.use('/api/auth', authRoutes);
 const exchangeRateRoutes = require('./routers/exchangeRateRoutes');
 app.use('/api/exchange-rates', exchangeRateRoutes);
 
-// ========================
-// Serve Frontend Static Files
-// ========================
-const frontendDistPath = path.join(__dirname, '../../client/dist');
-app.use(express.static(frontendDistPath));
-
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'Server is running and healthy!' });
 });
 
-// SPA Fallback - Redirect all non-API routes to index.html
-// Must be last middleware before listen
-app.use((req, res, next) => {
-  // Skip API routes
-  if (req.path.startsWith('/api')) {
-    return next();
-  }
-  // Serve index.html for all other routes (SPA fallback)
-  res.sendFile(path.join(frontendDistPath, 'index.html'));
-});
-
 // Run the server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📱 Frontend served from: ${frontendDistPath}`);
 });
