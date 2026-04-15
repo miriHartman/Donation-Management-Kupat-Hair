@@ -1,12 +1,23 @@
+// client/src/services/cashService.ts
 import api from '../api/axiosInstance';
 
 export const cashService = {
-  saveDailyReport: async (branchName: string, bills: Record<number, number>, total: number) => {
+  // יצירת דוח חדש (POST)
+  saveDailyReport: async (branchId: number, bills: Record<number, number>, total: number) => {
     const response = await api.post('/cash-reports', {
-      branchName,
-      reportDate: new Date().toISOString(),
+      branchId,
       bills,
-      totalAmount: total
+      total_amount: total // שימוש בנחש (underscore) להתאמה ל-DB
+    });
+    return response.data;
+  },
+
+  // עדכון דוח קיים (PUT) - זה מה שקרא לשגיאה שלך
+  updateSummary: async (recordId: number, branchId: number, bills: Record<number, number>, total: number) => {
+    const response = await api.put(`/cash-reports/${recordId}`, {
+      branchId,
+      bills,
+      total_amount: total
     });
     return response.data;
   }

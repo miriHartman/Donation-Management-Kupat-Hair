@@ -61,63 +61,43 @@ const cashService = {
         }
     },
 
-    // פונקציית עדכון (PUT) שביקשת
-    updateReport: async (recordId, data) => {
-        try {
-            console.log("🔧 updateReport - Start", { recordId });
-            console.log("   Input data keys:", Object.keys(data));
-            
-            const { bills, total_amount } = data;
-            
-            console.log("   bills:", bills);
-            console.log("   total_amount:", total_amount);
-            
-            if (!bills) {
-                throw new Error("Bills data is missing from request");
-            }
-            
-            if (!recordId) {
-                throw new Error("RecordId is missing");
-            }
-            
-            // וודא שכל הערכים מספרים
-            const bills20 = Number(bills['20'] || bills[20] || 0);
-            const bills50 = Number(bills['50'] || bills[50] || 0);
-            const bills100 = Number(bills['100'] || bills[100] || 0);
-            const bills200 = Number(bills['200'] || bills[200] || 0);
-            const totalAmount = Number(total_amount || 0);
-            const recId = Number(recordId);
-            
-            const values = [bills20, bills50, bills100, bills200, totalAmount, recId];
-            
-            console.log("   Query values (converted to numbers):", values);
-            
-            const query = `
-                UPDATE daily_cash_reports 
-                SET bills_20 = ?, bills_50 = ?, bills_100 = ?, bills_200 = ?, total_amount = ?
-                WHERE id = ?
-            `;
-            
-            console.log("   Executing UPDATE query...");
-            console.log("   Query:", query);
-            const result = await db.execute(query, values);
-            console.log("   ✅ Update result:", result);
-            
-            if (Array.isArray(result) && result[0]) {
-                console.log("   ✅ Update successful, affectedRows:", result[0].affectedRows);
-                
-                if (result[0].affectedRows === 0) {
-                    console.warn("   ⚠️ WARNING: No rows were updated. Record might not exist.");
-                }
-            }
-            
-            return { id: recordId, ...data };
-        } catch (err) {
-            console.error("   ❌ ERROR in updateReport:", err.message);
-            console.error("   Stack:", err.stack);
-            throw err;
+    // פונקציית עדכון (PUT) 
+
+updateReport: async (recordId, data) => {
+    try {
+        console.log("🔧 updateReport - Start", { recordId });
+        
+        const { bills } = data; // הוצאנו את total_amount, אנחנו לא צריכים אותו כאן
+        
+        if (!bills) {
+            throw new Error("Bills data is missing from request");
         }
+        
+        // המרת ערכי השטרות למספרים
+        const bills20 = Number(bills['20'] || bills[20] || 0);
+        const bills50 = Number(bills['50'] || bills[50] || 0);
+        const bills100 = Number(bills['100'] || bills[100] || 0);
+        const bills200 = Number(bills['200'] || bills[200] || 0);
+        const recId = Number(recordId);
+        
+        // מערך הערכים כעת מכיל רק את השטרות וה-ID
+        const values = [bills20, bills50, bills100, bills200, recId];
+        
+        const query = `
+            UPDATE daily_cash_reports 
+            SET bills_20 = ?, bills_50 = ?, bills_100 = ?, bills_200 = ?
+            WHERE id = ?
+        `;
+        
+        console.log("🚀 Executing UPDATE (without total_amount)...");
+        const [result] = await db.execute(query, values);
+        
+        return { id: recordId, ...data };
+    } catch (err) {
+        console.error("❌ ERROR in updateReport:", err.message);
+        throw err;
     }
+}
 };
 
 module.exports = cashService;
