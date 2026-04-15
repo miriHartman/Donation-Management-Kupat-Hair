@@ -25,7 +25,7 @@ export function useDonationForm(
     notes: '',
     workerName: '',
     branchId: initialBranchId || 0,
-    date: new Date().toISOString().split('T')[0]
+    date: "" // אתחול
   });
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export function useDonationForm(
       workerName: '',
       currency: 'ILS',
       branchId: initialBranchId || 0, // התיקון הקריטי לממשק מנהל
-      date: new Date().toISOString().split('T')[0]
+      date: ""
     }));
   }
 }, [editingDonation, initialBranchId]);

@@ -22,7 +22,7 @@ export function DonationsManagement() {
   const [selectedBranchFilter, setSelectedBranchFilter] = useState('all');
 
   const today = new Date().toISOString().split('T')[0];
-  const [dateRange, setDateRange] = useState({ start: today, end: today });
+  const [dateRange, setDateRange] = useState({ start: '', end: today });
   const [debouncedDateRange, setDebouncedDateRange] = useState({ start: '', end: '' });
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,8 +43,10 @@ export function DonationsManagement() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(inputValue);
-      setDebouncedDateRange(dateRange);
-      setPage(1);
+setDebouncedDateRange({
+  start: dateRange.start,
+  end: dateRange.start ? dateRange.end : '' // ❗ רק אם יש start
+});      setPage(1);
     }, 700);
     return () => clearTimeout(timer);
   }, [inputValue, dateRange]);
@@ -218,7 +220,7 @@ export function DonationsManagement() {
                   <td className="px-4 py-4 text-slate-600 font-medium">{trx.branch}</td>
                   <td className="px-4 py-4 text-slate-500 text-xs">
 
-                   {trx.date ? (
+  {trx.date ? (
   <div className="flex flex-col">
     <span>{trx.date.slice(0, 10).split('-').reverse().join('.')}</span>
     <span className="text-slate-400 text-[11px]">{trx.date.slice(11, 16)}</span>
