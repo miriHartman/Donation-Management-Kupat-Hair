@@ -1,24 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const app = express();
 
-// CORS Middleware - MUST be BEFORE any routes
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'false');
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  
-  next();
-});
-
-// Also use cors package as fallback
+// CORS Configuration
 app.use(cors());
 app.use(express.json());
 
@@ -45,14 +31,28 @@ app.use('/api/auth', authRoutes);
 const exchangeRateRoutes = require('./routers/exchangeRateRoutes');
 app.use('/api/exchange-rates', exchangeRateRoutes);
 
+// ========================
+// Serve Frontend Static Files
+// ========================
+const frontendDistPath = path.join(__dirname, '../../client/dist');
+app.use(express.static(frontendDistPath));
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'Server is running and healthy!' });
 });
 
+// SPA Fallback - Redirect all non-API routes to index.html
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  } else {
+    next();
+  }
+});
+
 // Run the server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📋 Environment PORT: ${process.env.PORT}`);
-  console.log(`🌐 Listening on 0.0.0.0:${PORT}`);
+  console.log(`📱 Frontend served from: ${frontendDistPath}`);
 });
