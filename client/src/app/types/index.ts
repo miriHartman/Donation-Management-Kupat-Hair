@@ -127,7 +127,7 @@ export interface Pagination {
 
 export interface DashboardData {
   transactions: Transaction[];
-  stats: Array<{ label: string; value: number }>;
+  stats: Array<{ title: string; value: string | number; change?: string; isPositive?: boolean }>;
   todaySummary: DashboardStats;
   branchSummary: BranchSummaryWithPercentage[];
   branches: { id: number; name: string }[];
