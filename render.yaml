@@ -1,7 +1,7 @@
 services:
   # =============== BACKEND SERVICE ===============
   - type: web
-    name: donation-backend-kupat-hair
+    name: donation-management-kupat-hair
     runtime: node
     plan: free
     
