@@ -51,7 +51,16 @@ saveCashReport : async (req, res) => {
         res.json(result);
     } catch (err) {
         console.error("❌ Error in saveCashReport:", err);
-        res.status(500).json({ error: err.message });
+        console.error("📌 Error details:", {
+            message: err.message,
+            code: err.code,
+            stack: err.stack
+        });
+        res.status(500).json({ 
+            error: err.message,
+            code: err.code,
+            details: err.message 
+        });
     }
 }}
 
