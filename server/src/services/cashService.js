@@ -80,14 +80,15 @@ const cashService = {
                 throw new Error("RecordId is missing");
             }
             
-            const values = [
-                Number(bills[20]) || 0,
-                Number(bills[50]) || 0,
-                Number(bills[100]) || 0,
-                Number(bills[200]) || 0,
-                Number(total_amount) || 0,
-                Number(recordId)
-            ];
+            // וודא שכל הערכים מספרים
+            const bills20 = Number(bills['20'] || bills[20] || 0);
+            const bills50 = Number(bills['50'] || bills[50] || 0);
+            const bills100 = Number(bills['100'] || bills[100] || 0);
+            const bills200 = Number(bills['200'] || bills[200] || 0);
+            const totalAmount = Number(total_amount || 0);
+            const recId = Number(recordId);
+            
+            const values = [bills20, bills50, bills100, bills200, totalAmount, recId];
             
             console.log("   Query values (converted to numbers):", values);
             
@@ -98,16 +99,22 @@ const cashService = {
             `;
             
             console.log("   Executing UPDATE query...");
-            const [result] = await db.execute(query, values);
-            console.log("   ✅ Update successful, affectedRows:", result.affectedRows);
+            console.log("   Query:", query);
+            const result = await db.execute(query, values);
+            console.log("   ✅ Update result:", result);
             
-            if (result.affectedRows === 0) {
-                console.warn("   ⚠️ WARNING: No rows were updated. Record might not exist.");
+            if (Array.isArray(result) && result[0]) {
+                console.log("   ✅ Update successful, affectedRows:", result[0].affectedRows);
+                
+                if (result[0].affectedRows === 0) {
+                    console.warn("   ⚠️ WARNING: No rows were updated. Record might not exist.");
+                }
             }
             
             return { id: recordId, ...data };
         } catch (err) {
             console.error("   ❌ ERROR in updateReport:", err.message);
+            console.error("   Stack:", err.stack);
             throw err;
         }
     }
