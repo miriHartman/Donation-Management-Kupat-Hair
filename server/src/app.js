@@ -3,21 +3,16 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-// CORS Configuration
-const corsOptions = {
-  origin: [
-    'https://donation-management-kupat-hair-client.onrender.com', // Production frontend (correct URL)
-    'https://donation-management-kupat-hair.onrender.com', // Production fallback
-    'http://localhost:5173', // Local development (Vite default)
-    'http://localhost:3000', // Local development fallback
-  ],
-  credentials: true,
+// CORS Configuration - Permissive for now (debug mode)
+// TODO: Restrict this after testing
+app.use(cors({
+  origin: '*', // Allow all origins temporarily for debugging
+  credentials: false,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  maxAge: 86400 // 24 hours
-};
+  maxAge: 86400
+}));
 
-app.use(cors(corsOptions));
 app.use(express.json());
 
 // Port Configuration for Render
