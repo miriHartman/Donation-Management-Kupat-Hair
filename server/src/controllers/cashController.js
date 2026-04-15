@@ -35,9 +35,11 @@ getReport: async (req, res) => {
 saveCashReport : async (req, res) => {
     try {
         const { recordId } = req.params; // אם מגיע מה-Route של ה-PUT
+        console.log("📝 saveCashReport called");
+        console.log("   recordId:", recordId);
+        console.log("   req.body:", JSON.stringify(req.body, null, 2));
+        
         let result;
-
-        console.log("📝 saveCashReport called:", { recordId, bodyKeys: Object.keys(req.body) });
 
         if (recordId) {
             console.log(`🔄 Updating record ${recordId}`);
@@ -47,19 +49,19 @@ saveCashReport : async (req, res) => {
             result = await cashService.createReport(req.body);
         }
         
-        console.log("✅ Report saved successfully:", result);
+        console.log("✅ Report saved successfully");
         res.json(result);
     } catch (err) {
-        console.error("❌ Error in saveCashReport:", err);
-        console.error("📌 Error details:", {
-            message: err.message,
-            code: err.code,
-            stack: err.stack
-        });
+        console.error("❌ ERROR in saveCashReport:");
+        console.error("   Message:", err.message);
+        console.error("   Code:", err.code);
+        console.error("   Full Error:", err);
+        console.error("   Stack:", err.stack);
+        
         res.status(500).json({ 
             error: err.message,
             code: err.code,
-            details: err.message 
+            type: err.constructor.name
         });
     }
 }}
