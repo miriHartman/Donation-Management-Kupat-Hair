@@ -28,16 +28,20 @@ export function DonationsManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<DonationData | null>(null);
 
-  const {
-    transactions,
-    stats,
-    todaySummary,
-    branchSummary,
-    loading,
-    fetchData,
-    deleteDonation // פונקציה מההוק
-  } = useDashboardData(selectedBranchFilter, debouncedSearch, page, debouncedDateRange);
-  
+// סטטיסטיקות ללא פילטרים – לא מושפעות מחיפוש/תאריך/סניף
+const {
+  stats,
+  todaySummary,
+} = useDashboardData('all', '', 1, { start: '', end: '' });
+
+// נתוני טבלה עם הפילטרים הנוכחיים
+const {
+  transactions,
+  branchSummary,
+  loading,
+  fetchData,
+  deleteDonation,
+} = useDashboardData(selectedBranchFilter, debouncedSearch, page, debouncedDateRange);
   const { allBranches } = useBranches();
 
   useEffect(() => {
