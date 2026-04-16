@@ -45,13 +45,17 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
     try {
       const data = await billService.getDailySummary(branchId);
       if (data) {
-        setBills(data.counts);
-        setRecordId(data.id);
+        setBills(data.counts || { 200: 0, 100: 0, 50: 0, 20: 0 });
+        setRecordId(data.id || null);
         toast.info("נטענו נתונים קיימים להיום");
+      } else {
+        // אין דיווח קיים - מדדנו טופס חדש
+        resetForm();
       }
     } catch (err) {
       console.error("Error loading daily summary", err);
       toast.error("נכשלה טעינת נתונים קודמים");
+      resetForm(); // מדדנו טופס חדש גם אם יש שגיאה
     } finally {
       setIsLoading(false);
     }

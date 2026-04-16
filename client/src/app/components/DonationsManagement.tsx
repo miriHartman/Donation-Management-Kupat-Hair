@@ -104,12 +104,18 @@ setDebouncedDateRange({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, idx) => {
-          const IconComponent = iconMap[stat.label] || Banknote;
+          const IconComponent = iconMap[stat.title] || Banknote;
           return (
             <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-500 mb-1">{stat.label}</p>
-                <h3 className="text-3xl font-bold text-slate-900">{stat.value}</h3>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-slate-500 mb-1">{stat.title}</p>
+                <h3 className="text-3xl font-bold text-slate-900 mb-2">{stat.value}</h3>
+                {stat.change && (
+                  <p className={`text-xs font-semibold ${stat.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                    {stat.isPositive ? <ArrowUpRight className="w-3 h-3 inline mr-1" /> : <ArrowDownRight className="w-3 h-3 inline mr-1" />}
+                    {stat.change}
+                  </p>
+                )}
               </div>
               <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
                 <IconComponent className="w-6 h-6" />
