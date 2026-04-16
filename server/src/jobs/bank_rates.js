@@ -8,8 +8,9 @@ async function updateExchangeRates() {
         
         // כתובת ה-API לפי הדוקומנטציה ששלחת (שליפת הדולר והאירו האחרונים בפורמט JSON)
 
-        const response = await axios.get(process.env.BANK_RATES_API_KEY);
-        
+const BOI_URL = 'https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0/RER_USD_ILS,RER_EUR_ILS?lastNObservations=1&format=sdmx-json';
+
+const response = await axios.get(BOI_URL); // במקום process.env.BANK_RATES_API_KEY        
         // חילוץ הנתונים מהמבנה המורכב של SDMX-JSON
         const observations = response.data.dataSets[0].series;
         const structures = response.data.structure.dimensions.series;
