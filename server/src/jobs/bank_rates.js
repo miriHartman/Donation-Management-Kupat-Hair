@@ -2,28 +2,25 @@ const cron = require('node-cron');
 const axios = require('axios');
 const db = require('../db');
 
+const BOI_URL = 'https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0/RER_USD_ILS,RER_EUR_ILS?lastNObservations=1&format=sdmx-json';
+
 async function updateExchangeRates() {
     try {
         console.log('Fetching rates from Bank of Israel...');
-        
-        // כתובת ה-API לפי הדוקומנטציה ששלחת (שליפת הדולר והאירו האחרונים בפורמט JSON)
 
-const BOI_URL = 'https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0/RER_USD_ILS,RER_EUR_ILS?lastNObservations=1&format=sdmx-json';
+        const response = await axios.get(BOI_URL);
 
-const response = await axios.get(BOI_URL); // במקום process.env.BANK_RATES_API_KEY        
-        // חילוץ הנתונים מהמבנה המורכב של SDMX-JSON
-        const observations = response.data.dataSets[0].series;
-        const structures = response.data.structure.dimensions.series;
-        
-        // מיפוי הקודים (USD/EUR) לערכים שלהם
-        // ב-SDMX המידע מפוצל בין ה-Structure לבין ה-DataSet
-        Object.keys(observations).forEach(async (key) => {
-            const seriesIndex = key.split(':');
-            const currencyCodeRaw = structures[1].values[seriesIndex[1]].id; // מחזיר RER_USD_ILS
-            const currencyCode = currencyCodeRaw.split('_')[1]; // מחלץ רק USD או EUR
-            
-            const obsData = observations[key].observations['0'];
-            const rate = obsData[0]; // השער היציג
+        const series = response.data.data.dataSets[0].series;
+        const seriesValues = response.data.data.structure.dimensions.series[0].values;
+        // seriesValues[0] = { id: "RER_EUR_ILS" }
+        // seriesValues[1] = { id: "RER_USD_ILS" }
+
+        const updates = Object.keys(series).map(async (key) => {
+            const seriesIndex = parseInt(key.split(':')[0]); // המספר הראשון = אינדקס המטבע
+            const seriesCodeRaw = seriesValues[seriesIndex].id; // RER_EUR_ILS או RER_USD_ILS
+            const currencyCode = seriesCodeRaw.split('_')[1]; // EUR או USD
+
+            const rate = series[key].observations['0'][0]; // ✅ string key '0'
 
             if (currencyCode && rate) {
                 const sql = `
@@ -31,21 +28,21 @@ const response = await axios.get(BOI_URL); // במקום process.env.BANK_RATES_
                     VALUES (?, ?) 
                     ON DUPLICATE KEY UPDATE rate = VALUES(rate), last_update = CURRENT_TIMESTAMP
                 `;
-                await db.execute(sql, [currencyCode, rate]);
+                await db.execute(sql, [currencyCode, parseFloat(rate)]);
                 console.log(`Updated ${currencyCode}: ${rate}`);
             }
         });
 
+        await Promise.all(updates);
+        console.log('Done updating exchange rates.');
+
     } catch (error) {
-        console.error('Error updating rates from BOI:', error);
+        console.error('Error updating rates from BOI:', error.message);
     }
 }
 
-// התזמון שלך (16:30 בימי חול)
-cron.schedule('30 16 * * 1-5', () => {
+cron.schedule('30 9 * * 1-5', () => {
     updateExchangeRates();
 });
-
-
 
 module.exports = { updateExchangeRates };
