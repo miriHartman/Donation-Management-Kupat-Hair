@@ -108,7 +108,7 @@ const donationService = {
                 branchSummary,
                 transactions: recentTransactions.map(t => ({
                     ...t,
-                    date: t.date ? new Date(t.date).toISOString().split('T')[0] : null,
+                   date: t.date ? new Date(t.date).toISOString() : null,
                     amount: parseFloat(t.amount) || 0,
                     isRecurring: t.isRecurring === 1 || t.isRecurring === true
                 })),
@@ -181,7 +181,7 @@ const donationService = {
             const query = `
                 INSERT INTO donations 
                 (amount, target_id, fund_number, target_other_note, method_id, worker_name, branch_id, donation_date, status, notes, created_by, is_recurring, months_count, created_at) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE(), 'completed', ?, ?, ?, ?, NOW())
+                VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), 'completed', ?, ?, ?, ?, NOW())
             `;
 
             const [result] = await db.query(query, [
