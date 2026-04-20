@@ -29,11 +29,16 @@ app.use('/api/auth', authRoutes);
 
 const exchangeRateRoutes = require('./routers/exchangeRateRoutes');
 app.use('/api/exchange-rates', exchangeRateRoutes);
+app.get('/test-date', async (req, res) => {
+  const [rows] = await db.query('SELECT donation_date FROM donations ORDER BY id DESC LIMIT 5');
+  res.json(rows);
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'Server is running and healthy!' });
 });
+
 
 // Run the server
 app.listen(PORT, '0.0.0.0', () => {
