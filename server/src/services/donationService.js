@@ -108,7 +108,7 @@ const donationService = {
                 branchSummary,
                 transactions: recentTransactions.map(t => ({
                     ...t,
-                   date: t.date ? new Date(t.date).toISOString() : null,
+                   date: t.date ? new Date(t.date).toLocaleString('sv-SE', { timeZone: 'Asia/Jerusalem' }).replace(' ', 'T') : null,
                     amount: parseFloat(t.amount) || 0,
                     isRecurring: t.isRecurring === 1 || t.isRecurring === true
                 })),
