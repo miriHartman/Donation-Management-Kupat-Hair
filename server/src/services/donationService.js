@@ -163,53 +163,56 @@ const donationService = {
     // 3. יצירה ועדכון
     // ========================
 createDonation: async (data) => {
-    try {
-        console.log("📝 createDonation - Received data:", data);
-
-        // מיפוי שדות מהפרונט (CamelCase) לבקאנד (SnakeCase)
-        const amount = data.amount;
-        const notes = data.notes || null;
-        const fund_number = data.fundNumber || data.fund_number || null;
-        const target_other_note = data.targetOtherNote || data.target_other_note || null;
-        const is_recurring = data.isRecurring ? 1 : 0;
-        const months_count = data.installments || data.months_count || 1;
-        const branch_id = data.branchId || data.branch_id;
-        const target_id = data.targetId || data.target_id;
-        const method_id = data.methodId || data.method_id;
-        const worker_name = data.workerName || data.worker_name;
-        const created_by = data.userId || data.created_by;
-
-        // שאילתה נקייה ללא created_at (כי הוא Generated ב-DB)
-        const query = `
-            INSERT INTO donations 
-            (amount, target_id, fund_number, target_other_note, method_id, worker_name, branch_id, status, notes, created_by, is_recurring, months_count) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, 'completed', ?, ?, ?, ?)
-        `;
-
-        const values = [
-            amount, target_id, fund_number, target_other_note, method_id,
-            worker_name, branch_id, notes, created_by, is_recurring, months_count
-        ];
-
-        console.log("🚀 Executing Insert with values:", values);
-        
-        // שימוש ב-execute נחשב בטוח יותר
-        const [result] = await db.execute(query, values);
-
-        console.log("✅ Donation created successfully, ID:", result.insertId);
-        return { id: result.insertId, ...data };
-    } catch (error) {
-        console.error("❌ SQL Error in createDonation:", error.message);
-        throw error;
-    }
-},
-
-    deleteDonation: async (id) => {
         try {
-            await db.query('DELETE FROM donations WHERE id = ?', [id]);
+            console.log("📝 Service: createDonation - Processing data...");
+
+            // מיפוי נתונים וטיפול בערכי ברירת מחדל
+            const amount = data.amount;
+            const notes = data.notes || null;
+            const fund_number = data.fundNumber || data.fund_number || null;
+            const target_other_note = data.targetOtherNote || data.target_other_note || null;
+            
+            // המרה לבוליאני/מספר עבור ה-DB
+            const is_recurring = data.isRecurring ? 1 : 0;
+            const months_count = data.installments || data.months_count || 1;
+            
+            const branch_id = data.branchId || data.branch_id;
+            const target_id = data.targetId || data.target_id;
+            const method_id = data.methodId || data.method_id;
+            const worker_name = data.workerName || data.worker_name;
+            const created_by = data.userId || data.created_by;
+
+            // שימי לב: הסרתי לחלוטין את created_at מהשאילתה
+            const query = `
+                INSERT INTO donations 
+                (amount, target_id, fund_number, target_other_note, method_id, worker_name, branch_id, status, notes, created_by, is_recurring, months_count) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'completed', ?, ?, ?, ?)
+            `;
+
+            const values = [
+                amount, 
+                target_id, 
+                fund_number, 
+                target_other_note, 
+                method_id,
+                worker_name, 
+                branch_id, 
+                notes, 
+                created_by, 
+                is_recurring, 
+                months_count
+            ];
+
+            // שימוש ב-execute (מומלץ ב-Render/MySQL2)
+            const [result] = await db.execute(query, values);
+
+            console.log("✅ Donation created successfully. ID:", result.insertId);
+            return { id: result.insertId, ...data };
+
         } catch (error) {
-            console.error("Service Error (deleteDonation):", error);
-            throw error;
+            console.error("❌ SQL Error in createDonation:", error.message);
+            // זריקת השגיאה כדי שה-Controller יתפוס אותה ויחזיר 500 עם פירוט
+            throw error; 
         }
     },
 
