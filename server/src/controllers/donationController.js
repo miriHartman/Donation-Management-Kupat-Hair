@@ -72,12 +72,20 @@ const donationController = {
     // 6. מחיקת תרומה
     deleteDonation: async (req, res) => {
         try {
-            const { id } = req.params;  
-            await donationService.deleteDonation(id);
+            const { id } = req.params;
+            const success = await donationService.deleteDonation(id);
+            
+            if (!success) {
+                return res.status(404).json({ message: "התרומה לא נמצאה או שכבר נמחקה" });
+            }
+            
             res.json({ message: "התרומה נמחקה בהצלחה" });
         } catch (error) {
-            console.error("Controller Error (deleteDonation):", error);
-            res.status(500).json({ message: "שגיאה במחיקת התרומה" });
+            console.error("❌ Controller Error (deleteDonation):", error.message);
+            res.status(500).json({ 
+                message: "שגיאה במחיקת התרומה", 
+                error: error.message 
+            });
         }
     },
 // 7. שליפת רשימת סניפים (למטרת בחירה בטופס)

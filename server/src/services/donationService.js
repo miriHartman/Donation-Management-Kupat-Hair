@@ -260,6 +260,21 @@ const donationService = {
         `;
         const [rows] = await db.query(query, [branchId]);
         return parseFloat(rows[0].totalCash) || 0;
+    },
+    deleteDonation: async (id) => {
+        try {
+            console.log(`🗑️ Service: Attempting to delete donation ID: ${id}`);
+            
+            // שימוש ב-execute במקום query
+            const [result] = await db.execute('DELETE FROM donations WHERE id = ?', [id]);
+            
+            console.log(`✅ Delete result: affectedRows = ${result.affectedRows}`);
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error("❌ SQL Error in deleteDonation:", error.message);
+            // אם יש שגיאת Foreign Key, אנחנו נראה אותה בלוגים של Render
+            throw error; 
+        }
     }
 }
 
