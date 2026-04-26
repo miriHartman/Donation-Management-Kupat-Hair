@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Building2, ArrowRight, Banknote, WalletCards } from 'lucide-react';
 import { DonationsManagement } from './DonationsManagement';
 import { BranchesManagement } from './BranchesManagement';
+import { FundsManagement } from './FundsManagement';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -48,15 +49,7 @@ export function AdminDashboard({ onLogout, onBack }: AdminDashboardProps) {
 
       <main className="flex-1 w-full">
         {activeTab === 'donations' && <DonationsManagement />}
-        {activeTab === 'funds' && (
-          <div className="p-8 text-center text-slate-500">
-            <div className="bg-white p-12 rounded-2xl border border-dashed border-slate-300">
-              <WalletCards className="w-12 h-12 mx-auto mb-4 text-slate-300" />
-              <h3 className="text-xl font-bold text-slate-700">ניהול תרומות לקרנות</h3>
-              <p>כאן תוצג רשימת התרומות לקרנות בלבד.</p>
-            </div>
-          </div>
-        )}
+         {activeTab === 'funds' && <FundsManagement />}
         {activeTab === 'branches' && <BranchesManagement />}
       </main>
     </div>

@@ -88,9 +88,12 @@ export interface Transaction {
   installments?: number;
   workerName?: string;
   currency?: string;
+  // השדות החסרים שגורמים לשגיאה:
+  fundNumber?: string | null;      
+  targetOtherNote?: string | null; 
+notes?: string;              
 }
-
-export interface BranchSummary {
+  export interface BranchSummary {
   name: string;
   amount: number;
   count: number;
