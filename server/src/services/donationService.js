@@ -162,31 +162,29 @@ const donationService = {
     // ========================
     // 3. יצירה ועדכון
     // ========================
-createDonation: async (data) => {
+// ========================
+    createDonation: async (data) => {
         try {
-            console.log("📝 Service: createDonation - Processing data...");
+            console.log("📝 Service: createDonation - Adding donation_date...");
 
-            // מיפוי נתונים וטיפול בערכי ברירת מחדל
+            // מיפוי נתונים
             const amount = data.amount;
             const notes = data.notes || null;
             const fund_number = data.fundNumber || data.fund_number || null;
             const target_other_note = data.targetOtherNote || data.target_other_note || null;
-            
-            // המרה לבוליאני/מספר עבור ה-DB
             const is_recurring = data.isRecurring ? 1 : 0;
             const months_count = data.installments || data.months_count || 1;
-            
             const branch_id = data.branchId || data.branch_id;
             const target_id = data.targetId || data.target_id;
             const method_id = data.methodId || data.method_id;
             const worker_name = data.workerName || data.worker_name;
             const created_by = data.userId || data.created_by;
 
-            // שימי לב: הסרתי לחלוטין את created_at מהשאילתה
+            // הוספנו את donation_date לשאילתה ונתנו לו את הערך CURDATE() או NOW()
             const query = `
                 INSERT INTO donations 
-                (amount, target_id, fund_number, target_other_note, method_id, worker_name, branch_id, status, notes, created_by, is_recurring, months_count) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'completed', ?, ?, ?, ?)
+                (amount, target_id, fund_number, target_other_note, method_id, worker_name, branch_id, status, notes, created_by, is_recurring, months_count, donation_date) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'completed', ?, ?, ?, ?, CURDATE())
             `;
 
             const values = [
@@ -203,15 +201,13 @@ createDonation: async (data) => {
                 months_count
             ];
 
-            // שימוש ב-execute (מומלץ ב-Render/MySQL2)
             const [result] = await db.execute(query, values);
 
-            console.log("✅ Donation created successfully. ID:", result.insertId);
+            console.log("✅ Donation created with ID:", result.insertId);
             return { id: result.insertId, ...data };
 
         } catch (error) {
             console.error("❌ SQL Error in createDonation:", error.message);
-            // זריקת השגיאה כדי שה-Controller יתפוס אותה ויחזיר 500 עם פירוט
             throw error; 
         }
     },
