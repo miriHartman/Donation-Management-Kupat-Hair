@@ -19,7 +19,7 @@ const donationService = {
             }
 
             if (filters.startDate && filters.endDate && filters.startDate !== '' && filters.endDate !== '') {
-                whereClause += ' AND d.donation_date BETWEEN ? AND ?';
+                whereClause += ' AND d.created_at BETWEEN ? AND ?';
                 queryParams.push(filters.startDate, filters.endDate);
             }
 
@@ -32,8 +32,8 @@ const donationService = {
             const lastMonthQuery = `
                 SELECT SUM(amount) as total, COUNT(id) as count 
                 FROM donations 
-                WHERE donation_date >= DATE_SUB(DATE_FORMAT(CURDATE() ,'%Y-%m-01'), INTERVAL 1 MONTH)
-                AND donation_date < DATE_FORMAT(CURDATE() ,'%Y-%m-01')
+                WHERE created_at >= DATE_SUB(DATE_FORMAT(CURDATE() ,'%Y-%m-01'), INTERVAL 1 MONTH)
+                AND created_at < DATE_FORMAT(CURDATE() ,'%Y-%m-01')
             `;
             const [lastMonthRows] = await db.query(lastMonthQuery);
             const lastMonthTotal = parseFloat(lastMonthRows[0].total) || 0;
@@ -72,14 +72,14 @@ const donationService = {
             });
 
             let transactionsQuery = `
-    SELECT d.id, b.name AS branch, d.donation_date AS date, d.amount, d.status, 
+    SELECT d.id, b.name AS branch, d.created_at AS date, d.amount, d.status, 
            d.is_recurring AS isRecurring, d.months_count AS installments,
            d.method_id AS methodId, d.target_id AS targetId,
            d.fund_number AS fundNumber, d.target_other_note AS targetOtherNote,worker_name AS workerName
     FROM donations d
     LEFT JOIN branches b ON d.branch_id = b.id
     ${whereClause}
-    ORDER BY d.donation_date DESC, d.id DESC LIMIT ? OFFSET ?
+    ORDER BY d.created_at DESC, d.id DESC LIMIT ? OFFSET ?
 `;
 
             const [recentTransactions] = await db.query(transactionsQuery, [...queryParams, limit, offset]);
@@ -87,7 +87,7 @@ const donationService = {
             const [todayBranchData] = await db.query(`
                 SELECT b.name, COALESCE(SUM(d.amount), 0) as amount, COUNT(d.id) as count
                 FROM branches b
-                LEFT JOIN donations d ON b.id = d.branch_id AND DATE(d.donation_date) = CURDATE()
+                LEFT JOIN donations d ON b.id = d.branch_id AND DATE(d.created_at) = CURDATE()
                 GROUP BY b.id, b.name
             `);
 
@@ -134,13 +134,13 @@ const donationService = {
 
             const query = `
             SELECT 
-                id, amount, donation_date AS date, 
+                id, amount, created_at AS date, 
                 target_id AS targetId, method_id AS methodId, 
                 fund_number AS fundNumber, target_other_note AS targetOtherNote,
                 is_recurring AS isRecurring, months_count AS installments,
                 status, notes
             FROM donations 
-            WHERE branch_id = ? AND DATE(donation_date) = CURDATE()
+            WHERE branch_id = ? AND DATE(created_at) = CURDATE()
             ORDER BY created_at DESC
         `;
 
@@ -180,7 +180,7 @@ const donationService = {
             const created_by = data.userId || data.created_by;
             const query = `
                 INSERT INTO donations 
-                (amount, target_id, fund_number, target_other_note, method_id, worker_name, branch_id, donation_date, status, notes, created_by, is_recurring, months_count, created_at) 
+                (amount, target_id, fund_number, target_other_note, method_id, worker_name, branch_id, created_at, status, notes, created_by, is_recurring, months_count, created_at) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), 'completed', ?, ?, ?, ?, NOW())
             `;
 
@@ -250,7 +250,7 @@ const donationService = {
         const query = `
             SELECT SUM(amount) AS totalCash 
             FROM donations 
-            WHERE branch_id = ? AND method_id = 1 AND DATE(donation_date) = CURDATE()
+            WHERE branch_id = ? AND method_id = 1 AND DATE(created_at) = CURDATE()
         `;
         const [rows] = await db.query(query, [branchId]);
         return parseFloat(rows[0].totalCash) || 0;
