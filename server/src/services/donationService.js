@@ -247,10 +247,6 @@ const donationService = {
             throw error;
         }
     },
-    getBranches: async () => {
-        const [rows] = await db.query('SELECT id, name FROM branches ORDER BY name ASC');
-        return rows;
-    },
 
     getAmountDonationCash: async (branchId) => {
         const query = `

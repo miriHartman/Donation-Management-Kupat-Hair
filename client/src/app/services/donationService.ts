@@ -61,7 +61,7 @@ export const donationService = {
   },
   getBranches: async () => {
     try {
-      const response = await api.get('/donations/branches');
+      const response = await api.get('/branches');
       return response.data;
     } catch (error) {
       console.error("Error in getBranches service:", error);

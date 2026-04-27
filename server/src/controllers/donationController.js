@@ -88,15 +88,6 @@ const donationController = {
             });
         }
     },
-// 7. שליפת רשימת סניפים (למטרת בחירה בטופס)
-    getBranches: async (req, res) => {
-    try {
-        const branches = await donationService.getBranches();
-        res.json(branches);
-    } catch (error) {
-        res.status(500).json({ message: "שגיאה בשליפת סניפים" });
-    }
-},
 // 8. שליפת סכום התרומות במזומן של היום לסניף מסוים
     getAmountDonationCash: async (req, res) => {
         try {
