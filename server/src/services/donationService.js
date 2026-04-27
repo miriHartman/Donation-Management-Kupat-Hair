@@ -271,21 +271,31 @@ const donationService = {
             throw error; 
         }
     },
-    getFundsDonations: async () => {
-        try {
-            const query = `
-                SELECT fund_number, SUM(amount) AS total_amount
-                FROM donations
-                WHERE fund_number IS NOT NULL
-                GROUP BY fund_number
-            `;
-            const [rows] = await db.query(query);
-            return rows;
-        } catch (error) {
-            console.error("Service Error (getFundsDonations):", error);
-            throw error;
-        }
+getFundsDonations: async () => {
+    try {
+        const query = `
+            SELECT 
+                d.id,
+                d.amount,
+                d.fund_number AS fundNumber, -- מיפוי לשם שה-Frontend מכיר
+                d.target_other_note AS targetOtherNote,
+                d.notes,
+                d.worker_name AS workerName,
+                d.created_at AS date,
+                b.name AS branch, -- חיבור לשם הסניף
+                d.branch_id AS branchId
+            FROM donations d
+            LEFT JOIN branches b ON d.branch_id = b.id
+            WHERE d.target_id = 2 OR d.fund_number IS NOT NULL
+            ORDER BY d.created_at DESC
+        `;
+        const [rows] = await db.query(query);
+        return rows;
+    } catch (error) {
+        console.error("Service Error (getFundsDonations):", error);
+        throw error;
     }
+}
 };
 
 module.exports = donationService;
