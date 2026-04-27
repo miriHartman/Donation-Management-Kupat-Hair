@@ -271,7 +271,22 @@ const donationService = {
             // אם יש שגיאת Foreign Key, אנחנו נראה אותה בלוגים של Render
             throw error; 
         }
+    },
+    getFundsDonations: async () => {
+        try {
+            const query = `
+                SELECT fund_number, SUM(amount) AS total_amount
+                FROM donations
+                WHERE fund_number IS NOT NULL
+                GROUP BY fund_number
+            `;
+            const [rows] = await db.query(query);
+            return rows;
+        } catch (error) {
+            console.error("Service Error (getFundsDonations):", error);
+            throw error;
+        }
     }
-}
+};
 
 module.exports = donationService;

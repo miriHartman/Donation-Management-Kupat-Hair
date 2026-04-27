@@ -98,6 +98,16 @@ const donationController = {
             console.error("Controller Error (getAmountDonationCash):", error);
             res.status(500).json({ message: "שגיאה בשליפת סכום התרומות במזומן" });
         }
-}}
+},
+
+ getFundsDonations: async (req, res) => {
+        try {
+            const fundsDonations = await donationService.getFundsDonations();
+            res.json(fundsDonations);
+        } catch (error) {
+            console.error("Controller Error (getFundsDonations):", error);
+            res.status(500).json({ message: "שגיאה בשליפת תרומות הקרנות" });
+        }}};
+
 
 module.exports = donationController;

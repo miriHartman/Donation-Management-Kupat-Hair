@@ -25,7 +25,7 @@ export function useBranches() {
   const fetchAllBranches = useCallback(async () => {
     try {
       setIsLoading(true);
-      const data = await branchService.getAllBranches();
+      const data = await branchService.getBranches();
       setAllBranches(data);
     } catch (error) {
       console.error('Error fetching all branches:', error);

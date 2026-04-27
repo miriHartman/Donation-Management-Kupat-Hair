@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { cashService } from '../services/cashService';
 
-export function useBillCalculator(branchName: string) {
+export function useBillCalculator(branchId: number) {
   const [bills, setBills] = useState({
     200: 0,
     100: 0,
@@ -17,7 +17,7 @@ export function useBillCalculator(branchName: string) {
   const handleSave = async () => {
     try {
       const total = calculateBillTotal();
-      await cashService.saveDailyReport(branchName, bills, total);
+      await cashService.saveDailyReport(branchId, bills, total);
       toast.success('הסיכום נשמר בהצלחה במערכת');
     } catch (error) {
       toast.error('שגיאה בשמירת הנתונים');

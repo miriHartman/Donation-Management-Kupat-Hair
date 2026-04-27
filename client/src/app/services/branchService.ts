@@ -10,22 +10,16 @@ export interface Branch {
 
 export const branchService = {
   // שליפת כל הסניפים מהשרת
-  getAllBranches: async (): Promise<Branch[]> => {
-    const response = await api.get('/branches');
-    return response.data;
+
+  getBranches: async () => {
+    try {
+      const response = await api.get('/branches');
+      return response.data;
+    } catch (error) {
+      console.error("Error in getBranches service:", error);
+      return []; // מחזירים מערך ריק במקרה של שגיאה כדי לא לשבור את ה-UI
+    }
   },
-
-  // // שליפת סניפים פעילים בלבד
-  // getActiveBranches: async (): Promise<Branch[]> => {
-  //   try {
-  //     const response = await api.get('/branches/active');
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error('Error fetching active branches:', error);
-  //     throw error;
-  //   }
-  // },
-
  
   // יצירת סניף חדש
   createBranch: async (branchData: Omit<Branch, 'id'>): Promise<Branch> => {

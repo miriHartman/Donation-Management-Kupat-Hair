@@ -59,13 +59,13 @@ export const donationService = {
       throw error;
     }
   },
-  getBranches: async () => {
+  getFundsDonations: async (page: number = 1) => {
     try {
-      const response = await api.get('/branches');
+      const response = await api.get('/donations/funds');
       return response.data;
     } catch (error) {
-      console.error("Error in getBranches service:", error);
-      return []; // מחזירים מערך ריק במקרה של שגיאה כדי לא לשבור את ה-UI
+      console.error("API Error (getFundsDonations):", error);
+      throw error;
     }
   }
 };
