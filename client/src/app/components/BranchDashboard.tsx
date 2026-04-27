@@ -245,6 +245,7 @@ useEffect(() => {
                     <th className="px-4 py-4 font-bold">סוג</th>
                     <th className="px-4 py-4 font-bold">יעד</th>
                     <th className="px-4 py-4 font-bold">אמצעי תשלום</th>
+                    <th className="px-4 py-4 font-bold">הערות</th>
                     <th className="px-4 py-4 font-bold text-left">פעולות</th>
                   </tr>
                 </thead>
@@ -295,6 +296,10 @@ useEffect(() => {
                               <span>{getPaymentLabel(donation.methodId)}</span>
                             </div>
                           </td>
+                          <td className="px-4 py-4 text-slate-600">
+                            {donation.notes || '-'}
+                          </td>
+
                           <td className="px-4 py-4 text-left">
                             <div className="flex items-center justify-end gap-2">
                               <button

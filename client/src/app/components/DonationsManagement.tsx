@@ -207,6 +207,7 @@ setDebouncedDateRange({
                 <th className="px-4 py-4">סניף</th>
                 <th className="px-4 py-4">תאריך</th>
                 <th className="px-4 py-4">עובדת</th>
+                <th className='px-4 py-4'>הערות</th>
                 <th className="px-4 py-4 text-left">פעולות</th>
               </tr>
             </thead>
@@ -238,7 +239,7 @@ setDebouncedDateRange({
 ) : '-'}
                   </td>
                   <td className="px-4 py-4 text-slate-700">{trx.workerName || '-'}</td>
-
+                  <td className="px-4 py-4 text-slate-600">{trx.notes || '-'}</td>
                   <td className="px-4 py-4 text-left">
                     <div className="flex items-center justify-end gap-2">
                       <button onClick={() => openEditModal(trx)} className="p-2 hover:bg-indigo-50 text-indigo-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"><Edit2 className="w-4 h-4" /></button>
