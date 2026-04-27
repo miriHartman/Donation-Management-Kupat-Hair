@@ -87,24 +87,39 @@ export function useDonationForm(
       const user = userString ? JSON.parse(userString) : null;
       const userId = user?.id ? Number(user.id) : undefined;
 
-      const payload = {
+     const payload = {
+        // שדות לזיהוי
         branchId: selectedBranchId,
+        branch_id: selectedBranchId, // הוספת גרסת SQL
         userId: userId,
-        fundNumber: formData.targetId === 2 ? formData.fundNumber : undefined,
-        targetOtherNote: formData.targetId === 3 ? formData.targetOtherNote : undefined,
-        is_recurring: formData.isRecurring ? 1 : 0,
-        months_count: formData.isRecurring ? (formData.installments || 1) : 1,
-        targetId: formData.targetId,
-        methodId: formData.methodId,
+        created_by: userId, // הוספת גרסת SQL
+        
+        // שדות הליבה
         amount: formData.amount,
+        targetId: formData.targetId,
+        target_id: formData.targetId, // הוספת גרסת SQL
+        methodId: formData.methodId,
+        method_id: formData.methodId, // הוספת גרסת SQL
+        
+        // השדות הבעייתיים - ודאי שהם נשלחים כ-NULL אם אינם בשימוש
+        fundNumber: formData.targetId === 2 ? formData.fundNumber : null,
+        fund_number: formData.targetId === 2 ? formData.fundNumber : null,
+        targetOtherNote: formData.targetId === 3 ? formData.targetOtherNote : null,
+        target_other_note: formData.targetId === 3 ? formData.targetOtherNote : null,
+        
+        // ניהול תשלומים
+        isRecurring: formData.isRecurring,
+        is_recurring: formData.isRecurring ? 1 : 0,
+        installments: formData.installments,
+        months_count: formData.installments || 1,
+        
+        // מידע נוסף
         date: formData.date,
         currency: formData.currency,
         workerName: formData.workerName,
-        notes: formData.notes,
-        isRecurring: formData.isRecurring,
-        installments: formData.installments
-      } as const;
-
+        worker_name: formData.workerName, // הוספת גרסת SQL
+        notes: formData.notes
+      };
       if (editingDonation && editingDonation.id) {
         await donationService.updateDonation(editingDonation.id, payload);
         toast.success('התרומה עודכנה בהצלחה');
