@@ -10,7 +10,7 @@ router.get('/transactions', donationController.getTransactions);
 router.get('/today/:branchId', donationController.getTodayDonations);
 router.post('/', donationController.createDonation);
 router.put('/:id', donationController.updateDonation);
-router.get('/branches', donationController.getBranches);
 router.delete('/:id', donationController.deleteDonation); 
 router.get('/cash/:branchId', donationController.getAmountDonationCash);
+// router.get('/funds', donationController.getFundsDonations);
 module.exports = router;

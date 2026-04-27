@@ -1,4 +1,3 @@
-// ב-JS רגיל משתמשים ב-require ולא ב-import
 
 const exchangeRateService = require("../services/exchangeRateService");
 
