@@ -28,29 +28,29 @@ export function DonationsManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<DonationData | null>(null);
 
-// סטטיסטיקות ללא פילטרים – לא מושפעות מחיפוש/תאריך/סניף
-const {
-  stats,
-  todaySummary,
-} = useDashboardData('all', '', 1, { start: '', end: '' });
+  // סטטיסטיקות ללא פילטרים – לא מושפעות מחיפוש/תאריך/סניף
+  const {
+    stats,
+    todaySummary,
+  } = useDashboardData('all', '', 1, { start: '', end: '' });
 
-// נתוני טבלה עם הפילטרים הנוכחיים
-const {
-  transactions,
-  branchSummary,
-  loading,
-  fetchData,
-  deleteDonation,
-} = useDashboardData(selectedBranchFilter, debouncedSearch, page, debouncedDateRange);
+  // נתוני טבלה עם הפילטרים הנוכחיים
+  const {
+    transactions,
+    branchSummary,
+    loading,
+    fetchData,
+    deleteDonation,
+  } = useDashboardData(selectedBranchFilter, debouncedSearch, page, debouncedDateRange);
   const { allBranches } = useBranches();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(inputValue);
-setDebouncedDateRange({
-  start: dateRange.start,
-  end: dateRange.start ? dateRange.end : '' // ❗ רק אם יש start
-});      setPage(1);
+      setDebouncedDateRange({
+        start: dateRange.start,
+        end: dateRange.start ? dateRange.end : '' // ❗ רק אם יש start
+      }); setPage(1);
     }, 700);
     return () => clearTimeout(timer);
   }, [inputValue, dateRange]);
@@ -230,16 +230,13 @@ setDebouncedDateRange({
                   </td>
                   <td className="px-4 py-4 text-slate-600 font-medium">{trx.branch}</td>
                   <td className="px-4 py-4 text-slate-500 text-xs">
-
-  {trx.date ? (
-  <div className="flex flex-col">
-    <span>{trx.date.slice(0, 10).split('-').reverse().join('.')}</span>
-    <span className="text-slate-400 text-[11px]">{trx.date.slice(11, 16)}</span>
-  </div>
-) : '-'}
                   </td>
                   <td className="px-4 py-4 text-slate-700">{trx.workerName || '-'}</td>
-                  <td className="px-4 py-4 text-slate-600">{trx.notes || '-'}</td>
+                  <td className="px-4 py-4">
+                    <div className="max-w-[150px] truncate text-slate-500 text-xs" title={trx.notes}>
+                      {trx.notes || <span className="text-slate-300 italic">אין הערה</span>}
+                    </div>
+                  </td>
                   <td className="px-4 py-4 text-left">
                     <div className="flex items-center justify-end gap-2">
                       <button onClick={() => openEditModal(trx)} className="p-2 hover:bg-indigo-50 text-indigo-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all"><Edit2 className="w-4 h-4" /></button>
