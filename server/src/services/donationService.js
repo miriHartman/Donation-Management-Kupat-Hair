@@ -180,11 +180,10 @@ const donationService = {
             const worker_name = data.workerName || data.worker_name;
             const created_by = data.userId || data.created_by;
 
-            // הוספנו את donation_date לשאילתה ונתנו לו את הערך CURDATE() או NOW()
             const query = `
                 INSERT INTO donations 
-                (amount, target_id, fund_number, target_other_note, method_id, worker_name, branch_id, status, notes, created_by, is_recurring, months_count, donation_date) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'completed', ?, ?, ?, ?, CURDATE())
+                (amount, target_id, fund_number, target_other_note, method_id, worker_name, branch_id, status, notes, created_by, is_recurring, months_count, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'completed', ?, ?, ?, ?, NOW())
             `;
 
             const values = [
@@ -232,13 +231,13 @@ const donationService = {
                 UPDATE donations 
                 SET amount = ?, target_id = ?, fund_number = ?, target_other_note = ?, 
                     method_id = ?, worker_name = ?, branch_id = ?, notes = ?, 
-                    is_recurring = ?, months_count = ?
+                    is_recurring = ?, months_count = ?, created_at = ?
                 WHERE id = ?
             `;
 
             await db.query(query, [
                 amount, target_id, fund_number, target_other_note, method_id,
-                worker_name, branch_id, notes, is_recurring, months_count, id
+                worker_name, branch_id, notes, is_recurring, months_count, NOW(), id
             ]);
 
             return { id, ...data };
