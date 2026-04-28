@@ -50,9 +50,8 @@ export interface DonationData {
   workerName: string;
   installments?: number;
   fundNumber?: string | null;
-  targetOtherNote?: string | null;
+  notes?: string | null;
   currency: string;
-  notes?: string;
   branchId?: number;
   userId?: number | string;
 }
@@ -60,7 +59,7 @@ export interface DonationData {
 export interface DonationPayload {
   userId: number | string | undefined;
   fundNumber: string | undefined;
-  targetOtherNote: string | undefined;
+  notes: string | undefined;
   is_recurring: 0 | 1;
   months_count: number;
   targetId: number;
@@ -70,7 +69,6 @@ export interface DonationPayload {
   branchId?: number;
   currency?: string;
   workerName?: string;
-  notes?: string;
   isRecurring?: boolean;
   installments?: number;
 }
@@ -90,8 +88,7 @@ export interface Transaction {
   currency?: string;
   // השדות החסרים שגורמים לשגיאה:
   fundNumber?: string | null;      
-  targetOtherNote?: string | null; 
-notes?: string;              
+  notes?: string | null; 
 }
   export interface BranchSummary {
   name: string;
@@ -238,7 +235,7 @@ export interface DonationFormData {
   methodId: number;
   targetId: number;
   fundNumber?: number;
-  targetOtherNote?: string;
+  notes?: string;
   isRecurring: boolean;
   installments?: number;
   date: string;

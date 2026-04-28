@@ -59,6 +59,7 @@ export const donationService = {
       throw error;
     }
   },
+  // שליפת התרומות לקרנות 
   getFundsDonations: async (page: number = 1) => {
     try {
       const response = await api.get('/donations/funds');

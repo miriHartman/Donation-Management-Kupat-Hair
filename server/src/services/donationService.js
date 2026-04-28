@@ -75,7 +75,7 @@ const donationService = {
     SELECT d.id, b.name AS branch, d.created_at AS date, d.amount, d.status, 
            d.is_recurring AS isRecurring, d.months_count AS installments,
            d.method_id AS methodId, d.target_id AS targetId,
-           d.fund_number AS fundNumber, d.target_other_note AS targetOtherNote,worker_name AS workerName
+           d.fund_number AS fundNumber, d.target_other_note AS notes,worker_name AS workerName
     FROM donations d
     LEFT JOIN branches b ON d.branch_id = b.id
     ${whereClause}
@@ -136,7 +136,7 @@ const donationService = {
             SELECT 
                 id, amount, created_at AS date, 
                 target_id AS targetId, method_id AS methodId, 
-                fund_number AS fundNumber, target_other_note AS targetOtherNote,
+                fund_number AS fundNumber, target_other_note AS notes, worker_name AS workerName,
                 is_recurring AS isRecurring, months_count AS installments,
                 status, notes
             FROM donations 
@@ -171,7 +171,7 @@ const donationService = {
             const amount = data.amount;
             const notes = data.notes || null;
             const fund_number = data.fundNumber || data.fund_number || null;
-            const target_other_note = data.targetOtherNote || data.target_other_note || null;
+            const target_other_note = data.notes || data.target_other_note || null;
             const is_recurring = data.isRecurring ? 1 : 0;
             const months_count = data.installments || data.months_count || 1;
             const branch_id = data.branchId || data.branch_id;
@@ -220,7 +220,7 @@ const donationService = {
             const worker_name = data.workerName || data.worker_name;
 
             const fund_number = data.fundNumber || data.fund_number || null;
-            const target_other_note = data.targetOtherNote || data.target_other_note || null;
+            const target_other_note = data.notes || data.target_other_note || null;
 
             const is_recurring = data.isRecurring !== undefined ? (data.isRecurring ? 1 : 0) : (data.is_recurring || 0);
             const months_count = data.installments || data.months_count || 1;
@@ -277,8 +277,8 @@ getFundsDonations: async () => {
             SELECT 
                 d.id,
                 d.amount,
-                d.fund_number AS fundNumber, -- מיפוי לשם שה-Frontend מכיר
-                d.target_other_note AS targetOtherNote,
+                d.fund_number AS fundNumber, 
+                d.target_other_note AS notes,
                 d.notes,
                 d.worker_name AS workerName,
                 d.created_at AS date,

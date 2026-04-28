@@ -60,7 +60,6 @@ const { formData, setFormData, handleSave, loading } = useDonationForm(
           installments: 1,
           notes: '',
           fundNumber: '',
-          targetOtherNote: '',
           currency: 'ILS',
           workerName: formData.workerName, // שמור שם!
         }));
@@ -135,7 +134,7 @@ const { formData, setFormData, handleSave, loading } = useDonationForm(
                           ...formData,
                           targetId: newTargetId,
                           fundNumber: newTargetId === 2 ? formData.fundNumber : '',
-                          targetOtherNote: newTargetId === 3 ? formData.targetOtherNote : ''
+                          notes: newTargetId === 3 ? formData.notes : ''
                         });
                       }}
                       className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
@@ -167,8 +166,8 @@ const { formData, setFormData, handleSave, loading } = useDonationForm(
                     <input
                       type="text"
                       required
-                      value={formData.targetOtherNote || ''}
-                      onChange={(e) => setFormData({ ...formData, targetOtherNote: e.target.value })}
+                      value={formData.notes || ''}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                       placeholder="עבור מה התרומה?"
                       className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -396,7 +395,7 @@ const { formData, setFormData, handleSave, loading } = useDonationForm(
                     !formData.amount ||
                     !formData.workerName ||
                     (formData.targetId === 2 && !formData.fundNumber) ||
-                    (formData.targetId === 3 && !formData.targetOtherNote)
+                    (formData.targetId === 3 && !formData.notes)
                   }
                   className="flex-[2] px-4 py-3 text-white bg-blue-600 hover:bg-blue-700 rounded-xl font-bold shadow-lg shadow-blue-200 flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-95"
                 >

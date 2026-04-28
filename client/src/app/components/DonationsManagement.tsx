@@ -233,7 +233,7 @@ export function DonationsManagement() {
                   </td>
                   <td className="px-4 py-4 text-slate-700">{trx.workerName || '-'}</td>
                   <td className="px-4 py-4">
-                    <div className="max-w-[150px] truncate text-slate-500 text-xs" title={trx.notes}>
+                    <div className="max-w-[150px] truncate text-slate-500 text-xs" title={trx.notes ?? undefined}>
                       {trx.notes || <span className="text-slate-300 italic">אין הערה</span>}
                     </div>
                   </td>

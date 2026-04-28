@@ -109,8 +109,8 @@ export function FundsManagement() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="max-w-xs text-slate-600 truncate font-medium" title={trx.targetOtherNote || trx.notes}>
-                        {trx.targetOtherNote || trx.notes || <span className="text-slate-300 italic">אין הערה</span>}
+                      <div className="max-w-xs text-slate-600 truncate font-medium" title={trx.notes ?? undefined}>
+                        {trx.notes || trx.notes || <span className="text-slate-300 italic">אין הערה</span>}
                       </div>
                     </td>
                     <td className="px-6 py-4 font-bold text-indigo-600 text-lg">

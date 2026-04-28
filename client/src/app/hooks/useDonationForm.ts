@@ -19,7 +19,7 @@ export function useDonationForm(
     methodId: 1,
     isRecurring: false,
     fundNumber: '', // אתחול
-    targetOtherNote: '', // אתחול
+    notes: '', // אתחול
     installments: 1,
     currency: 'ILS',
     notes: '',
@@ -38,7 +38,7 @@ export function useDonationForm(
         ? editingDonation.date.split('T')[0] 
         : new Date().toISOString().split('T')[0],
       fundNumber: editingDonation.fundNumber || '',
-      targetOtherNote: editingDonation.targetOtherNote || ''
+      notes: editingDonation.notes || ''
     });
   } else {
     // מצב תרומה חדשה - איפוס שדות תוך שמירה על מבנה האובייקט
@@ -48,7 +48,7 @@ export function useDonationForm(
       isRecurring: false,
       installments: 1,
       fundNumber: '',
-      targetOtherNote: '',
+      notes: '',
       notes: '',
       workerName: '',
       currency: 'ILS',
@@ -76,7 +76,7 @@ export function useDonationForm(
       toast.error('חובה להזין מספר קרן');
       return;
     }
-    if (formData.targetId === 3 && !formData.targetOtherNote) {
+    if (formData.targetId === 3 && !formData.notes) {
       toast.error('חובה לפרט את יעד התרומה');
       return;
     }
@@ -104,8 +104,8 @@ export function useDonationForm(
         // השדות הבעייתיים - ודאי שהם נשלחים כ-NULL אם אינם בשימוש
         fundNumber: formData.targetId === 2 ? formData.fundNumber : null,
         fund_number: formData.targetId === 2 ? formData.fundNumber : null,
-        targetOtherNote: formData.targetId === 3 ? formData.targetOtherNote : null,
-        target_other_note: formData.targetId === 3 ? formData.targetOtherNote : null,
+        notes: formData.targetId === 3 ? formData.notes : null,
+        target_other_note: formData.targetId === 3 ? formData.notes : null,
         
         // ניהול תשלומים
         isRecurring: formData.isRecurring,
@@ -145,7 +145,7 @@ const resetForm = () => {
     methodId: 1,
     isRecurring: false,
     fundNumber: '',
-    targetOtherNote: '',
+    notes: '',
     installments: 1,
     currency: 'ILS',
     notes: '',
