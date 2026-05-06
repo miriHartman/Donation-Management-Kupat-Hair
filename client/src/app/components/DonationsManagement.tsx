@@ -230,7 +230,12 @@ export function DonationsManagement() {
                   </td>
                   <td className="px-4 py-4 text-slate-600 font-medium">{trx.branch}</td>
                   <td className="px-4 py-4 text-slate-500 text-xs font-medium">
-                    {trx.date ? new Date(trx.date).toLocaleDateString('he-IL') : '--'}
+                    <div className="flex flex-col">
+                      <span>{trx.date ? new Date(trx.date).toLocaleDateString('he-IL') : '-'}</span>
+                      <span className="text-[10px] text-slate-400">
+                        {trx.date ? new Date(trx.date).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : ''}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-4 py-4 text-slate-700">{trx.workerName || '-'}</td>
                   <td className="px-4 py-4">
