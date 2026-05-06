@@ -229,7 +229,8 @@ export function DonationsManagement() {
                     </div>
                   </td>
                   <td className="px-4 py-4 text-slate-600 font-medium">{trx.branch}</td>
-                  <td className="px-4 py-4 text-slate-500 text-xs">
+                  <td className="px-4 py-4 text-slate-500 text-xs font-medium">
+                    {trx.date ? new Date(trx.date).toLocaleDateString('he-IL') : '--'}
                   </td>
                   <td className="px-4 py-4 text-slate-700">{trx.workerName || '-'}</td>
                   <td className="px-4 py-4">
