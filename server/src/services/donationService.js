@@ -237,7 +237,7 @@ const donationService = {
 
             await db.query(query, [
                 amount, target_id, fund_number, target_other_note, method_id,
-                worker_name, branch_id, notes, is_recurring, months_count, NOW(), id
+                worker_name, branch_id, notes, is_recurring, months_count, new Date(), id
             ]);
 
             return { id, ...data };
