@@ -55,7 +55,7 @@ export function FundsManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-black text-slate-800">ניהול תרומות לקרנות</h2>
-          <p className="text-slate-500 text-sm">מעקב אחר מספרי קרנות והערות מיוחדות</p>
+          <p className="text-slate-500 text-sm">מעקב אחר מספרי קרנות </p>
         </div>
         <div className="relative w-64">
           <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />

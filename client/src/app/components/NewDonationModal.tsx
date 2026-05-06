@@ -74,6 +74,27 @@ const { formData, setFormData, handleSave, loading } = useDonationForm(
   },
   branchId
 );
+useEffect(() => {
+    if (editingDonation) {
+      setFormData({
+        ...editingDonation,
+        // מוודאים המרה נכונה למספרים
+        targetId: Number(editingDonation.targetId) || 1,
+        amount: Number(editingDonation.amount) || 0,
+        installments: Number(editingDonation.installments) || 1,
+        branchId: editingDonation.branchId || branchId,
+        date: editingDonation.date ? editingDonation.date.substring(0, 10) : new Date().toISOString().split('T')[0],
+      });
+      // אם מדובר בסכום מחזורי או עסקת מט"ח, אפשר לעדכן גם את סה"כ לתרומה
+      if (editingDonation.isRecurring) {
+        setTotalAmount(
+          Number(
+            (Number(editingDonation.amount) * Number(editingDonation.installments || 1)).toFixed(2)
+          )
+        );
+      }
+    }
+  }, [editingDonation, setFormData]);
 
 
   const updateMonthlyAmount = (total: number, months: number) => {
