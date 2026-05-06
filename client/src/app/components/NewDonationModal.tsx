@@ -85,10 +85,11 @@ useEffect(() => {
         branchId: editingDonation.branchId || branchId,
         fundNumber: editingDonation.fundNumber || '',
         notes: editingDonation.notes || '',
+        methodId: Number(editingDonation.methodId) || 1, // שמירה על סוג תשלום
         date: editingDonation.date ? editingDonation.date.substring(0, 10) : new Date().toISOString().split('T')[0],
       }));
 
-      // תיקון השגיאה: שימוש ב-setTotalAmount במקום setTotalAmountSetter
+      // עדכון הסכום הכולל במידת הצורך
       if (editingDonation.isRecurring) {
         setTotalAmount(
           Number(

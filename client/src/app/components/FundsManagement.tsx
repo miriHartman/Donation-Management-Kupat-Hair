@@ -44,7 +44,13 @@ export function FundsManagement() {
   const openEditModal = (trx: any) => {
     // מציאת ה-ID של הסניף לפי השם לצורך המודאל
     const foundBranch = allBranches.find((b: any) => b.name === trx.branch);
-    setEditingTransaction({ ...trx, branchId: foundBranch?.id || 0 });
+    
+    // הוספת targetId: 2 כדי שהמודאל יזהה שמדובר בקרנות ויפתח את השדות המתאימים
+    setEditingTransaction({ 
+      ...trx, 
+      branchId: foundBranch?.id || 0,
+      targetId: 2 // מגדיר את היעד להיות קרנות בעריכה
+    });
     setIsModalOpen(true);
   };
 
