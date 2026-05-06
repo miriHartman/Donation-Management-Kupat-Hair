@@ -76,16 +76,19 @@ const { formData, setFormData, handleSave, loading } = useDonationForm(
 );
 useEffect(() => {
     if (editingDonation) {
-      setFormData({
+      setFormData(prev => ({
+        ...prev,
         ...editingDonation,
-        // מוודאים המרה נכונה למספרים
         targetId: Number(editingDonation.targetId) || 1,
         amount: Number(editingDonation.amount) || 0,
         installments: Number(editingDonation.installments) || 1,
         branchId: editingDonation.branchId || branchId,
+        fundNumber: editingDonation.fundNumber || '',
+        notes: editingDonation.notes || '',
         date: editingDonation.date ? editingDonation.date.substring(0, 10) : new Date().toISOString().split('T')[0],
-      });
-      // אם מדובר בסכום מחזורי או עסקת מט"ח, אפשר לעדכן גם את סה"כ לתרומה
+      }));
+
+      // תיקון השגיאה: שימוש ב-setTotalAmount במקום setTotalAmountSetter
       if (editingDonation.isRecurring) {
         setTotalAmount(
           Number(
@@ -94,7 +97,7 @@ useEffect(() => {
         );
       }
     }
-  }, [editingDonation, setFormData]);
+  }, [editingDonation, branchId, setFormData]);
 
 
   const updateMonthlyAmount = (total: number, months: number) => {
