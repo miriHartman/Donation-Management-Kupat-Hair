@@ -22,7 +22,6 @@ export function useDonationForm(
     notes: '', // אתחול
     installments: 1,
     currency: 'ILS',
-    notes: '',
     workerName: '',
     branchId: initialBranchId || 0,
     date: new Date().toISOString().split('T')[0]
@@ -48,7 +47,6 @@ export function useDonationForm(
       isRecurring: false,
       installments: 1,
       fundNumber: '',
-      notes: '',
       notes: '',
       workerName: '',
       currency: 'ILS',
@@ -104,7 +102,6 @@ export function useDonationForm(
         // השדות הבעייתיים - ודאי שהם נשלחים כ-NULL אם אינם בשימוש
         fundNumber: formData.targetId === 2 ? formData.fundNumber : null,
         fund_number: formData.targetId === 2 ? formData.fundNumber : null,
-        notes: formData.targetId === 3 ? formData.notes : null,
         target_other_note: formData.targetId === 3 ? formData.notes : null,
         
         // ניהול תשלומים
@@ -148,7 +145,6 @@ const resetForm = () => {
     notes: '',
     installments: 1,
     currency: 'ILS',
-    notes: '',
     workerName: '',
     branchId: initialBranchId || 0,
     date: new Date().toISOString().split('T')[0]
