@@ -238,5 +238,6 @@ export interface DonationFormData {
   notes?: string;
   isRecurring: boolean;
   installments?: number;
+  branchId?: number; 
   date: string;
 }

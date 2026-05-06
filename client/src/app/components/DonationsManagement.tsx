@@ -265,6 +265,7 @@ export function DonationsManagement() {
       </div>
 
       <NewDonationModal
+        key={editingTransaction?.id || 'new'}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onRefresh={() => { fetchData(); setIsModalOpen(false); }}
