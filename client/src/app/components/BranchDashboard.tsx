@@ -210,7 +210,7 @@ useEffect(() => {
                 <p className={`text-sm font-medium ${hasExistingSummary ? 'text-emerald-600' : 'text-emerald-100 opacity-80'}`}>
                   {hasExistingSummary 
                     ? `נרשם סיכום: ₪${existingTotal?.toLocaleString()} (לחץ לעריכה)` 
-                    : 'מחשבון מזומן לסגירת יום'}
+                    : 'מחשבון מזומן וצקים לסגירת יום'}
                 </p>
               </div>
 

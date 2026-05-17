@@ -78,14 +78,18 @@ export const billService = {
       throw error;
     }
   },
-  // --- פונקציה חדשה שנוספה ---
+// שליפת הסכום שנתרם עד עתה במזומן לצורך השוואה בין הסכום הקיים בקופה בסוף יום
   getExpectedCash: async (branchId: number): Promise<number> => {
     try {
-      const response = await api.get<{ totalCash: number }>(`/donations/cash/${branchId}`);
+      const response = await api.get<{ totalCash: number }>(`/donations/cashAndCheck/${branchId}`);
       return Number(response.data.totalCash) || 0;
     } catch (error) {
       console.error("Error fetching expected cash:", error);
       return 0;
     }
   },
+  getExpectedTotal: async (branchId: number): Promise<number> => {
+    const response = await api.get<{ total: number }>(`/donations/expected/${branchId}`);
+    return Number(response.data.total) || 0;
+},
 };

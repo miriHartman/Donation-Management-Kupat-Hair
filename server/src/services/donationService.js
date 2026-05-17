@@ -1,9 +1,7 @@
 const db = require('../db')
 
 const donationService = {
-    // ========================
     // 1. חישובי Dashboard (ניהול כללי)
-    // ========================
     calculateDashboardStats: async (filters = {}) => {
         try {
             const page = parseInt(filters.page) || 1;
@@ -159,10 +157,8 @@ const donationService = {
         }
     },
 
-    // ========================
     // 3. יצירה ועדכון
-    // ========================
-// ========================
+ 
     createDonation: async (data) => {
         try {
             console.log("📝 Service: createDonation - Adding donation_date...");
@@ -246,16 +242,18 @@ const donationService = {
             throw error;
         }
     },
-
-    getAmountDonationCash: async (branchId) => {
-        const query = `
-            SELECT SUM(amount) AS totalCash 
-            FROM donations 
-            WHERE branch_id = ? AND method_id = 1 AND DATE(created_at) = CURDATE()
-        `;
-        const [rows] = await db.query(query, [branchId]);
-        return parseFloat(rows[0].totalCash) || 0;
-    },
+    // method_id = 1 מזומן, method_id = 2 צ'ק (תבדוק מה ה-id של צ'ק במערכת שלך)
+getAmountDonationCashAndCheck: async (branchId) => {
+    const query = `
+        SELECT SUM(amount) AS total 
+        FROM donations 
+        WHERE branch_id = ? 
+        AND method_id IN (1, 2) 
+        AND DATE(created_at) = CURDATE()
+    `;
+    const [rows] = await db.query(query, [branchId]);
+    return parseFloat(rows[0].total) || 0;
+},
     deleteDonation: async (id) => {
         try {
             console.log(`🗑️ Service: Attempting to delete donation ID: ${id}`);

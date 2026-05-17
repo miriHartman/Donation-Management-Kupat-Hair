@@ -26,10 +26,11 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
   const [recordId, setRecordId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [checks, setChecks] = useState<number>(0); // סכום הצ'קים
 
   // --- Calculations ---
-  const total = Object.entries(bills).reduce((sum, [d, c]) => sum + (Number(d) * c), 0);
-
+const cashTotal = Object.entries(bills).reduce((sum, [d, c]) => sum + (Number(d) * c), 0);
+const total = cashTotal + checks;
   // --- Lifecycle ---
   useEffect(() => {
     if (isOpen) {
@@ -77,13 +78,11 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
     }, 500);
   };
 
-  // --- Save Functionality ---
   const handleSave = async () => {
     setIsLoading(true);
     try {
       // 1. שליפת הסכום הצפוי מהשרת (מה שהוקלד כתרומות מזומן)
-      const expectedTotal = await billService.getExpectedCash(branchId);
-
+    const expectedTotal = await billService.getExpectedTotal(branchId)
       // 2. בדיקה האם יש הפרש בין המחשבון למה שרשום במערכת
       if (total !== expectedTotal) {
         const diff = total - expectedTotal;
@@ -116,17 +115,12 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
       }
 
       // 3. תהליך השמירה בפועל
-      const savePromise = billService.saveSummary(branchId, bills, total, recordId);
+      const data  =await  billService.saveSummary(branchId, bills, total, recordId);
 
-      toast.promise(savePromise, {
-        loading: 'שומר נתונים...',
-        success: (data) => {
-          if (data && data.id) setRecordId(data.id);
-          setShowConfirmModal(true);
-          return 'הנתונים נשמרו בהצלחה';
-        },
-        error: 'שגיאה בשמירת הנתונים',
-      });
+      if (data && data.id) setRecordId(data.id);
+setShowConfirmModal(true);
+toast.success('הנתונים נשמרו בהצלחה');
+
 
     } catch (err) {
       console.error("Save error:", err);
@@ -222,6 +216,20 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
             </div>
           )}
         </div>
+        <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 mt-4">
+    <div className="flex items-center justify-between mb-3">
+        <span className="text-lg font-bold text-slate-800">סכום צ'קים</span>
+        <span className="text-2xl">📝</span>
+    </div>
+    <input
+        type="number"
+        value={checks}
+        onChange={(e) => setChecks(Math.max(0, Number(e.target.value)))}
+        className="w-full text-3xl font-black text-slate-900 text-center border border-slate-200 rounded-2xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
+        placeholder="0"
+        min={0}
+    />
+</div>
       </main>
 
       {/* Footer / Summary Bar */}
