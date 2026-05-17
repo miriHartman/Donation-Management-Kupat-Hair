@@ -242,13 +242,13 @@ const donationService = {
             throw error;
         }
     },
-    // method_id = 1 מזומן, method_id = 2 צ'ק (תבדוק מה ה-id של צ'ק במערכת שלך)
 getAmountDonationCashAndCheck: async (branchId) => {
+    // כאשר התרומה במזומן 1 או צק -3
     const query = `
         SELECT SUM(amount) AS total 
         FROM donations 
         WHERE branch_id = ? 
-        AND method_id IN (1, 2) 
+        AND method_id IN (1, 3) 
         AND DATE(created_at) = CURDATE()
     `;
     const [rows] = await db.query(query, [branchId]);
