@@ -89,7 +89,7 @@ export const billService = {
     }
   },
   getExpectedTotal: async (branchId: number): Promise<number> => {
-    const response = await api.get<{ total: number }>(`/donations/expected/${branchId}`);
+    const response = await api.get<{ total: number }>(`/donations/cashAndCheck/${branchId}`);
     return Number(response.data.total) || 0;
 },
 };
