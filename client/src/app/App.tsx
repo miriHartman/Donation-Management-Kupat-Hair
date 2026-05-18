@@ -4,6 +4,7 @@ import { BranchSelector } from './components/BranchSelector';
 import { BranchDashboard } from './components/BranchDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
 import { Layout } from './components/ui/Layout';
+import { useTokenExpiry } from './hooks/useAuth';
 
 export type ViewState = 'login' | 'branchSelector' | 'branch' | 'admin';
 
@@ -12,6 +13,13 @@ export type ViewState = 'login' | 'branchSelector' | 'branch' | 'admin';
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewState>('login');
   const [selectedBranch, setSelectedBranch] = useState<{ id: number; name: string } | null>(null);
+
+useTokenExpiry(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('loginTime');
+    setCurrentView('login');
+});
 
   useEffect(() => {
     const token = localStorage.getItem('token');

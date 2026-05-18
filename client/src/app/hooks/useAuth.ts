@@ -42,3 +42,22 @@ export function useUsers() {
 
   return { users, isLoading };
 }
+export function useTokenExpiry(onExpired: () => void) {
+    useEffect(() => {
+        // בדיקה מיידית בטעינה
+        if (!authService.checkTokenExpiry()) {
+            onExpired();
+            return;
+        }
+
+        // בדיקה כל דקה
+        const interval = setInterval(() => {
+            if (!authService.checkTokenExpiry()) {
+                toast.error('פג תוקף החיבור, אנא התחבר מחדש');
+                onExpired();
+            }
+        }, 60 * 1000);
+
+        return () => clearInterval(interval);
+    }, []);
+}

@@ -11,6 +11,7 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/'; // ירענן את הדף ויחזיר ללוגין בגלל ה-useEffect
+      
     }
     return Promise.reject(error);
   }
@@ -33,9 +34,26 @@ export const authService = {
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('loginTime', Date.now().toString()); 
     }
     return response.data;
   }
+  ,
+  checkTokenExpiry: () => {
+    const loginTime = localStorage.getItem('loginTime');
+    if (!loginTime) return false;
+
+    const EIGHTEEN_HOURS = 18 * 60 * 60 * 1000;
+    const elapsed = Date.now() - Number(loginTime);
+
+    if (elapsed > EIGHTEEN_HOURS) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('loginTime');
+        return false; // פג תוקף
+    }
+    return true; // תקף
+}
 };
 export const userService = {
   getAllUsernames: async (): Promise<string[]> => {
@@ -43,5 +61,7 @@ export const userService = {
     return response.data;
   }
 };
+
+
 
 
