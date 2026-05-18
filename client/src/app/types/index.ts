@@ -90,22 +90,13 @@ export interface Transaction {
   fundNumber?: string | null;      
   notes?: string | null; 
 }
-  export interface BranchSummary {
-  name: string;
-  amount: number;
-  count: number;
-}
+ 
 
 export interface BranchSummaryWithPercentage extends BranchSummary {
   percentage: number;
 }
 
-// ==================== DASHBOARD TYPES ====================
-export interface DashboardStats {
-  total: number;
-  donations: number;
-  branches: BranchInfo[];
-}
+// ==================== DASHBOARD TYPES ==================
 
 export interface BranchInfo {
   id: number;
@@ -240,4 +231,22 @@ export interface DonationFormData {
   installments?: number;
   branchId?: number; 
   date: string;
+}
+export interface DashboardStats {
+  total: number;
+  donations: number;
+  branches: BranchInfo[];
+  totalCash?: number;
+  totalCredit?: number;
+  totalCheck?: number;
+  totalStandingOrder?: number;
+}
+export interface BranchSummary {
+  name: string;
+  amount: number;
+  count: number;
+  cashAmount?: number;
+  creditAmount?: number;
+  checkAmount?: number;
+  standingOrderAmount?: number;
 }

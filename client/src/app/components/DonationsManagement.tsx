@@ -135,12 +135,86 @@ export function DonationsManagement() {
             סה"כ יומי: ₪{todaySummary?.total?.toLocaleString() || 0}
           </div>
         </div>
+
+        {/* פירוט לפי אמצעי תשלום — סה"כ כללי */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+          <div className="bg-green-50 border border-green-100 rounded-xl p-3 flex items-center gap-3">
+            <Wallet className="w-5 h-5 text-green-600 shrink-0" />
+            <div>
+              <p className="text-[10px] text-green-700 font-bold">מזומן</p>
+              <p className="text-lg font-black text-green-800">
+                ₪{(todaySummary?.totalCash || 0).toLocaleString()}
+              </p>
+            </div>
+          </div>
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-center gap-3">
+            <CreditCard className="w-5 h-5 text-blue-600 shrink-0" />
+            <div>
+              <p className="text-[10px] text-blue-700 font-bold">אשראי</p>
+              <p className="text-lg font-black text-blue-800">
+                ₪{(todaySummary?.totalCredit || 0).toLocaleString()}
+              </p>
+            </div>
+          </div>
+          <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-center gap-3">
+            <FileText className="w-5 h-5 text-amber-600 shrink-0" />
+            <div>
+              <p className="text-[10px] text-amber-700 font-bold">צ'קים</p>
+              <p className="text-lg font-black text-amber-800">
+                ₪{(todaySummary?.totalCheck || 0).toLocaleString()}
+              </p>
+            </div>
+          </div>
+          <div className="bg-purple-50 border border-purple-100 rounded-xl p-3 flex items-center gap-3">
+            <Repeat className="w-5 h-5 text-purple-600 shrink-0" />
+            <div>
+              <p className="text-[10px] text-purple-700 font-bold">הו"ק</p>
+              <p className="text-lg font-black text-purple-800">
+                ₪{(todaySummary?.totalStandingOrder || 0).toLocaleString()}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* פירוט לפי סניף */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {todaySummary?.branches?.map((branch: any, idx: number) => (
-            <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col items-center shadow-sm">
-              <span className="text-xs text-slate-500 font-bold mb-1 truncate w-full text-center">{branch.name}</span>
-              <span className="text-lg font-black text-indigo-600">₪{(branch.amount || 0).toLocaleString()}</span>
-              <span className="text-[10px] text-slate-400 mt-2">{branch.count || 0} תרומות</span>
+            <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col shadow-sm">
+              <span className="text-xs text-slate-500 font-bold mb-2 truncate text-center">
+                {branch.name}
+              </span>
+              <span className="text-lg font-black text-indigo-600 text-center mb-2">
+                ₪{(branch.amount || 0).toLocaleString()}
+              </span>
+              <div className="flex flex-col gap-1 text-[10px] font-medium">
+                {branch.cashAmount > 0 && (
+                  <span className="flex justify-between text-green-700">
+                    <span>💵 מזומן</span>
+                    <span>₪{branch.cashAmount.toLocaleString()}</span>
+                  </span>
+                )}
+                {branch.creditAmount > 0 && (
+                  <span className="flex justify-between text-blue-700">
+                    <span>💳 אשראי</span>
+                    <span>₪{branch.creditAmount.toLocaleString()}</span>
+                  </span>
+                )}
+                {branch.checkAmount > 0 && (
+                  <span className="flex justify-between text-amber-700">
+                    <span>📝 צ'ק</span>
+                    <span>₪{branch.checkAmount.toLocaleString()}</span>
+                  </span>
+                )}
+                {branch.standingOrderAmount > 0 && (
+                  <span className="flex justify-between text-purple-700">
+                    <span>🔄 הו"ק</span>
+                    <span>₪{branch.standingOrderAmount.toLocaleString()}</span>
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] text-slate-400 mt-2 text-center">
+                {branch.count || 0} תרומות
+              </span>
             </div>
           ))}
         </div>

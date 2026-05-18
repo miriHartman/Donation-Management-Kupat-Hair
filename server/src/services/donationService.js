@@ -83,11 +83,18 @@ const donationService = {
             const [recentTransactions] = await db.query(transactionsQuery, [...queryParams, limit, offset]);
 
             const [todayBranchData] = await db.query(`
-                SELECT b.name, COALESCE(SUM(d.amount), 0) as amount, COUNT(d.id) as count
-                FROM branches b
-                LEFT JOIN donations d ON b.id = d.branch_id AND DATE(d.created_at) = CURDATE()
-                GROUP BY b.id, b.name
-            `);
+    SELECT 
+        b.name,
+        COALESCE(SUM(d.amount), 0) as amount,
+        COUNT(d.id) as count,
+        COALESCE(SUM(CASE WHEN d.method_id = 1 THEN d.amount ELSE 0 END), 0) as cashAmount,
+        COALESCE(SUM(CASE WHEN d.method_id = 2 THEN d.amount ELSE 0 END), 0) as creditAmount,
+        COALESCE(SUM(CASE WHEN d.method_id = 3 THEN d.amount ELSE 0 END), 0) as checkAmount,
+        COALESCE(SUM(CASE WHEN d.method_id = 4 THEN d.amount ELSE 0 END), 0) as standingOrderAmount
+    FROM branches b
+    LEFT JOIN donations d ON b.id = d.branch_id AND DATE(d.created_at) = CURDATE()
+    GROUP BY b.id, b.name
+`);
 
             return {
                 stats: [
@@ -97,16 +104,24 @@ const donationService = {
                 ],
                 todaySummary: {
                     total: todayBranchData.reduce((sum, b) => sum + (parseFloat(b.amount) || 0), 0),
+                    totalCash: todayBranchData.reduce((sum, b) => sum + (parseFloat(b.cashAmount) || 0), 0),
+                    totalCredit: todayBranchData.reduce((sum, b) => sum + (parseFloat(b.creditAmount) || 0), 0),
+                    totalCheck: todayBranchData.reduce((sum, b) => sum + (parseFloat(b.checkAmount) || 0), 0),
+                    totalStandingOrder: todayBranchData.reduce((sum, b) => sum + (parseFloat(b.standingOrderAmount) || 0), 0),
                     branches: todayBranchData.map(b => ({
                         name: b.name,
                         amount: parseFloat(b.amount) || 0,
-                        count: b.count || 0
+                        count: b.count || 0,
+                        cashAmount: parseFloat(b.cashAmount) || 0,
+                        creditAmount: parseFloat(b.creditAmount) || 0,
+                        checkAmount: parseFloat(b.checkAmount) || 0,
+                        standingOrderAmount: parseFloat(b.standingOrderAmount) || 0
                     }))
                 },
                 branchSummary,
                 transactions: recentTransactions.map(t => ({
                     ...t,
-                   date: t.date ? new Date(t.date).toLocaleString('sv-SE', { timeZone: 'Asia/Jerusalem' }).replace(' ', 'T') : null,
+                    date: t.date ? new Date(t.date).toLocaleString('sv-SE', { timeZone: 'Asia/Jerusalem' }).replace(' ', 'T') : null,
                     amount: parseFloat(t.amount) || 0,
                     isRecurring: t.isRecurring === 1 || t.isRecurring === true
                 })),
@@ -158,7 +173,7 @@ const donationService = {
     },
 
     // 3. יצירה ועדכון
- 
+
     createDonation: async (data) => {
         try {
             console.log("📝 Service: createDonation - Adding donation_date...");
@@ -183,16 +198,16 @@ const donationService = {
             `;
 
             const values = [
-                amount, 
-                target_id, 
-                fund_number, 
-                target_other_note, 
+                amount,
+                target_id,
+                fund_number,
+                target_other_note,
                 method_id,
-                worker_name, 
-                branch_id, 
-                notes, 
-                created_by, 
-                is_recurring, 
+                worker_name,
+                branch_id,
+                notes,
+                created_by,
+                is_recurring,
                 months_count
             ];
 
@@ -203,7 +218,7 @@ const donationService = {
 
         } catch (error) {
             console.error("❌ SQL Error in createDonation:", error.message);
-            throw error; 
+            throw error;
         }
     },
 
@@ -242,9 +257,9 @@ const donationService = {
             throw error;
         }
     },
-getAmountDonationCashAndCheck: async (branchId) => {
-    // כאשר התרומה במזומן 1 או צק -3
-    const query = `
+    getAmountDonationCashAndCheck: async (branchId) => {
+        // כאשר התרומה במזומן 1 או צק -3
+        const query = `
         SELECT 
             SUM(CASE WHEN method_id = 1 THEN amount ELSE 0 END) AS totalCash,
             SUM(CASE WHEN method_id = 3 THEN amount ELSE 0 END) AS totalCheck
@@ -252,30 +267,30 @@ getAmountDonationCashAndCheck: async (branchId) => {
         WHERE branch_id = ? 
         AND DATE(created_at) = CURDATE()
     `;
-    const [rows] = await db.query(query, [branchId]);
-    return {
-        totalCash: parseFloat(rows[0].totalCash) || 0,
-        totalCheck: parseFloat(rows[0].totalCheck) || 0
-    };
-},
+        const [rows] = await db.query(query, [branchId]);
+        return {
+            totalCash: parseFloat(rows[0].totalCash) || 0,
+            totalCheck: parseFloat(rows[0].totalCheck) || 0
+        };
+    },
     deleteDonation: async (id) => {
         try {
             console.log(`🗑️ Service: Attempting to delete donation ID: ${id}`);
-            
+
             // שימוש ב-execute במקום query
             const [result] = await db.execute('DELETE FROM donations WHERE id = ?', [id]);
-            
+
             console.log(`✅ Delete result: affectedRows = ${result.affectedRows}`);
             return result.affectedRows > 0;
         } catch (error) {
             console.error("❌ SQL Error in deleteDonation:", error.message);
             // אם יש שגיאת Foreign Key, אנחנו נראה אותה בלוגים של Render
-            throw error; 
+            throw error;
         }
     },
-getFundsDonations: async () => {
-    try {
-        const query = `
+    getFundsDonations: async () => {
+        try {
+            const query = `
             SELECT 
                 d.id,
                 d.amount,
@@ -291,13 +306,13 @@ getFundsDonations: async () => {
             WHERE d.target_id = 2 OR d.fund_number IS NOT NULL
             ORDER BY d.created_at DESC
         `;
-        const [rows] = await db.query(query);
-        return rows;
-    } catch (error) {
-        console.error("Service Error (getFundsDonations):", error);
-        throw error;
+            const [rows] = await db.query(query);
+            return rows;
+        } catch (error) {
+            console.error("Service Error (getFundsDonations):", error);
+            throw error;
+        }
     }
-}
 };
 
 module.exports = donationService;
