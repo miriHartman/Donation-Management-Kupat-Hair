@@ -85,12 +85,12 @@ const donationService = {
             const [todayBranchData] = await db.query(`
     SELECT 
         b.name,
-        COALESCE(SUM(d.amount), 0) as amount,
+        COALESCE(SUM(d.amount * COALESCE(d.months_count, 1)), 0) as amount,
         COUNT(d.id) as count,
-        COALESCE(SUM(CASE WHEN d.method_id = 1 THEN d.amount ELSE 0 END), 0) as cashAmount,
-        COALESCE(SUM(CASE WHEN d.method_id = 2 THEN d.amount ELSE 0 END), 0) as creditAmount,
-        COALESCE(SUM(CASE WHEN d.method_id = 3 THEN d.amount ELSE 0 END), 0) as checkAmount,
-        COALESCE(SUM(CASE WHEN d.method_id = 4 THEN d.amount ELSE 0 END), 0) as standingOrderAmount
+        COALESCE(SUM(CASE WHEN d.method_id = 1 THEN d.amount * COALESCE(d.months_count, 1) ELSE 0 END), 0) as cashAmount,
+        COALESCE(SUM(CASE WHEN d.method_id = 2 THEN d.amount * COALESCE(d.months_count, 1) ELSE 0 END), 0) as creditAmount,
+        COALESCE(SUM(CASE WHEN d.method_id = 3 THEN d.amount * COALESCE(d.months_count, 1) ELSE 0 END), 0) as checkAmount,
+        COALESCE(SUM(CASE WHEN d.method_id = 4 THEN d.amount * COALESCE(d.months_count, 1) ELSE 0 END), 0) as standingOrderAmount
     FROM branches b
     LEFT JOIN donations d ON b.id = d.branch_id AND DATE(d.created_at) = CURDATE()
     GROUP BY b.id, b.name
