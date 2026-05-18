@@ -2,13 +2,12 @@ const cron = require('node-cron');
 const axios = require('axios');
 const db = require('../db');
 
-const BOI_URL = 'https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0/RER_USD_ILS,RER_EUR_ILS?lastNObservations=1&format=sdmx-json';
-
+const BANK_RATES_API_KEY = process.env.BANK_RATES_API_KEY;
 async function updateExchangeRates() {
     try {
         console.log('Fetching rates from Bank of Israel...');
 
-        const response = await axios.get(BOI_URL);
+        const response = await axios.get(BANK_RATES_API_KEY);
 
         const series = response.data.data.dataSets[0].series;
         const seriesValues = response.data.data.structure.dimensions.series[0].values;

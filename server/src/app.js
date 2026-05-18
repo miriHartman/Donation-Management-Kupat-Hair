@@ -3,6 +3,7 @@ const db = require('./db');
 const express = require('express');
 const cors = require('cors');
 const app = express();
+require('./cron/keepAlive');
 
 // CORS Configuration
 app.use(cors());
@@ -33,6 +34,9 @@ app.use('/api/exchange-rates', exchangeRateRoutes);
 app.get('/test-date', async (req, res) => {
   const [rows] = await db.query('SELECT created_at FROM donations ORDER BY id DESC LIMIT 5');
   res.json(rows);
+});
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok' });
 });
 
 // Health check endpoint
