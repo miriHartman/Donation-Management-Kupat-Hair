@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { AxiosError } from 'axios';
 import { authService, userService } from '../services/authService';
 import { toast } from 'sonner';
+import { branchService } from '../services/branchService';
 
-export function useAuth(onLoginSuccess: () => void) {
+export function useAuth(onLoginSuccess: (view: 'branch' | 'branchSelector', branch?: { id: number; name: string }) => void) {
   const [loading, setLoading] = useState(false);
 
   const login = async (username: string, password: string) => {
@@ -15,12 +16,30 @@ export function useAuth(onLoginSuccess: () => void) {
     setLoading(true);
     try {
       await authService.login(username, password);
+      
+      const userString = localStorage.getItem('user');
+      const user = userString ? JSON.parse(userString) : null;
+
+      if (user?.role === 'admin') {
+        toast.success('התחברת בהצלחה למערכת');
+        onLoginSuccess('branchSelector');
+        return;
+      }
+
+      // משתמש רגיל — מצא סניף לפי שם
+      const branches = await branchService.getBranches();
+      const matched = branches.find((b: { name: string; }) => b.name === username);
+
       toast.success('התחברת בהצלחה למערכת');
-      onLoginSuccess();
+      if (matched) {
+        onLoginSuccess('branch', { id: matched.id, name: matched.name });
+      } else {
+        onLoginSuccess('branchSelector');
+      }
+
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
-      const message = axiosError.response?.data?.message || 'שגיאת התחברות';
-      toast.error(message);
+      toast.error(axiosError.response?.data?.message || 'שגיאת התחברות');
     } finally {
       setLoading(false);
     }
@@ -61,3 +80,4 @@ export function useTokenExpiry(onExpired: () => void) {
         return () => clearInterval(interval);
     }, []);
 }
+  

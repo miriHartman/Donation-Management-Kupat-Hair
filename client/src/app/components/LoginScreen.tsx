@@ -3,7 +3,7 @@ import { User, Check, ChevronDown } from 'lucide-react';
 import { useAuth, useUsers } from '../hooks/useAuth';
 
 interface LoginScreenProps {
-  onLogin: () => void;
+  onLogin: (view: 'branch' | 'branchSelector', branch?: { id: number; name: string }) => void;
 }
 
 export function LoginScreen({ onLogin }: LoginScreenProps) {

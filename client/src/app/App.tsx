@@ -28,10 +28,14 @@ useTokenExpiry(() => {
       setCurrentView('branchSelector');
     }
   }, []);
-
-  const handleLogin = () => {
-    setCurrentView('branchSelector');
-  };
+//כניסה ישירה לסניף
+const handleLogin = (
+  view: 'branch' | 'branchSelector', 
+  branch?: { id: number; name: string }
+) => {
+  if (branch) setSelectedBranch(branch);
+  setCurrentView(view);
+};
 
   const handleLogout = () => {
     // חשוב: במחיקת לוגאוט, ננקה גם את הטוקן
