@@ -3,7 +3,6 @@ const db = require('./db');
 const express = require('express');
 const cors = require('cors');
 const app = express();
-require('./jobs/keepAlive');
 
 // CORS Configuration
 app.use(cors());
@@ -16,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 // API Routes
 // ========================
 require('./jobs/bank_rates'); // Bank rates update job
+require('./jobs/keepServerAlive');
 
 const branchRouter = require('./routers/branchRoutes');
 app.use('/api/branches', branchRouter);
