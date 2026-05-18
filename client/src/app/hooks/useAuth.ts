@@ -16,7 +16,7 @@ export function useAuth(onLoginSuccess: (view: 'branch' | 'branchSelector', bran
     setLoading(true);
     try {
       await authService.login(username, password);
-      
+
       const userString = localStorage.getItem('user');
       const user = userString ? JSON.parse(userString) : null;
 
@@ -29,7 +29,18 @@ export function useAuth(onLoginSuccess: (view: 'branch' | 'branchSelector', bran
       // משתמש רגיל — מצא סניף לפי שם
       const branches = await branchService.getBranches();
       const matched = branches.find((b: { name: string; }) => b.name === username);
+      if (matched) {
+        // הוסף את זה לפני onLoginSuccess:
+        const userString = localStorage.getItem('user');
+        const user = userString ? JSON.parse(userString) : {};
+        localStorage.setItem('user', JSON.stringify({
+          ...user,
+          branchId: matched.id,
+          branchName: matched.name
+        }));
 
+        onLoginSuccess('branch', { id: matched.id, name: matched.name });
+      }
       toast.success('התחברת בהצלחה למערכת');
       if (matched) {
         onLoginSuccess('branch', { id: matched.id, name: matched.name });
@@ -62,22 +73,21 @@ export function useUsers() {
   return { users, isLoading };
 }
 export function useTokenExpiry(onExpired: () => void) {
-    useEffect(() => {
-        // בדיקה מיידית בטעינה
-        if (!authService.checkTokenExpiry()) {
-            onExpired();
-            return;
-        }
+  useEffect(() => {
+    // בדיקה מיידית בטעינה
+    if (!authService.checkTokenExpiry()) {
+      onExpired();
+      return;
+    }
 
-        // בדיקה כל דקה
-        const interval = setInterval(() => {
-            if (!authService.checkTokenExpiry()) {
-                toast.error('פג תוקף החיבור, אנא התחבר מחדש');
-                onExpired();
-            }
-        }, 60 * 1000);
+    // בדיקה כל דקה
+    const interval = setInterval(() => {
+      if (!authService.checkTokenExpiry()) {
+        toast.error('פג תוקף החיבור, אנא התחבר מחדש');
+        onExpired();
+      }
+    }, 60 * 1000);
 
-        return () => clearInterval(interval);
-    }, []);
+    return () => clearInterval(interval);
+  }, []);
 }
-  

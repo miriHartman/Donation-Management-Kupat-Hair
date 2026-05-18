@@ -14,28 +14,37 @@ export default function App() {
   const [currentView, setCurrentView] = useState<ViewState>('login');
   const [selectedBranch, setSelectedBranch] = useState<{ id: number; name: string } | null>(null);
 
-useTokenExpiry(() => {
+  useTokenExpiry(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('loginTime');
     setCurrentView('login');
-});
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
-      // אם יש טוקן, נעבור ישר לבחירת סניף
+    if (!token) return;
+
+    const userString = localStorage.getItem('user');
+    const user = userString ? JSON.parse(userString) : null;
+
+    if (user?.role === 'admin') {
+      setCurrentView('branchSelector');
+    } else if (user?.branchId && user?.branchName) {
+      setSelectedBranch({ id: user.branchId, name: user.branchName });
+      setCurrentView('branch');
+    } else {
       setCurrentView('branchSelector');
     }
   }, []);
-//כניסה ישירה לסניף
-const handleLogin = (
-  view: 'branch' | 'branchSelector', 
-  branch?: { id: number; name: string }
-) => {
-  if (branch) setSelectedBranch(branch);
-  setCurrentView(view);
-};
+  //כניסה ישירה לסניף
+  const handleLogin = (
+    view: 'branch' | 'branchSelector',
+    branch?: { id: number; name: string }
+  ) => {
+    if (branch) setSelectedBranch(branch);
+    setCurrentView(view);
+  };
 
   const handleLogout = () => {
     // חשוב: במחיקת לוגאוט, ננקה גם את הטוקן
@@ -53,27 +62,27 @@ const handleLogin = (
     setCurrentView('admin');
   };
 
-  
+
   // פונקציה חדשה: חזרה לבחירת סניף
   const handleBackToSelector = () => {
     setCurrentView('branchSelector');
   };
 
 
-  
+
 
   return (
     <Layout>
       {currentView === 'login' && <LoginScreen onLogin={handleLogin} />}
       {currentView === 'branchSelector' && (
-        <BranchSelector 
-          onSelectBranch={handleBranchSelect} 
+        <BranchSelector
+          onSelectBranch={handleBranchSelect}
           onAdminAccess={handleAdminAccess}
         />
       )}
       {currentView === 'branch' && selectedBranch && (
-        <BranchDashboard 
-          onLogout={handleLogout} 
+        <BranchDashboard
+          onLogout={handleLogout}
           onBack={handleBackToSelector}
           branchName={selectedBranch.name}
           branchId={selectedBranch.id}
