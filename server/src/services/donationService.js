@@ -245,14 +245,18 @@ const donationService = {
 getAmountDonationCashAndCheck: async (branchId) => {
     // כאשר התרומה במזומן 1 או צק -3
     const query = `
-        SELECT SUM(amount) AS total 
+        SELECT 
+            SUM(CASE WHEN method_id = 1 THEN amount ELSE 0 END) AS totalCash,
+            SUM(CASE WHEN method_id = 3 THEN amount ELSE 0 END) AS totalCheck
         FROM donations 
         WHERE branch_id = ? 
-        AND method_id IN (1, 3) 
         AND DATE(created_at) = CURDATE()
     `;
     const [rows] = await db.query(query, [branchId]);
-    return parseFloat(rows[0].total) || 0;
+    return {
+        totalCash: parseFloat(rows[0].totalCash) || 0,
+        totalCheck: parseFloat(rows[0].totalCheck) || 0
+    };
 },
     deleteDonation: async (id) => {
         try {

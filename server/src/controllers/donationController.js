@@ -90,14 +90,13 @@ const donationController = {
     },
 // 8. שליפת סכום התרומות במזומן ובצק של היום לסניף מסוים
     getAmountDonationCashAndCheck: async (req, res) => {
-        try {
-            const { branchId } = req.params;
-            const totalCash = await donationService.getAmountDonationCashAndCheck(branchId);
-            res.json({ totalCash });
-        } catch (error) {
-            console.error("Controller Error (getAmountDonationCash):", error);
-            res.status(500).json({ message: "שגיאה בשליפת סכום התרומות במזומן" });
-        }
+       try {
+        const { branchId } = req.params;
+        const totals = await donationService.getAmountDonationCashAndCheck(branchId);
+        res.json(totals); // { totalCash, totalCheck }
+    } catch (error) {
+        res.status(500).json({ message: "שגיאה" });
+    }
 },
 
  getFundsDonations: async (req, res) => {

@@ -19,7 +19,7 @@ export const billService = {
       const response = await api.get<CashReportResponse>(`/cash-reports/${branchId}`);
       const data = response.data;
 
-      if (!data) return null; // ← הגנה נוספת
+      if (!data) return null; //  הגנה נוספת
 
       return {
         id: data.id ?? null,
@@ -35,10 +35,10 @@ export const billService = {
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response?.status === 404) {
-        return null; // ← תקין, אין דיווח להיום
+        return null; //  תקין, אין דיווח להיום
       }
       console.error("Error fetching daily summary:", error);
-      return null; // ← במקום throw — מחזיר null ולא קורס
+      return null; //  במקום throw — מחזיר null ולא קורס
     }
   },
 
@@ -64,13 +64,18 @@ export const billService = {
   },
 
   // מזומן + צ'ק ביחד
-  getExpectedTotal: async (branchId: number): Promise<number> => {
+  getAmountCheckAndCash: async (branchId: number): Promise<{ totalCash: number; totalCheck: number }> => {
     try {
-      const response = await api.get<{ totalCash: number }>(`/donations/cashAndCheck/${branchId}`);
-      return Number(response.data.totalCash) || 0;
+        const response = await api.get<{ totalCash: number; totalCheck: number }>(
+            `/donations/cashAndCheck/${branchId}`
+        );
+        return {
+            totalCash: Number(response.data.totalCash) || 0,
+            totalCheck: Number(response.data.totalCheck) || 0
+        };
     } catch (error) {
-      console.error("Error fetching expected total:", error);
-      return 0;
+        console.error("Error fetching by method:", error);
+        return { totalCash: 0, totalCheck: 0 };
     }
-  },
+},
 };

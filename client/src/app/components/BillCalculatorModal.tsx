@@ -81,54 +81,79 @@ const total = cashTotal + checks;
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      // 1. שליפת הסכום הצפוי מהשרת (מה שהוקלד כתרומות מזומן)
-    const expectedTotal = await billService.getExpectedTotal(branchId)
-      // 2. בדיקה האם יש הפרש בין המחשבון למה שרשום במערכת
-      if (total !== expectedTotal) {
-        const diff = total - expectedTotal;
-        const diffText = diff > 0 ? `עודף של ₪${diff}` : `חוסר של ₪${Math.abs(diff)}`;
+        // שליפת מזומן + צ'ק בנפרד מהשרת
+        const expected = await billService.getAmountCheckAndCash(branchId);
 
-        const result = await Swal.fire({
-          title: 'נמצא הפרש בספירה',
-          html: `
-            <div class="text-right" dir="rtl" style="text-align: right;">
-              <p>סכום התרומות במערכת: <b>₪${expectedTotal.toLocaleString()}</b></p>
-              <p>סכום שספרת כעת: <b>₪${total.toLocaleString()}</b></p>
-              <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;"/>
-              <p style="color: ${diff > 0 ? '#059669' : '#e11d48'}; font-weight: bold; font-size: 1.1em;">${diffText}</p>
-            </div>
-          `,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'ספירה מחדש',
-          cancelButtonText: 'השארתי בקופה (המשך שמירה)',
-          confirmButtonColor: '#3b82f6',
-          cancelButtonColor: '#64748b',
-          reverseButtons: true
-        });
+        const cashDiff = cashTotal - expected.totalCash;
+        const checkDiff = checks - expected.totalCheck;
 
-        // אם המשתמש בחר "ספירה מחדש" - פשוט עוצרים כאן
-        if (result.isConfirmed) {
-          setIsLoading(false);
-          return;
+        const hasCashDiff = cashDiff !== 0;
+        const hasCheckDiff = checkDiff !== 0;
+
+        // אם יש הפרש באחד מהערוצים — מציגים התראה
+        if (hasCashDiff || hasCheckDiff) {
+            const cashRow = hasCashDiff ? `
+                <tr>
+                    <td style="padding:6px 8px;">💵 מזומן</td>
+                    <td style="padding:6px 8px;">₪${expected.totalCash.toLocaleString()}</td>
+                    <td style="padding:6px 8px;">₪${cashTotal.toLocaleString()}</td>
+                    <td style="padding:6px 8px; color:${cashDiff > 0 ? '#059669' : '#e11d48'}; font-weight:bold;">
+                        ${cashDiff > 0 ? '+' : ''}₪${cashDiff.toLocaleString()}
+                    </td>
+                </tr>` : '';
+
+            const checkRow = hasCheckDiff ? `
+                <tr>
+                    <td style="padding:6px 8px;">📝 צ'קים</td>
+                    <td style="padding:6px 8px;">₪${expected.totalCheck.toLocaleString()}</td>
+                    <td style="padding:6px 8px;">₪${checks.toLocaleString()}</td>
+                    <td style="padding:6px 8px; color:${checkDiff > 0 ? '#059669' : '#e11d48'}; font-weight:bold;">
+                        ${checkDiff > 0 ? '+' : ''}₪${checkDiff.toLocaleString()}
+                    </td>
+                </tr>` : '';
+
+            const result = await Swal.fire({
+                title: 'נמצא הפרש בספירה',
+                html: `
+                    <div dir="rtl" style="text-align:right;">
+                        <table style="width:100%; border-collapse:collapse; font-size:0.95em;">
+                            <thead>
+                                <tr style="border-bottom:1px solid #eee; color:#64748b; font-size:0.85em;">
+                                    <th style="padding:6px 8px; text-align:right;">ערוץ</th>
+                                    <th style="padding:6px 8px; text-align:right;">במערכת</th>
+                                    <th style="padding:6px 8px; text-align:right;">נספר</th>
+                                    <th style="padding:6px 8px; text-align:right;">הפרש</th>
+                                </tr>
+                            </thead>
+                            <tbody>${cashRow}${checkRow}</tbody>
+                        </table>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ספירה מחדש',
+                cancelButtonText: 'המשך שמירה',
+                confirmButtonColor: '#3b82f6',
+                cancelButtonColor: '#64748b',
+                reverseButtons: true
+            });
+
+            if (result.isConfirmed) return;
         }
-      }
 
-      // 3. תהליך השמירה בפועל
-      const data  =await  billService.saveSummary(branchId, bills, total, recordId);
-
-      if (data && data.id) setRecordId(data.id);
-setShowConfirmModal(true);
-toast.success('הנתונים נשמרו בהצלחה');
-
+        // שמירה בפועל
+        const data = await billService.saveSummary(branchId, bills, total, recordId);
+        if (data && data.id) setRecordId(data.id);
+        setShowConfirmModal(true);
+        toast.success('הנתונים נשמרו בהצלחה');
 
     } catch (err) {
-      console.error("Save error:", err);
-      toast.error("קרתה שגיאה בתהליך האימות");
+        console.error("Save error:", err);
+        toast.error("קרתה שגיאה בתהליך האימות");
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
+};
 
   if (!isOpen) return null;
 
