@@ -28,7 +28,10 @@ export function useAuth(onLoginSuccess: (view: 'branch' | 'branchSelector', bran
 
       // משתמש רגיל — מצא סניף לפי שם
       const branches = await branchService.getBranches();
-      const matched = branches.find((b: { name: string; }) => b.name === username);
+      console.log('branches:', branches);
+      console.log('username:', username);
+      const matched = branches.find((b: { name: string }) => b.name === username);
+      console.log('matched:', matched);
       if (matched) {
         // הוסף את זה לפני onLoginSuccess:
         const userString = localStorage.getItem('user');
