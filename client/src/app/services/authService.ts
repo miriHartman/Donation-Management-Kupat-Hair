@@ -53,6 +53,10 @@ export const authService = {
         return false; // פג תוקף
     }
     return true; // תקף
+},
+createUser: async (data: { username: string; password: string; branchId: number }) => {
+    const response = await api.post('/auth/create', data);
+    return response.data;
 }
 };
 export const userService = {
@@ -61,6 +65,7 @@ export const userService = {
     return response.data;
   }
 };
+
 
 
 

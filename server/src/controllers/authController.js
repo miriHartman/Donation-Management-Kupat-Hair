@@ -48,7 +48,19 @@ res.status(200).json({
             error: error.message
         });
     }
-}}
+},
+createUser: async (req, res) => {
+    try {
+        const user = await AuthService.createUser(req.body);
+        res.status(201).json(user);
+    } catch (error) {
+        console.error('Controller Error (createUser):', error);
+        res.status(500).json({ message: 'שגיאה ביצירת משתמש', error: error.message });
+    }
+}
+
+
+}
 
 
 module.exports = authController;

@@ -54,22 +54,22 @@ export function useBranches() {
    */
 
   // שמירת סניף - תומך בהוספה (ללא ID) ובעריכה (עם ID)
-  const saveBranch = async (branchData: Partial<Branch>, id?: number) => {
+  const saveBranch = async (branchData: Partial<Branch>, id?: number): Promise<Branch | null> => {
     try {
-      if (id) {
-        // עדכון סניף קיים
-        await branchService.updateBranch(id, branchData);
-      } else {
-        // יצירת סניף חדש
-        await branchService.createBranch(branchData as CreateBranchData);
-      }
-      // רענון הרשימות לאחר שינוי מוצלח
-      await refreshBranches();
+        if (id) {
+            await branchService.updateBranch(id, branchData);
+            await refreshBranches();
+            return null;
+        } else {
+            const created = await branchService.createBranch(branchData as CreateBranchData);
+            await refreshBranches();
+            return created; // ← מחזיר את הסניף החדש עם ה-id
+        }
     } catch (error) {
-      console.error('Error saving branch:', error);
-      throw error; // זריקת השגיאה כדי שה-UI (ה-Toast בקומפוננטה) יטפל בה
+        console.error('Error saving branch:', error);
+        throw error;
     }
-  };
+};
 // מחיקת סניף -מחזיר האם נמחק או רק הפך ל"לא פעיל"
 const deleteBranch = async (id: number) => {
   try {

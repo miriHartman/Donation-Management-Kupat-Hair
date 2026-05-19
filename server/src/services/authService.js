@@ -45,6 +45,18 @@ static async getAllUsers() {
     }
 
 }
+static async createUser(userData) {
+    const { username, password, branchId } = userData;
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const query = `
+        INSERT INTO users (username, password_hash, role, branch_id)
+        VALUES (?, ?, 'worker', ?)
+    `;
+    const [result] = await db.query(query, [username, hashedPassword, branchId]);
+    return { id: result.insertId, username, branchId };
+}
 }
 
 module.exports = AuthService;
