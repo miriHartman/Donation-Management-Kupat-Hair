@@ -45,24 +45,22 @@ const branchController = {
     },
 
     deleteBranch: async (req, res) => {
-        try {
-            const { id } = req.params;
-            console.log(`🗑️ Controller: Attempting to delete branch ID: ${id}`);
-            
-            const result = await BranchService.deleteBranch(id);
-            
-            // בדרך כלל הסרוויס מחזיר true/false או affectedRows
-            if (!result) {
-                return res.status(404).json({ message: 'סניף לא נמצא או שכבר נמחק' });
-            }
-            
-            res.status(200).json({ message: 'סניף נמחק בהצלחה' });
-        } catch (error) {
-            console.error('Controller Error (deleteBranch):', error);
-            res.status(500).json({ 
-                message: 'שגיאה במחיקת הסניף', 
-                error: error.message 
-            });
+    try {
+        const { id } = req.params;
+        const result = await BranchService.deleteBranch(id);
+        
+        if (!result) {
+            return res.status(404).json({ message: 'סניף לא נמצא' });
+        }
+        
+        // ← החזר את ה-result המלא כדי שהפרונט ידע מה קרה
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Controller Error (deleteBranch):', error);
+        res.status(500).json({ 
+            message: 'שגיאה במחיקת הסניף', 
+            error: error.message 
+        });
         }
     }
 };

@@ -60,7 +60,6 @@ class BranchService {
 // 5. מחיקת סניף - מחיקה סופית או השבתה בהתאם לקיום תרומות
 static async deleteBranch(id) {
     try {
-        // 1. בדיקה בשתי הטבלאות במקביל
         const checkDonationsQuery = `SELECT COUNT(*) as count FROM donations WHERE branch_id = ?`;
         const checkReportsQuery = `SELECT COUNT(*) as count FROM daily_cash_reports WHERE branch_id = ?`;
 
@@ -71,30 +70,24 @@ static async deleteBranch(id) {
 
         const hasHistory = donationsRes[0].count > 0 || reportsRes[0].count > 0;
 
+        // מחיקת המשתמש המשויך לסניף בכל מקרה
+        await db.query(`DELETE FROM users WHERE branch_id = ?`, [id]);
+
         if (hasHistory) {
-            // 2. אם יש היסטוריה (תרומות או דוחות) - השבתה בלבד
-            const updateQuery = `UPDATE branches SET is_active = 0 WHERE id = ?`;
-            const [updateResult] = await db.query(updateQuery, [id]);
-            
-            return { 
-                success: true, 
-                action: 'deactivated', 
-                affectedRows: updateResult.affectedRows 
-            };
+            const [updateResult] = await db.query(
+                `UPDATE branches SET is_active = 0 WHERE id = ?`, [id]
+            );
+            return { success: true, action: 'deactivated', affectedRows: updateResult.affectedRows };
         } else {
-            // 3. אם הסניף נקי לגמרי - מחיקה לצמיתות
-            const deleteQuery = `DELETE FROM branches WHERE id = ?`;
-            const [deleteResult] = await db.query(deleteQuery, [id]);
-            
-            return { 
-                success: true, 
-                action: 'deleted', 
-                affectedRows: deleteResult.affectedRows 
-            };
+            const [deleteResult] = await db.query(
+                `DELETE FROM branches WHERE id = ?`, [id]
+            );
+            return { success: true, action: 'deleted', affectedRows: deleteResult.affectedRows };
         }
     } catch (error) {
         console.error('Error in BranchService.deleteBranch:', error);
         throw error;
     }
+
 }}
 module.exports = BranchService;
