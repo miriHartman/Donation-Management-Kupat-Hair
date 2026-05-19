@@ -22,7 +22,9 @@ res.status(200).json({
     user: { 
         id: user.id, 
         username: user.username, 
-        role: user.role 
+        role: user.role ,
+        branchId: user.branchId,     
+        branchName: user.branchName   
     }
 });
 

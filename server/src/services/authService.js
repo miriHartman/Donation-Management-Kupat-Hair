@@ -4,7 +4,13 @@ const bcrypt = require('bcryptjs'); // ייבוא הספרייה
 class AuthService {
     static async validateUser(username, password) {
     try {
-        const query = 'SELECT * FROM users WHERE username = ?';
+        // ← הוסף JOIN לשליפת שם הסניף
+        const query = `
+            SELECT u.*, b.name as branch_name 
+            FROM users u
+            LEFT JOIN branches b ON u.branch_id = b.id
+            WHERE u.username = ?
+        `;
         const [rows] = await db.query(query, [username]);
         
         if (rows.length === 0) return null;
@@ -13,10 +19,14 @@ class AuthService {
         const isMatch = await bcrypt.compare(password, user.password_hash);
         
         if (isMatch) {
-            // הוספנו כאן את user.role
-            return { id: user.id, username: user.username, role: user.role };
+            return { 
+                id: user.id, 
+                username: user.username, 
+                role: user.role,
+                branchId: user.branch_id,      // ← הוסף
+                branchName: user.branch_name    // ← הוסף
+            };
         }
-        
         return null;
     } catch (error) {
         console.error('Bcrypt error:', error);

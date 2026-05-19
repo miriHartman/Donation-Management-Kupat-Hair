@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { AxiosError } from 'axios';
 import { authService, userService } from '../services/authService';
 import { toast } from 'sonner';
-import { branchService } from '../services/branchService';
 
 export function useAuth(onLoginSuccess: (view: 'branch' | 'branchSelector', branch?: { id: number; name: string }) => void) {
   const [loading, setLoading] = useState(false);
@@ -20,33 +19,16 @@ export function useAuth(onLoginSuccess: (view: 'branch' | 'branchSelector', bran
       const userString = localStorage.getItem('user');
       const user = userString ? JSON.parse(userString) : null;
 
+      toast.success('התחברת בהצלחה למערכת');
+
       if (user?.role === 'admin') {
-        toast.success('התחברת בהצלחה למערכת');
         onLoginSuccess('branchSelector');
         return;
       }
 
-      // משתמש רגיל — מצא סניף לפי שם
-      const branches = await branchService.getBranches();
-      console.log('branches:', branches);
-      console.log('username:', username);
-      const matched = branches.find((b: { name: string }) => b.name === username);
-      console.log('matched:', matched);
-      if (matched) {
-        // הוסף את זה לפני onLoginSuccess:
-        const userString = localStorage.getItem('user');
-        const user = userString ? JSON.parse(userString) : {};
-        localStorage.setItem('user', JSON.stringify({
-          ...user,
-          branchId: matched.id,
-          branchName: matched.name
-        }));
-
-        onLoginSuccess('branch', { id: matched.id, name: matched.name });
-      }
-      toast.success('התחברת בהצלחה למערכת');
-      if (matched) {
-        onLoginSuccess('branch', { id: matched.id, name: matched.name });
+      // משתמש רגיל — branchId מגיע ישירות מהשרת
+      if (user?.branchId && user?.branchName) {
+        onLoginSuccess('branch', { id: user.branchId, name: user.branchName });
       } else {
         onLoginSuccess('branchSelector');
       }
@@ -75,15 +57,14 @@ export function useUsers() {
 
   return { users, isLoading };
 }
+
 export function useTokenExpiry(onExpired: () => void) {
   useEffect(() => {
-    // בדיקה מיידית בטעינה
     if (!authService.checkTokenExpiry()) {
       onExpired();
       return;
     }
 
-    // בדיקה כל דקה
     const interval = setInterval(() => {
       if (!authService.checkTokenExpiry()) {
         toast.error('פג תוקף החיבור, אנא התחבר מחדש');
