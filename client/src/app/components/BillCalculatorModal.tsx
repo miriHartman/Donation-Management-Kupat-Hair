@@ -3,6 +3,7 @@ import { X, Printer, Plus, Minus, Loader2, CheckCircle2, Banknote } from 'lucide
 import { billService } from '../services/billService'; // ייבוא הסרוויס
 import { toast } from 'sonner';
 import Swal from 'sweetalert2';
+import { CurrencyCalculator } from './CurrencyCalculator';
 
 interface BillCalculatorModalProps {
   isOpen: boolean;
@@ -27,10 +28,11 @@ export function BillCalculatorModal({ isOpen, onClose, branchName, branchId }: B
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [checks, setChecks] = useState<number>(0); // סכום הצ'קים
+  const [foreignTotal, setForeignTotal] = useState<number>(0);
 
   // --- Calculations ---
 const cashTotal = Object.entries(bills).reduce((sum, [d, c]) => sum + (Number(d) * c), 0);
-const total = cashTotal + checks;
+const total = cashTotal + checks + foreignTotal;
   // --- Lifecycle ---
   useEffect(() => {
     if (isOpen) {
@@ -254,6 +256,19 @@ const total = cashTotal + checks;
         placeholder="0"
         min={0}
     />
+</div>
+{/* מחשבון מט"ח */}
+<div className="mt-4">
+    <CurrencyCalculator
+        onAmountConverted={(nis) => setForeignTotal(nis)}
+        onCurrencyChange={() => {}}
+    />
+    {foreignTotal > 0 && (
+        <div className="mt-2 bg-emerald-50 border border-emerald-100 rounded-2xl p-3 text-center">
+            <span className="text-xs text-emerald-600 font-bold">סכום מט"ח שהומר: </span>
+            <span className="text-emerald-800 font-black">₪{foreignTotal.toLocaleString()}</span>
+        </div>
+    )}
 </div>
       </main>
 
